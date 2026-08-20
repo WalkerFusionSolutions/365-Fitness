@@ -1,11 +1,12 @@
 {
   "expo": {
-    "name": "temp",
-    "slug": "temp",
+    "name": "365 Fitness",
+    "slug": "365-fitness",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "scheme": "365fitness",
     "ios": {
       "supportsTablet": true
     },
@@ -20,6 +21,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-font",
+      "expo-video",
+      "expo-status-bar"
+    ]
   }
 }
