@@ -1,5 +1,9 @@
--- Enum for Role
+-- Extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Enums
 CREATE TYPE user_role AS ENUM ('client', 'coach');
+CREATE TYPE assignment_status AS ENUM ('pending', 'active', 'archived');
 
 -- Profiles Table
 CREATE TABLE profiles (
@@ -11,9 +15,63 @@ CREATE TABLE profiles (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Profiles are viewable by everyone" ON profiles FOR SELECT USING (true);
-CREATE POLICY "Users can insert their own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Coaches can view assigned client profiles" ON profiles FOR SELECT USING (
+    EXISTS (SELECT 1 FROM profiles coach WHERE coach.id = auth.uid() AND coach.role = 'coach'::user_role)
+    AND is_assigned_coach(auth.uid(), id)
+);
+CREATE POLICY "Clients can view assigned coach profiles" ON profiles FOR SELECT USING (
+    EXISTS (SELECT 1 FROM profiles client WHERE client.id = auth.uid() AND client.role = 'client'::user_role)
+    AND EXISTS (
+        SELECT 1 FROM coach_client_assignments
+        WHERE client_id = auth.uid()
+          AND coach_id = profiles.id
+          AND status = 'active'::assignment_status
+    )
+);
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+
+-- Coach-Client Assignments
+CREATE TABLE coach_client_assignments (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    client_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    status assignment_status NOT NULL DEFAULT 'pending',
+    assigned_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE (coach_id, client_id),
+    CHECK (coach_id <> client_id)
+);
+CREATE INDEX idx_coach_client_assignments_coach_id ON coach_client_assignments (coach_id);
+CREATE INDEX idx_coach_client_assignments_client_id ON coach_client_assignments (client_id);
+CREATE INDEX idx_coach_client_assignments_status ON coach_client_assignments (status);
+CREATE INDEX idx_coach_client_assignments_active_lookup
+  ON coach_client_assignments (coach_id, client_id) WHERE status = 'active';
+ALTER TABLE coach_client_assignments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Coaches can view own assignments" ON coach_client_assignments FOR SELECT USING (auth.uid() = coach_id);
+CREATE POLICY "Clients can view own assignments" ON coach_client_assignments FOR SELECT USING (auth.uid() = client_id);
+CREATE POLICY "Coaches can create pending assignments for themselves" ON coach_client_assignments FOR INSERT WITH CHECK (
+    auth.uid() = coach_id
+    AND status = 'pending'::assignment_status
+    AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'coach'::user_role)
+);
+CREATE POLICY "Clients can create assignments for themselves" ON coach_client_assignments FOR INSERT WITH CHECK (
+    auth.uid() = client_id
+    AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'client'::user_role)
+);
+CREATE POLICY "Coaches can update own assignments" ON coach_client_assignments FOR UPDATE USING (
+    auth.uid() = coach_id
+) WITH CHECK (
+    auth.uid() = coach_id
+    AND status <> 'active'::assignment_status
+);
+CREATE POLICY "Clients can update own assignments" ON coach_client_assignments FOR UPDATE USING (
+    auth.uid() = client_id
+) WITH CHECK (
+    auth.uid() = client_id
+);
 
 -- Medical Questionnaire
 CREATE TABLE medical_questionnaire (
@@ -23,8 +81,8 @@ CREATE TABLE medical_questionnaire (
 );
 ALTER TABLE medical_questionnaire ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can manage own questionnaire" ON medical_questionnaire FOR ALL USING (auth.uid() = client_id);
-CREATE POLICY "Coaches can view client questionnaire" ON medical_questionnaire FOR SELECT USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'coach')
+CREATE POLICY "Coaches can view assigned client questionnaire" ON medical_questionnaire FOR SELECT USING (
+    is_assigned_coach(auth.uid(), client_id)
 );
 
 -- Goals
@@ -37,7 +95,9 @@ CREATE TABLE goals (
 );
 ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can manage own goals" ON goals FOR ALL USING (auth.uid() = client_id);
-CREATE POLICY "Coaches can view client goals" ON goals FOR SELECT USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'coach'));
+CREATE POLICY "Coaches can view assigned client goals" ON goals FOR SELECT USING (
+    is_assigned_coach(auth.uid(), client_id)
+);
 
 -- Measurements
 CREATE TABLE measurements (
@@ -51,7 +111,9 @@ CREATE TABLE measurements (
 );
 ALTER TABLE measurements ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can manage own measurements" ON measurements FOR ALL USING (auth.uid() = client_id);
-CREATE POLICY "Coaches can view client measurements" ON measurements FOR SELECT USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'coach'));
+CREATE POLICY "Coaches can view assigned client measurements" ON measurements FOR SELECT USING (
+    is_assigned_coach(auth.uid(), client_id)
+);
 
 -- Progress Photos
 CREATE TABLE progress_photos (
@@ -62,7 +124,9 @@ CREATE TABLE progress_photos (
 );
 ALTER TABLE progress_photos ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can manage own photos" ON progress_photos FOR ALL USING (auth.uid() = client_id);
-CREATE POLICY "Coaches can view client photos" ON progress_photos FOR SELECT USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'coach'));
+CREATE POLICY "Coaches can view assigned client photos" ON progress_photos FOR SELECT USING (
+    is_assigned_coach(auth.uid(), client_id)
+);
 
 -- Workouts
 CREATE TABLE workouts (
@@ -75,7 +139,9 @@ CREATE TABLE workouts (
 );
 ALTER TABLE workouts ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can view own workouts" ON workouts FOR SELECT USING (auth.uid() = client_id);
-CREATE POLICY "Coaches can manage workouts they created" ON workouts FOR ALL USING (auth.uid() = coach_id);
+CREATE POLICY "Coaches can manage workouts for assigned clients" ON workouts FOR ALL
+  USING (auth.uid() = coach_id AND is_assigned_coach(auth.uid(), client_id))
+  WITH CHECK (auth.uid() = coach_id AND is_assigned_coach(auth.uid(), client_id));
 
 -- Workout Exercises
 CREATE TABLE workout_exercises (
@@ -93,8 +159,20 @@ ALTER TABLE workout_exercises ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can view assigned exercises" ON workout_exercises FOR SELECT USING (
     EXISTS (SELECT 1 FROM workouts WHERE workouts.id = workout_exercises.workout_id AND workouts.client_id = auth.uid())
 );
-CREATE POLICY "Coaches can manage exercises for their workouts" ON workout_exercises FOR ALL USING (
-    EXISTS (SELECT 1 FROM workouts WHERE workouts.id = workout_exercises.workout_id AND workouts.coach_id = auth.uid())
+CREATE POLICY "Coaches can manage exercises for assigned client workouts" ON workout_exercises FOR ALL USING (
+    EXISTS (
+        SELECT 1 FROM workouts w
+        WHERE w.id = workout_exercises.workout_id
+          AND w.coach_id = auth.uid()
+          AND is_assigned_coach(auth.uid(), w.client_id)
+    )
+) WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM workouts w
+        WHERE w.id = workout_exercises.workout_id
+          AND w.coach_id = auth.uid()
+          AND is_assigned_coach(auth.uid(), w.client_id)
+    )
 );
 
 -- Workout Logs
@@ -110,7 +188,9 @@ CREATE TABLE workout_logs (
 );
 ALTER TABLE workout_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can manage own logs" ON workout_logs FOR ALL USING (auth.uid() = client_id);
-CREATE POLICY "Coaches can view logs" ON workout_logs FOR SELECT USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'coach'));
+CREATE POLICY "Coaches can view assigned client logs" ON workout_logs FOR SELECT USING (
+    is_assigned_coach(auth.uid(), client_id)
+);
 
 -- Completed Workouts
 CREATE TABLE completed_workouts (
@@ -122,7 +202,9 @@ CREATE TABLE completed_workouts (
 );
 ALTER TABLE completed_workouts ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can manage own completions" ON completed_workouts FOR ALL USING (auth.uid() = client_id);
-CREATE POLICY "Coaches can view completions" ON completed_workouts FOR SELECT USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'coach'));
+CREATE POLICY "Coaches can view assigned client completions" ON completed_workouts FOR SELECT USING (
+    is_assigned_coach(auth.uid(), client_id)
+);
 
 -- Meal Plans
 CREATE TABLE meal_plans (
@@ -135,7 +217,9 @@ CREATE TABLE meal_plans (
 );
 ALTER TABLE meal_plans ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can view own meal plans" ON meal_plans FOR SELECT USING (auth.uid() = client_id);
-CREATE POLICY "Coaches can manage meal plans they created" ON meal_plans FOR ALL USING (auth.uid() = coach_id);
+CREATE POLICY "Coaches can manage meal plans for assigned clients" ON meal_plans FOR ALL
+  USING (auth.uid() = coach_id AND is_assigned_coach(auth.uid(), client_id))
+  WITH CHECK (auth.uid() = coach_id AND is_assigned_coach(auth.uid(), client_id));
 
 -- Meal Plan Meals
 CREATE TABLE meal_plan_meals (
@@ -153,8 +237,20 @@ ALTER TABLE meal_plan_meals ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can view own meals" ON meal_plan_meals FOR SELECT USING (
     EXISTS (SELECT 1 FROM meal_plans WHERE meal_plans.id = meal_plan_meals.meal_plan_id AND meal_plans.client_id = auth.uid())
 );
-CREATE POLICY "Coaches can manage meals for their plans" ON meal_plan_meals FOR ALL USING (
-    EXISTS (SELECT 1 FROM meal_plans WHERE meal_plans.id = meal_plan_meals.meal_plan_id AND meal_plans.coach_id = auth.uid())
+CREATE POLICY "Coaches can manage meals for assigned client plans" ON meal_plan_meals FOR ALL USING (
+    EXISTS (
+        SELECT 1 FROM meal_plans mp
+        WHERE mp.id = meal_plan_meals.meal_plan_id
+          AND mp.coach_id = auth.uid()
+          AND is_assigned_coach(auth.uid(), mp.client_id)
+    )
+) WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM meal_plans mp
+        WHERE mp.id = meal_plan_meals.meal_plan_id
+          AND mp.coach_id = auth.uid()
+          AND is_assigned_coach(auth.uid(), mp.client_id)
+    )
 );
 
 -- Grocery Lists
@@ -190,7 +286,9 @@ CREATE TABLE supplements (
 );
 ALTER TABLE supplements ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can manage own supplements" ON supplements FOR ALL USING (auth.uid() = client_id);
-CREATE POLICY "Coaches can view/manage supplements" ON supplements FOR ALL USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'coach'));
+CREATE POLICY "Coaches can view assigned client supplements" ON supplements FOR SELECT USING (
+    is_assigned_coach(auth.uid(), client_id)
+);
 
 -- Messages
 CREATE TABLE messages (
@@ -202,7 +300,17 @@ CREATE TABLE messages (
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can manage messages" ON messages FOR ALL USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
+CREATE POLICY "Users can view own messages" ON messages FOR SELECT USING (
+    auth.uid() = sender_id OR auth.uid() = receiver_id
+);
+CREATE POLICY "Users can insert own messages" ON messages FOR INSERT WITH CHECK (
+    auth.uid() = sender_id
+    AND (
+        is_assigned_coach(receiver_id, auth.uid())
+        OR
+        is_assigned_coach(auth.uid(), receiver_id)
+    )
+);
 
 -- Notifications
 CREATE TABLE notifications (
@@ -227,5 +335,109 @@ CREATE TABLE reports (
     generated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view relevant reports" ON reports FOR SELECT USING (auth.uid() = client_id OR auth.uid() = coach_id);
-CREATE POLICY "Coaches can insert reports" ON reports FOR INSERT WITH CHECK (auth.uid() = coach_id);
+CREATE POLICY "Clients can view own reports" ON reports FOR SELECT USING (auth.uid() = client_id);
+CREATE POLICY "Coaches can view assigned client reports" ON reports FOR SELECT USING (
+    auth.uid() = coach_id AND is_assigned_coach(auth.uid(), client_id)
+);
+CREATE POLICY "Coaches can insert reports for assigned clients" ON reports FOR INSERT WITH CHECK (
+    auth.uid() = coach_id AND is_assigned_coach(auth.uid(), client_id)
+);
+
+-- Functions
+CREATE OR REPLACE FUNCTION public.is_assigned_coach(coach_uuid uuid, client_uuid uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM coach_client_assignments
+    WHERE coach_id = coach_uuid
+      AND client_id = client_uuid
+      AND status = 'active'
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.profiles (id, role, full_name)
+  VALUES (
+    NEW.id,
+    'client'::user_role,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', '')
+  );
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.prevent_profile_role_change()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF OLD.role IS DISTINCT FROM NEW.role THEN
+    IF auth.uid() IS NOT NULL THEN
+      RAISE EXCEPTION 'Role changes require administrator privileges';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.validate_coach_client_assignment()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  coach_role user_role;
+  client_role user_role;
+BEGIN
+  SELECT role INTO coach_role FROM profiles WHERE id = NEW.coach_id;
+  SELECT role INTO client_role FROM profiles WHERE id = NEW.client_id;
+
+  IF coach_role IS DISTINCT FROM 'coach'::user_role THEN
+    RAISE EXCEPTION 'coach_id must reference a profile with role coach';
+  END IF;
+
+  IF client_role IS DISTINCT FROM 'client'::user_role THEN
+    RAISE EXCEPTION 'client_id must reference a profile with role client';
+  END IF;
+
+  IF NEW.status = 'active'::assignment_status AND NEW.assigned_at IS NULL THEN
+    NEW.assigned_at := timezone('utc'::text, now());
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+-- Triggers (auth schema)
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
+-- Triggers (public schema)
+DROP TRIGGER IF EXISTS prevent_profile_role_change ON public.profiles;
+CREATE TRIGGER prevent_profile_role_change
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.prevent_profile_role_change();
+
+DROP TRIGGER IF EXISTS validate_assignment_roles ON coach_client_assignments;
+CREATE TRIGGER validate_assignment_roles
+  BEFORE INSERT OR UPDATE ON coach_client_assignments
+  FOR EACH ROW
+  EXECUTE FUNCTION public.validate_coach_client_assignment();
