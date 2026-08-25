@@ -5,9 +5,7 @@ import { colors } from '@/utils/theme';
 import NutritionScreen from '@/screens/client/NutritionScreen';
 import WorkoutHistoryScreen from '@/screens/client/WorkoutHistoryScreen';
 import DashboardScreen from '@/screens/client/DashboardScreen';
-import { View, Text } from 'react-native';
-
-const ProfileScreen = () => <View style={{flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center'}}><Text style={{color: colors.textPrimary}}>Profile Coming Soon</Text></View>;
+import { ProfileScreen } from '@/screens/common/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 

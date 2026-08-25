@@ -5,6 +5,10 @@ import { Button } from '@/components/Button';
 import { supabase } from '@/services/supabase';
 import { colors, radius, spacing, typography } from '@/utils/theme';
 
+const emailRedirectTo =
+  process.env.EXPO_PUBLIC_EMAIL_CONFIRMATION_URL ??
+  'fitness365://auth/callback';
+
 export function SignupScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,11 +21,11 @@ export function SignupScreen({ navigation }: any) {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: '365fitness://auth/callback',
+        emailRedirectTo,
         data: {
           full_name: fullName,
         }
@@ -31,7 +35,7 @@ export function SignupScreen({ navigation }: any) {
     if (error) {
       Alert.alert('Error', error.message);
     } else {
-      Alert.alert('Success', 'Check your email for the login link!');
+      Alert.alert('Success', 'Check your email to confirm your account.');
       navigation.navigate('Login');
     }
     setLoading(false);
