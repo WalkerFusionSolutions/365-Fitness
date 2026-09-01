@@ -6,9 +6,12 @@ import { Button } from '@/components/Button';
 import { colors, radius, spacing, typography } from '@/utils/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
+import { useFitnessProfile } from '@/hooks/useFitnessProfile';
 
 export default function DashboardScreen({ navigation }: any) {
   const { profile } = useAuth();
+  const { data: fitnessProfile, isLoading: fitnessLoading } =
+    useFitnessProfile(profile?.id);
   const firstName = profile?.full_name?.split(' ')[0] || 'Athlete';
 
   return (
@@ -22,6 +25,20 @@ export default function DashboardScreen({ navigation }: any) {
           <Text style={styles.avatarText}>{firstName[0]}</Text>
         </Pressable>
       </View>
+
+      {!fitnessLoading && !fitnessProfile ? (
+        <Card style={styles.onboardingCard}>
+          <Text style={styles.cardTitle}>Complete Your Fitness Profile</Text>
+          <Text style={styles.cardSubtitle}>
+            Help your coach personalize your plan and track your progress.
+          </Text>
+          <Button
+            label="Get Started"
+            onPress={() => navigation.navigate('ClientOnboarding')}
+            style={styles.actionButton}
+          />
+        </Card>
+      ) : null}
 
       <Text style={styles.sectionTitle}>Today's Plan</Text>
       
@@ -115,6 +132,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceElevated,
     marginBottom: spacing.lg,
     padding: spacing.lg,
+  },
+  onboardingCard: {
+    gap: spacing.md,
+    marginBottom: spacing.lg,
   },
   cardHeader: {
     flexDirection: 'row',

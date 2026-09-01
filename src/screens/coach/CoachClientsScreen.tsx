@@ -8,6 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
@@ -17,6 +18,7 @@ import { useCoachAssignments } from '@/hooks/useAssignments';
 import { colors, radius, spacing, typography } from '@/utils/theme';
 
 export default function CoachClientsScreen() {
+  const navigation = useNavigation<any>();
   const {
     data,
     error,
@@ -117,6 +119,12 @@ export default function CoachClientsScreen() {
               ) : null}
               <AssignmentRow
                 assignment={item}
+                onView={() =>
+                  navigation.navigate('CoachClientDetail', {
+                    clientId: item.client_id,
+                    clientName: item.client?.full_name,
+                  })
+                }
                 onArchive={() => archive(item.id)}
                 isMutating={isMutating}
               />
@@ -130,10 +138,12 @@ export default function CoachClientsScreen() {
 
 function AssignmentRow({
   assignment,
+  onView,
   onArchive,
   isMutating,
 }: {
   assignment: AssignmentWithProfile;
+  onView: () => void;
   onArchive: () => void;
   isMutating: boolean;
 }) {
@@ -154,12 +164,23 @@ function AssignmentRow({
         </View>
         <Text style={styles.status}>{assignment.status}</Text>
       </View>
-      <Button
-        label="Archive"
-        variant="secondary"
-        onPress={onArchive}
-        disabled={isMutating}
-      />
+      <View style={styles.actions}>
+        {assignment.status === 'active' ? (
+          <Button
+            label="View"
+            onPress={onView}
+            disabled={isMutating}
+            style={styles.actionButton}
+          />
+        ) : null}
+        <Button
+          label="Archive"
+          variant="secondary"
+          onPress={onArchive}
+          disabled={isMutating}
+          style={styles.actionButton}
+        />
+      </View>
     </Card>
   );
 }
@@ -226,5 +247,12 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '700',
     textTransform: 'uppercase',
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  actionButton: {
+    flex: 1,
   },
 });

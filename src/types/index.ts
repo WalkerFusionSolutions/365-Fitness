@@ -1,5 +1,7 @@
 export type Role = 'client' | 'coach';
 export type AssignmentStatus = 'pending' | 'active' | 'archived';
+export type WeightUnit = 'lb' | 'kg';
+export type HeightUnit = 'ft_in' | 'cm';
 
 export interface Profile {
   id: string; // Supabase auth.users id
@@ -18,20 +20,62 @@ export interface MedicalQuestionnaire {
 
 export interface Goal {
   id: string;
-  client_id: string;
-  goal_type: 'weight' | 'strength' | 'custom';
+  client_id?: string | null;
+  goal_type: 'primary' | 'weight' | 'strength' | 'custom';
   target: string;
   deadline?: string | null;
 }
 
 export interface Measurement {
   id: string;
-  client_id: string;
-  weight?: number;
-  body_fat?: number;
-  chest?: number;
-  waist?: number;
-  date: string;
+  client_id?: string | null;
+  weight?: number | null;
+  body_fat?: number | null;
+  chest?: number | null;
+  waist?: number | null;
+  date?: string | null;
+}
+
+export interface FitnessAssessment {
+  primaryGoal: string;
+  dateOfBirth: string;
+  age: number;
+  heightUnit: HeightUnit;
+  heightCm: number;
+  heightFeet?: number;
+  heightInches?: number;
+  startingWeightKg: number;
+  currentWeightKg: number;
+  currentWeight: {
+    value: number;
+    unit: WeightUnit;
+  };
+  goalWeightKg: number;
+  goalWeight: {
+    value: number;
+    unit: WeightUnit;
+  };
+  bmi: number | null;
+  experienceLevel: string;
+  activityLevel: string;
+  trainingFrequency: string;
+  workoutLocation: string;
+  equipment: string[];
+  focusAreas: string[];
+  sessionDuration: string;
+  healthNotes: string;
+  limitations: string[];
+  completed_at?: string;
+}
+
+export interface FitnessProfileSummary {
+  assessment: FitnessAssessment;
+  latestMeasurement?: Measurement | null;
+  measurementCount: number;
+  startingWeightKg: number;
+  currentWeightKg?: number | null;
+  goalWeightKg: number;
+  bmi: number | null;
 }
 
 export interface ProgressPhoto {
@@ -194,6 +238,12 @@ export type ClientTabsParamList = {
 export type ClientStackParamList = {
   ClientTabs: undefined;
   ExerciseDetail: { workoutId: string };
+  ClientOnboarding: undefined;
+  ClientAssessment: undefined;
+  ClientMeasurements: { clientId?: string; clientName?: string } | undefined;
+  CoachClientDetail: { clientId: string; clientName?: string };
+  CoachClientAssessment: { clientId: string; clientName?: string };
+  CoachClientMeasurements: { clientId: string; clientName?: string };
   // add others later
 };
 

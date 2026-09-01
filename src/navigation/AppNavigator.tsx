@@ -16,6 +16,10 @@ import { ClientTabs } from './ClientTabs';
 import { CoachTabs } from './CoachTabs';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import ExerciseDetailScreen from '@/screens/client/ExerciseDetailScreen';
+import ClientOnboardingScreen from '@/screens/client/ClientOnboardingScreen';
+import AssessmentScreen from '@/screens/common/AssessmentScreen';
+import MeasurementsScreen from '@/screens/common/MeasurementsScreen';
+import CoachClientDetailScreen from '@/screens/coach/CoachClientDetailScreen';
 import { colors } from '@/utils/theme';
 import { ClientStackParamList } from '@/types';
 
@@ -196,10 +200,27 @@ export function AppNavigator() {
             />
           </>
         ) : profile.role === 'coach' ? (
-          <Stack.Screen
-            name="CoachApp"
-            component={CoachTabs}
-          />
+          <>
+            <Stack.Screen
+              name="CoachApp"
+              component={CoachTabs}
+            />
+            <Stack.Screen
+              name="CoachClientDetail"
+              component={CoachClientDetailScreen}
+              options={detailHeaderOptions('Client')}
+            />
+            <Stack.Screen
+              name="CoachClientAssessment"
+              component={AssessmentScreen}
+              options={detailHeaderOptions('Assessment')}
+            />
+            <Stack.Screen
+              name="CoachClientMeasurements"
+              component={MeasurementsScreen}
+              options={detailHeaderOptions('Measurements')}
+            />
+          </>
         ) : (
           <>
             <Stack.Screen
@@ -210,18 +231,37 @@ export function AppNavigator() {
             <Stack.Screen
               name="ExerciseDetail"
               component={ExerciseDetailScreen}
-              options={{
-                headerShown: true,
-                title: 'Workout',
-                headerStyle: {
-                  backgroundColor: colors.surface,
-                },
-                headerTintColor: colors.textPrimary,
-              }}
+              options={detailHeaderOptions('Workout')}
+            />
+            <Stack.Screen
+              name="ClientOnboarding"
+              component={ClientOnboardingScreen}
+              options={detailHeaderOptions('Fitness Profile')}
+            />
+            <Stack.Screen
+              name="ClientAssessment"
+              component={AssessmentScreen}
+              options={detailHeaderOptions('Assessment')}
+            />
+            <Stack.Screen
+              name="ClientMeasurements"
+              component={MeasurementsScreen}
+              options={detailHeaderOptions('Measurements')}
             />
           </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
   );
+}
+
+function detailHeaderOptions(title: string) {
+  return {
+    headerShown: true,
+    title,
+    headerStyle: {
+      backgroundColor: colors.surface,
+    },
+    headerTintColor: colors.textPrimary,
+  };
 }
