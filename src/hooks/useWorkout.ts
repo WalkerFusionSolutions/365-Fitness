@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/services/supabase';
 import { WorkoutExercise, CompletedWorkout } from '@/types';
 
 export function useWorkoutExercises(workoutId: string) {

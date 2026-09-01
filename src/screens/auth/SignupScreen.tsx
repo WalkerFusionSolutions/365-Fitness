@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TextInput, Text, Alert } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { Button } from '@/components/Button';
-import { supabase } from '@/services/supabase';
+import { signUpWithEmail as signUpWithEmailService } from '@/services/auth.service';
+import { AppServiceError } from '@/services/errors';
 import { colors, radius, spacing, typography } from '@/utils/theme';
 
 const emailRedirectTo =
@@ -21,24 +22,26 @@ export function SignupScreen({ navigation }: any) {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo,
-        data: {
-          full_name: fullName,
-        }
-      }
-    });
 
-    if (error) {
-      Alert.alert('Error', error.message);
-    } else {
+    try {
+      await signUpWithEmailService({
+        email: email.trim(),
+        password,
+        fullName: fullName.trim(),
+        emailRedirectTo,
+      });
+
       Alert.alert('Success', 'Check your email to confirm your account.');
       navigation.navigate('Login');
+    } catch (error) {
+      const message =
+        error instanceof AppServiceError
+          ? error.userMessage
+          : 'Unable to create your account.';
+      Alert.alert('Error', message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

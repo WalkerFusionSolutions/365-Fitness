@@ -1,16 +1,17 @@
 export type Role = 'client' | 'coach';
+export type AssignmentStatus = 'pending' | 'active' | 'archived';
 
 export interface Profile {
   id: string; // Supabase auth.users id
   role: Role;
   full_name: string;
-  avatar_url?: string;
-  bio?: string;
+  avatar_url?: string | null;
+  bio?: string | null;
   created_at: string;
 }
 
 export interface MedicalQuestionnaire {
-  client_id: string;
+  client_id?: string | null;
   responses: any; // JSON
   updated_at: string;
 }
@@ -20,7 +21,7 @@ export interface Goal {
   client_id: string;
   goal_type: 'weight' | 'strength' | 'custom';
   target: string;
-  deadline: string;
+  deadline?: string | null;
 }
 
 export interface Measurement {
@@ -42,47 +43,57 @@ export interface ProgressPhoto {
 
 export interface Workout {
   id: string;
-  coach_id: string;
-  client_id: string;
+  coach_id?: string | null;
+  client_id?: string | null;
   name: string;
-  description?: string;
-  assigned_date: string;
+  description?: string | null;
+  assigned_date?: string | null;
 }
 
 export interface WorkoutExercise {
   id: string;
-  workout_id: string;
+  workout_id?: string | null;
   exercise_name: string;
   sets: number;
   reps: string;
   rest_seconds: number;
-  video_url?: string;
+  video_url?: string | null;
   order_index: number;
-  notes?: string;
+  notes?: string | null;
 }
 
 export interface WorkoutLog {
   id: string;
-  client_id: string;
-  exercise_id: string;
+  client_id?: string | null;
+  exercise_id?: string | null;
+  workout_id?: string | null;
   weight_used: number;
   reps_completed: number;
   date: string;
   set_number: number;
 }
 
+export interface CoachClientAssignment {
+  id: string;
+  coach_id: string;
+  client_id: string;
+  status: AssignmentStatus;
+  assigned_at: string | null;
+  created_at: string;
+}
+
 export interface CompletedWorkout {
   id: string;
-  client_id: string;
-  workout_id: string;
+  client_id?: string | null;
+  workout_id?: string | null;
   date_completed: string;
   duration_minutes?: number;
 }
 
 export interface MealPlan {
   id: string;
-  coach_id: string;
-  client_id: string;
+  coach_id?: string | null;
+  client_id?: string | null;
   name: string;
   start_date: string;
   end_date: string;
@@ -101,7 +112,7 @@ export interface FoodItem {
 
 export interface MealPlanMeal {
   id: string;
-  meal_plan_id: string;
+  meal_plan_id?: string | null;
   day: number; // 1-7
   meal_type: MealType;
   food_items: FoodItem[]; // JSON
@@ -120,22 +131,22 @@ export interface GroceryItem {
 
 export interface GroceryList {
   id: string;
-  client_id: string;
+  client_id?: string | null;
   items: GroceryItem[]; // JSON
   generated_date: string;
 }
 
 export interface WaterTracker {
   id: string;
-  client_id: string;
-  date: string;
-  cups_consumed: number;
-  daily_goal_cups: number;
+  client_id?: string | null;
+  date?: string | null;
+  cups_consumed?: number | null;
+  daily_goal_cups?: number | null;
 }
 
 export interface Supplement {
   id: string;
-  client_id: string;
+  client_id?: string | null;
   supplement_name: string;
   dosage: string;
   frequency: string;
@@ -144,27 +155,27 @@ export interface Supplement {
 
 export interface Message {
   id: string;
-  sender_id: string;
-  receiver_id: string;
-  content: string;
+  sender_id?: string | null;
+  receiver_id?: string | null;
+  content?: string | null;
   timestamp: string;
   video_url?: string;
 }
 
 export interface Notification {
   id: string;
-  user_id: string;
+  user_id?: string | null;
   title: string;
   body: string;
   type: string;
-  read: boolean;
+  read?: boolean | null;
   created_at: string;
 }
 
 export interface Report {
   id: string;
-  client_id: string;
-  coach_id: string;
+  client_id?: string | null;
+  coach_id?: string | null;
   type: string;
   data: any; // JSON
   generated_at: string;
@@ -175,6 +186,7 @@ export type ClientTabsParamList = {
   Home: undefined;
   Workouts: undefined;
   Nutrition: undefined;
+  Coach: undefined;
   Progress: undefined;
   Profile: undefined;
 };
@@ -186,11 +198,11 @@ export type ClientStackParamList = {
 };
 
 export type CoachTabsParamList = {
+  Coach: undefined;
   Clients: undefined;
-  Programs: undefined;
+  Workouts: undefined;
   Nutrition: undefined;
-  Messages: undefined;
-  Analytics: undefined;
+  Profile: undefined;
 };
 
 export type CoachStackParamList = {

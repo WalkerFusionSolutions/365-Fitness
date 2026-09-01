@@ -26,13 +26,16 @@ export default function DashboardScreen({ navigation }: any) {
       <Text style={styles.sectionTitle}>Today's Plan</Text>
       
       <Card style={styles.workoutCard}>
+        <Text style={styles.placeholderLabel}>Development placeholder data</Text>
         <View style={styles.cardHeader}>
           <View style={styles.iconContainer}>
             <Ionicons name="barbell" size={24} color={colors.white} />
           </View>
           <View style={styles.cardTextContainer}>
             <Text style={styles.cardTitle}>Leg Day (Hypertrophy)</Text>
-            <Text style={styles.cardSubtitle}>6 exercises &middot; 45 mins</Text>
+            <Text style={styles.cardSubtitle}>
+              Workout assignment connects in Phase 3
+            </Text>
           </View>
         </View>
         <Button 
@@ -46,7 +49,7 @@ export default function DashboardScreen({ navigation }: any) {
         <Card style={styles.smallCard}>
           <Ionicons name="water-outline" size={24} color={colors.primary} />
           <Text style={styles.smallCardValue}>3 / 8</Text>
-          <Text style={styles.smallCardLabel}>Water Cups</Text>
+          <Text style={styles.smallCardLabel}>Placeholder Water</Text>
         </Card>
         
         <Card style={styles.smallCard}>
@@ -58,6 +61,7 @@ export default function DashboardScreen({ navigation }: any) {
 
       <Text style={styles.sectionTitle}>Progress Snapshot</Text>
       <Card style={styles.progressCard}>
+        <Text style={styles.placeholderLabel}>Development placeholder data</Text>
         <View style={styles.progressRow}>
           <Text style={styles.progressLabel}>Current Weight</Text>
           <Text style={styles.progressValue}>185 lbs</Text>
@@ -137,6 +141,13 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     ...typography.caption,
     color: colors.textSecondary,
+  },
+  placeholderLabel: {
+    ...typography.caption,
+    color: colors.warning,
+    fontWeight: '700',
+    marginBottom: spacing.sm,
+    textTransform: 'uppercase',
   },
   actionButton: {
     width: '100%',

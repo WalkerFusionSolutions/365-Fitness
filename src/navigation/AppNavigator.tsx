@@ -3,22 +3,77 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Linking from 'expo-linking';
 
-import { supabase } from '@/services/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import {
+  getCurrentSession,
+  onAuthSessionChange,
+  setSessionFromTokens,
+} from '@/services/auth.service';
+import { getProfileById } from '@/services/profiles.service';
 import { LoginScreen } from '@/screens/auth/LoginScreen';
 import { SignupScreen } from '@/screens/auth/SignupScreen';
 import { ClientTabs } from './ClientTabs';
 import { CoachTabs } from './CoachTabs';
-import { LoadingView } from '@/components/StateViews';
+import { ErrorState, LoadingView } from '@/components/StateViews';
 import ExerciseDetailScreen from '@/screens/client/ExerciseDetailScreen';
 import { colors } from '@/utils/theme';
+import { ClientStackParamList } from '@/types';
 
-const Stack = createNativeStackNavigator<any>();
+type RootStackParamList = ClientStackParamList & {
+  Login: undefined;
+  Signup: undefined;
+  ClientApp: undefined;
+  CoachApp: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function AppNavigator() {
-  const { profile, setProfile, isLoading, setLoading } = useAuth();
+  const {
+    profile,
+    setSession,
+    setProfile,
+    error,
+    setError,
+    isLoading,
+    setLoading,
+    resetAuth,
+  } = useAuth();
 
   useEffect(() => {
+    let isMounted = true;
+
+    const loadProfileForSession = async (sessionUserId?: string) => {
+      if (!isMounted) return;
+
+      if (!sessionUserId) {
+        resetAuth();
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const profileData = await getProfileById(sessionUserId);
+
+        if (!isMounted) return;
+
+        setProfile(profileData);
+      } catch (loadError) {
+        console.error('Error fetching user profile:', loadError);
+
+        if (!isMounted) return;
+
+        setProfile(null);
+        setError('Unable to load your profile.');
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
     // Handle Supabase authentication links opened by the app.
     const handleDeepLink = async (url: string) => {
       try {
@@ -32,27 +87,38 @@ export function AppNavigator() {
         if (accessToken && refreshToken) {
           console.log('Setting Supabase session from deep link...');
 
-          const { error } = await supabase.auth.setSession({
-            access_token: String(accessToken),
-            refresh_token: String(refreshToken),
-          });
+          await setSessionFromTokens(
+            String(accessToken),
+            String(refreshToken)
+          );
 
-          if (error) {
-            console.error(
-              'Error setting Supabase session:',
-              error
-            );
-          } else {
-            console.log(
-              'Supabase session successfully restored.'
-            );
-          }
+          console.log(
+            'Supabase session successfully restored.'
+          );
         }
       } catch (error) {
         console.error(
           'Error handling authentication deep link:',
           error
         );
+      }
+    };
+
+    const restoreSession = async () => {
+      try {
+        const session = await getCurrentSession();
+
+        if (!isMounted) return;
+
+        setSession(session);
+        await loadProfileForSession(session?.user?.id);
+      } catch (sessionError) {
+        console.error('Error restoring authentication session:', sessionError);
+
+        if (!isMounted) return;
+
+        setError('Unable to restore your session.');
+        resetAuth();
       }
     };
 
@@ -71,57 +137,39 @@ export function AppNavigator() {
       }
     );
 
-    // Get the currently authenticated user.
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      fetchProfile(session?.user?.id);
-    });
+    restoreSession();
 
     // Listen for login, logout, signup and session changes.
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        fetchProfile(session?.user?.id);
-      }
-    );
+    const unsubscribeAuth = onAuthSessionChange((session) => {
+      setSession(session);
+      loadProfileForSession(session?.user?.id);
+    });
 
     return () => {
-      subscription.unsubscribe();
+      isMounted = false;
+      unsubscribeAuth();
       deepLinkSubscription.remove();
     };
-  }, []);
-
-  async function fetchProfile(userId?: string) {
-    if (!userId) {
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (error) {
-      console.error(
-        'Error fetching user profile:',
-        error
-      );
-
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
-
-    setProfile(data);
-    setLoading(false);
-  }
+  }, [
+    resetAuth,
+    setError,
+    setLoading,
+    setProfile,
+    setSession,
+  ]);
 
   if (isLoading) {
     return (
       <LoadingView label="Loading 365 FITNESS..." />
+    );
+  }
+
+  if (error && !profile) {
+    return (
+      <ErrorState
+        title="Unable to load your profile"
+        subtitle="Close and reopen the app, or sign in again."
+      />
     );
   }
 
@@ -161,7 +209,7 @@ export function AppNavigator() {
 
             <Stack.Screen
               name="ExerciseDetail"
-              component={ExerciseDetailScreen as any}
+              component={ExerciseDetailScreen}
               options={{
                 headerShown: true,
                 title: 'Workout',

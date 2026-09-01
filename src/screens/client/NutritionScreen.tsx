@@ -34,6 +34,8 @@ export default function NutritionScreen() {
   const { data: supplements } = useSupplements(clientId);
   const { data: water } = useTodaysWater(clientId);
   const incrementWater = useIncrementWater();
+  const cupsConsumed = water?.cups_consumed ?? 0;
+  const dailyGoalCups = water?.daily_goal_cups ?? 8;
 
   const today = new Date().getDay(); // 0-6; meal plans use day 1-7 relative
   const dayOfPlan = (today % 7) + 1;
@@ -56,7 +58,7 @@ export default function NutritionScreen() {
       <Card style={styles.waterCard}>
         <View>
           <Text style={styles.waterCount}>
-            {water?.cups_consumed ?? 0} / {water?.daily_goal_cups ?? 8} cups
+            {cupsConsumed} / {dailyGoalCups} cups
           </Text>
           <Text style={styles.waterLabel}>Water today</Text>
         </View>
@@ -64,7 +66,13 @@ export default function NutritionScreen() {
           label="+ Cup"
           variant="secondary"
           onPress={() =>
-            water && clientId && incrementWater.mutate({ trackerId: water.id, currentCups: water.cups_consumed, clientId })
+            water &&
+            clientId &&
+            incrementWater.mutate({
+              trackerId: water.id,
+              currentCups: cupsConsumed,
+              clientId,
+            })
           }
         />
       </Card>

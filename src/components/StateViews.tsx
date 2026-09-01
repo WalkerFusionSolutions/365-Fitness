@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Button } from '@/components/Button';
 import { colors, spacing, typography } from '@/utils/theme';
 
 export function LoadingView({ label = 'Loading...' }: { label?: string }) {
@@ -18,6 +19,32 @@ export function EmptyState({ icon, title, subtitle }: { icon: keyof typeof Ionic
       <Ionicons name={icon} size={48} color={colors.textMuted} />
       <Text style={styles.emptyTitle}>{title}</Text>
       {subtitle ? <Text style={styles.emptySubtitle}>{subtitle}</Text> : null}
+    </View>
+  );
+}
+
+export function ErrorState({
+  title = 'Something went wrong',
+  subtitle = 'Please try again.',
+  onRetry,
+}: {
+  title?: string;
+  subtitle?: string;
+  onRetry?: () => void;
+}) {
+  return (
+    <View style={styles.emptyContainer}>
+      <Ionicons name="warning-outline" size={48} color={colors.error} />
+      <Text style={styles.emptyTitle}>{title}</Text>
+      <Text style={styles.emptySubtitle}>{subtitle}</Text>
+      {onRetry ? (
+        <Button
+          label="Retry"
+          variant="secondary"
+          onPress={onRetry}
+          style={styles.retryButton}
+        />
+      ) : null}
     </View>
   );
 }
@@ -50,5 +77,8 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: spacing.xs,
     textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: spacing.md,
   }
 });

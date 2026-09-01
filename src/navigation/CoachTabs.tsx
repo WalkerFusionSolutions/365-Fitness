@@ -4,33 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
+import CoachDashboardScreen from '@/screens/coach/CoachDashboardScreen';
+import CoachClientsScreen from '@/screens/coach/CoachClientsScreen';
 import { ProfileScreen } from '@/screens/common/ProfileScreen';
 import { colors, spacing, typography } from '@/utils/theme';
-
-const dashboardItems = [
-  ['Clients', 'Development placeholder'],
-  ['Workout Plans', 'Development placeholder'],
-  ['Meal Plans', 'Development placeholder'],
-  ['Progress', 'Coming soon'],
-  ['Messages', 'Coming soon'],
-  ['Reports', 'Coming soon'],
-] as const;
-
-function CoachDashboardScreen() {
-  return (
-    <Screen>
-      <Text style={styles.title}>365 FITNESS - Coach</Text>
-      <View style={styles.list}>
-        {dashboardItems.map(([title, subtitle]) => (
-          <Card key={title} style={styles.card}>
-            <Text style={styles.cardTitle}>{title}</Text>
-            <Text style={styles.cardSubtitle}>{subtitle}</Text>
-          </Card>
-        ))}
-      </View>
-    </Screen>
-  );
-}
+import { CoachTabsParamList } from '@/types';
 
 function PlaceholderScreen({
   title,
@@ -49,14 +27,14 @@ function PlaceholderScreen({
   );
 }
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<CoachTabsParamList>();
 
 export function CoachTabs() {
   return (
     <Tab.Navigator
-      screenOptions={({ route }: any) => ({
+      screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: ({ focused, color, size }: any) => {
+        tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'people';
           if (route.name === 'Coach') iconName = focused ? 'grid' : 'grid-outline';
           if (route.name === 'Clients') iconName = focused ? 'people' : 'people-outline';
@@ -75,17 +53,19 @@ export function CoachTabs() {
       })}
     >
       <Tab.Screen name="Coach" component={CoachDashboardScreen} />
-      <Tab.Screen
-        name="Clients"
-        children={() => <PlaceholderScreen title="Clients" />}
-      />
+      <Tab.Screen name="Clients" component={CoachClientsScreen} />
       <Tab.Screen
         name="Workouts"
-        children={() => <PlaceholderScreen title="Workout Plans" />}
+        children={() => (
+          <PlaceholderScreen
+            title="Workout Plans"
+            subtitle="Workout management will be connected in Phase 3."
+          />
+        )}
       />
       <Tab.Screen
         name="Nutrition"
-        children={() => <PlaceholderScreen title="Meal Plans" />}
+        children={() => <PlaceholderScreen title="Meal Plans" subtitle="Nutrition management coming soon." />}
       />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

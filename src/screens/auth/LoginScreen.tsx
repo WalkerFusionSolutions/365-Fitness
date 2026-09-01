@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TextInput, Text, Alert } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { Button } from '@/components/Button';
-import { supabase } from '@/services/supabase';
+import { signInWithEmail as signInWithEmailService } from '@/services/auth.service';
+import { AppServiceError } from '@/services/errors';
 import { colors, radius, spacing, typography } from '@/utils/theme';
 
 export function LoginScreen({ navigation }: any) {
@@ -12,13 +13,18 @@ export function LoginScreen({ navigation }: any) {
 
   async function signInWithEmail() {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
 
-    if (error) Alert.alert('Error', error.message);
-    setLoading(false);
+    try {
+      await signInWithEmailService(email.trim(), password);
+    } catch (error) {
+      const message =
+        error instanceof AppServiceError
+          ? error.userMessage
+          : 'Unable to sign in.';
+      Alert.alert('Error', message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
