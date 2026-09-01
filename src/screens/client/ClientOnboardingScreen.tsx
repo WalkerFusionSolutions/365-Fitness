@@ -15,6 +15,7 @@ import { Screen } from '@/components/Screen';
 import { useAuth } from '@/hooks/useAuth';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
 import { calculateBmi } from '@/services/fitness.service';
+import { useAppTheme } from '@/hooks/useTheme';
 import { FitnessAssessment, HeightUnit, WeightUnit } from '@/types';
 import {
   calculateAge,
@@ -22,7 +23,7 @@ import {
   formatWeight,
   weightToKg,
 } from '@/utils/fitness';
-import { colors, radius, spacing, typography } from '@/utils/theme';
+import { radius, spacing, typography } from '@/utils/theme';
 
 const TOTAL_STEPS = 15;
 
@@ -43,6 +44,7 @@ const durations = ['30 min', '45 min', '60 min', '75+ min'] as const;
 const limitationOptions = ['Knee', 'Back', 'Shoulder', 'Wrist', 'Cardio limitation', 'None'] as const;
 
 export default function ClientOnboardingScreen({ navigation }: any) {
+  const { colors } = useAppTheme();
   const { profile } = useAuth();
   const { saveAssessment, isSaving, error } = useFitnessProfile(profile?.id);
   const [step, setStep] = useState(1);
@@ -121,9 +123,9 @@ export default function ClientOnboardingScreen({ navigation }: any) {
           subtitle="Your coach can now use this information to personalize your plan."
         />
         <Card style={styles.completionCard}>
-          <Text style={styles.metricLabel}>Current BMI</Text>
-          <Text style={styles.bmiValue}>{bmi?.toFixed(1) ?? 'Not available'}</Text>
-          <Text style={styles.bodyText}>
+          <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Current BMI</Text>
+          <Text style={[styles.bmiValue, { color: colors.primary }]}>{bmi?.toFixed(1) ?? 'Not available'}</Text>
+          <Text style={[styles.bodyText, { color: colors.textSecondary }]}>
             Your assessment and starting measurement were saved.
           </Text>
         </Card>
@@ -136,7 +138,7 @@ export default function ClientOnboardingScreen({ navigation }: any) {
     <Screen>
       <ProgressIndicator current={step} total={TOTAL_STEPS} />
       {renderStep()}
-      {error ? <Text style={styles.inlineError}>{error}</Text> : null}
+      {error ? <Text style={[styles.inlineError, { color: colors.error }]}>{error}</Text> : null}
       <QuestionnaireNav
         canGoBack={step > 1}
         canContinue={canContinue}
@@ -177,7 +179,7 @@ export default function ClientOnboardingScreen({ navigation }: any) {
             subtitle="Build your fitness profile so your plan starts with the right context."
           />
           <Card>
-            <Text style={styles.bodyText}>
+            <Text style={[styles.bodyText, { color: colors.textSecondary }]}>
               This takes a few minutes. Your answers are saved to your authenticated fitness profile.
             </Text>
           </Card>
@@ -190,7 +192,14 @@ export default function ClientOnboardingScreen({ navigation }: any) {
         <>
           <SectionHeader title="Date of Birth" subtitle="Used to estimate age for your profile." />
           <TextInput
-            style={styles.largeInput}
+            style={[
+              styles.largeInput,
+              {
+                backgroundColor: colors.inputBackground,
+                borderColor: colors.border,
+                color: colors.textPrimary,
+              },
+            ]}
             placeholder="YYYY-MM-DD"
             placeholderTextColor={colors.textMuted}
             value={dateOfBirth}
@@ -241,10 +250,10 @@ export default function ClientOnboardingScreen({ navigation }: any) {
         <>
           <SectionHeader title="Your BMI" subtitle="Based on your current height and weight." />
           <Card style={styles.bmiCard}>
-            <Text style={styles.bmiValue}>{bmi?.toFixed(1) ?? 'Not available'}</Text>
-            <Text style={styles.bodyText}>Current Weight: {formatWeight(currentWeightKg)}</Text>
-            <Text style={styles.bodyText}>Height: {formatHeight(heightCm)}</Text>
-            <Text style={styles.note}>BMI is one general measurement and does not represent your complete fitness level.</Text>
+            <Text style={[styles.bmiValue, { color: colors.primary }]}>{bmi?.toFixed(1) ?? 'Not available'}</Text>
+            <Text style={[styles.bodyText, { color: colors.textSecondary }]}>Current Weight: {formatWeight(currentWeightKg)}</Text>
+            <Text style={[styles.bodyText, { color: colors.textSecondary }]}>Height: {formatHeight(heightCm)}</Text>
+            <Text style={[styles.note, { color: colors.textMuted }]}>BMI is one general measurement and does not represent your complete fitness level.</Text>
           </Card>
         </>
       );
@@ -283,10 +292,17 @@ export default function ClientOnboardingScreen({ navigation }: any) {
             values={limitations}
             onChange={(values) => setLimitations(values.includes('None') ? ['None'] : values)}
           />
-          <TextInput
-            style={styles.notesInput}
+        <TextInput
+          style={[
+            styles.notesInput,
+            {
+              backgroundColor: colors.inputBackground,
+              borderColor: colors.border,
+              color: colors.textPrimary,
+            },
+          ]}
             placeholder="Optional notes"
-            placeholderTextColor={colors.textMuted}
+          placeholderTextColor={colors.textMuted}
             value={healthNotes}
             onChangeText={setHealthNotes}
             multiline
@@ -342,44 +358,47 @@ function toOption<T extends string>(value: T) {
 function Summary({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.summaryRow}>
-      <Text style={styles.summaryLabel}>{label}</Text>
-      <Text style={styles.summaryValue}>{value}</Text>
+      <SummaryText label={label} value={value} />
     </View>
+  );
+}
+
+function SummaryText({ label, value }: { label: string; value: string }) {
+  const { colors } = useAppTheme();
+  return (
+    <>
+      <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{label}</Text>
+      <Text style={[styles.summaryValue, { color: colors.textPrimary }]}>{value}</Text>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: spacing.md },
   completionCard: { gap: spacing.sm, marginBottom: spacing.lg },
-  bodyText: { ...typography.body, color: colors.textSecondary },
-  metricLabel: { ...typography.caption, color: colors.textSecondary, fontWeight: '700' },
+  bodyText: { ...typography.body },
+  metricLabel: { ...typography.caption, fontWeight: '700' },
   bmiCard: { gap: spacing.sm },
-  bmiValue: { ...typography.h1, color: colors.primary, fontSize: 44 },
-  note: { ...typography.caption, color: colors.textMuted },
+  bmiValue: { ...typography.h1, fontSize: 44 },
+  note: { ...typography.caption },
   largeInput: {
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.md,
-    color: colors.textPrimary,
     padding: spacing.md,
     fontSize: 24,
     fontWeight: '700',
   },
   reviewCard: { gap: spacing.sm, marginBottom: spacing.lg },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md },
-  summaryLabel: { ...typography.caption, color: colors.textSecondary, flex: 1 },
-  summaryValue: { ...typography.body, color: colors.textPrimary, fontWeight: '600', flex: 1, textAlign: 'right' },
+  summaryLabel: { ...typography.caption, flex: 1 },
+  summaryValue: { ...typography.body, fontWeight: '600', flex: 1, textAlign: 'right' },
   notesInput: {
     minHeight: 96,
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.md,
-    color: colors.textPrimary,
     padding: spacing.md,
     marginTop: spacing.md,
     textAlignVertical: 'top',
   },
-  inlineError: { ...typography.caption, color: colors.error, marginTop: spacing.md },
+  inlineError: { ...typography.caption, marginTop: spacing.md },
 });

@@ -1,7 +1,3 @@
-import { Appearance } from 'react-native';
-
-const isDarkMode = Appearance.getColorScheme() === 'dark';
-
 // Base colors
 export const palette = {
   primary: {
@@ -31,16 +27,22 @@ export const lightColors = {
   background: palette.neutral.offWhite,
   surface: palette.neutral.pureWhite,
   surfaceElevated: palette.neutral.pureWhite,
+  surfaceSecondary: '#EEF5F3',
+  cardBackground: palette.neutral.pureWhite,
+  inputBackground: palette.neutral.pureWhite,
   primary: palette.primary.emerald,
+  primaryText: palette.neutral.pureWhite,
   primaryDark: palette.primary.deepTeal,
   secondary: palette.primary.teal,
   highlight: palette.primary.athleticGreen,
+  text: palette.neutral.charcoal,
   textPrimary: palette.neutral.charcoal,
   textSecondary: palette.neutral.slateGray,
   textMuted: palette.neutral.slateGray, // Might want a lighter gray if needed
   border: palette.neutral.lightGray,
   success: palette.status.success,
   error: palette.status.error,
+  danger: palette.status.error,
   warning: palette.accent.energyGold,
   white: palette.neutral.pureWhite,
 };
@@ -49,22 +51,48 @@ export const darkColors = {
   background: palette.neutral.black,
   surface: '#101A18',
   surfaceElevated: '#172522',
+  surfaceSecondary: '#1D2E2A',
+  cardBackground: '#101A18',
+  inputBackground: '#172522',
   primary: palette.primary.athleticGreen,
+  primaryText: palette.neutral.black,
   primaryDark: palette.primary.deepTeal,
   secondary: palette.primary.emerald,
   highlight: palette.primary.athleticGreen,
+  text: palette.neutral.pureWhite,
   textPrimary: palette.neutral.pureWhite,
   textSecondary: '#9BAAA6',
   textMuted: '#9BAAA6',
   border: '#263633',
   success: palette.status.success,
   error: palette.status.error,
+  danger: palette.status.error,
   warning: palette.accent.energyGold,
   white: palette.neutral.pureWhite,
 };
 
-// Toggle this or hook it up to a ThemeProvider context for dynamic switching
-export const colors = isDarkMode ? darkColors : lightColors; // Defaulting to dynamic based on device, or we can force dark mode
+export type ThemeName = 'light' | 'dark';
+export type ThemeColors = typeof lightColors;
+export type AppTheme = {
+  name: ThemeName;
+  colors: ThemeColors;
+};
+
+export const lightTheme: AppTheme = {
+  name: 'light',
+  colors: lightColors,
+};
+
+export const darkTheme: AppTheme = {
+  name: 'dark',
+  colors: darkColors,
+};
+
+export function getTheme(themeName: ThemeName) {
+  return themeName === 'dark' ? darkTheme : lightTheme;
+}
+
+export const colors = lightColors;
 
 export const typography = {
   h1: {

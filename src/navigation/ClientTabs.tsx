@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '@/utils/theme';
+import { useAppTheme } from '@/hooks/useTheme';
 import NutritionScreen from '@/screens/client/NutritionScreen';
 import WorkoutHistoryScreen from '@/screens/client/WorkoutHistoryScreen';
 import DashboardScreen from '@/screens/client/DashboardScreen';
@@ -12,6 +12,8 @@ import { ClientTabsParamList } from '@/types';
 const Tab = createBottomTabNavigator<ClientTabsParamList>();
 
 export function ClientTabs() {
+  const { colors } = useAppTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({

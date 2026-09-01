@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
-import { colors, radius, spacing, typography } from '@/utils/theme';
+import { radius, spacing, typography } from '@/utils/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
+import { useAppTheme } from '@/hooks/useTheme';
 
 export default function DashboardScreen({ navigation }: any) {
+  const { colors } = useAppTheme();
   const { profile } = useAuth();
   const { data: fitnessProfile, isLoading: fitnessLoading } =
     useFitnessProfile(profile?.id);
@@ -18,18 +20,18 @@ export default function DashboardScreen({ navigation }: any) {
     <Screen padded>
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Welcome back,</Text>
-          <Text style={styles.name}>{firstName}</Text>
+          <Text style={[styles.greeting, { color: colors.textSecondary }]}>Welcome back,</Text>
+          <Text style={[styles.name, { color: colors.textPrimary }]}>{firstName}</Text>
         </View>
-        <Pressable style={styles.avatarPlaceholder}>
+        <Pressable style={[styles.avatarPlaceholder, { backgroundColor: colors.primaryDark }]}>
           <Text style={styles.avatarText}>{firstName[0]}</Text>
         </Pressable>
       </View>
 
       {!fitnessLoading && !fitnessProfile ? (
         <Card style={styles.onboardingCard}>
-          <Text style={styles.cardTitle}>Complete Your Fitness Profile</Text>
-          <Text style={styles.cardSubtitle}>
+          <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Complete Your Fitness Profile</Text>
+          <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
             Help your coach personalize your plan and track your progress.
           </Text>
           <Button
@@ -40,17 +42,17 @@ export default function DashboardScreen({ navigation }: any) {
         </Card>
       ) : null}
 
-      <Text style={styles.sectionTitle}>Today's Plan</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Today's Plan</Text>
       
-      <Card style={styles.workoutCard}>
-        <Text style={styles.placeholderLabel}>Development placeholder data</Text>
+      <Card style={[styles.workoutCard, { backgroundColor: colors.surfaceElevated }]}>
+        <Text style={[styles.placeholderLabel, { color: colors.warning }]}>Development placeholder data</Text>
         <View style={styles.cardHeader}>
-          <View style={styles.iconContainer}>
+          <View style={[styles.iconContainer, { backgroundColor: colors.primary }]}>
             <Ionicons name="barbell" size={24} color={colors.white} />
           </View>
           <View style={styles.cardTextContainer}>
-            <Text style={styles.cardTitle}>Leg Day (Hypertrophy)</Text>
-            <Text style={styles.cardSubtitle}>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Leg Day (Hypertrophy)</Text>
+            <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
               Workout assignment connects in Phase 3
             </Text>
           </View>
@@ -65,28 +67,28 @@ export default function DashboardScreen({ navigation }: any) {
       <View style={styles.row}>
         <Card style={styles.smallCard}>
           <Ionicons name="water-outline" size={24} color={colors.primary} />
-          <Text style={styles.smallCardValue}>3 / 8</Text>
-          <Text style={styles.smallCardLabel}>Placeholder Water</Text>
+          <Text style={[styles.smallCardValue, { color: colors.textPrimary }]}>3 / 8</Text>
+          <Text style={[styles.smallCardLabel, { color: colors.textSecondary }]}>Placeholder Water</Text>
         </Card>
         
         <Card style={styles.smallCard}>
           <Ionicons name="flame-outline" size={24} color={colors.warning} />
-          <Text style={styles.smallCardValue}>Day 4</Text>
-          <Text style={styles.smallCardLabel}>Streak</Text>
+          <Text style={[styles.smallCardValue, { color: colors.textPrimary }]}>Day 4</Text>
+          <Text style={[styles.smallCardLabel, { color: colors.textSecondary }]}>Streak</Text>
         </Card>
       </View>
 
-      <Text style={styles.sectionTitle}>Progress Snapshot</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Progress Snapshot</Text>
       <Card style={styles.progressCard}>
-        <Text style={styles.placeholderLabel}>Development placeholder data</Text>
+        <Text style={[styles.placeholderLabel, { color: colors.warning }]}>Development placeholder data</Text>
         <View style={styles.progressRow}>
-          <Text style={styles.progressLabel}>Current Weight</Text>
-          <Text style={styles.progressValue}>185 lbs</Text>
+          <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>Current Weight</Text>
+          <Text style={[styles.progressValue, { color: colors.textPrimary }]}>185 lbs</Text>
         </View>
-        <View style={styles.progressBarBg}>
-          <View style={[styles.progressBarFill, { width: '60%' }]} />
+        <View style={[styles.progressBarBg, { backgroundColor: colors.border }]}>
+          <View style={[styles.progressBarFill, { width: '60%', backgroundColor: colors.highlight }]} />
         </View>
-        <Text style={styles.progressGoal}>Goal: 175 lbs</Text>
+        <Text style={[styles.progressGoal, { color: colors.textMuted }]}>Goal: 175 lbs</Text>
       </Card>
 
     </Screen>
@@ -102,34 +104,29 @@ const styles = StyleSheet.create({
   },
   greeting: {
     ...typography.caption,
-    color: colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   name: {
     ...typography.h1,
-    color: colors.textPrimary,
   },
   avatarPlaceholder: {
     width: 48,
     height: 48,
     borderRadius: radius.round,
-    backgroundColor: colors.primaryDark,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
-    color: colors.white,
+    color: '#FFFFFF',
     ...typography.h3,
   },
   sectionTitle: {
     ...typography.h3,
-    color: colors.textPrimary,
     marginBottom: spacing.md,
     marginTop: spacing.md,
   },
   workoutCard: {
-    backgroundColor: colors.surfaceElevated,
     marginBottom: spacing.lg,
     padding: spacing.lg,
   },
@@ -146,7 +143,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: radius.md,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
@@ -156,16 +152,13 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     ...typography.h3,
-    color: colors.textPrimary,
     marginBottom: 4,
   },
   cardSubtitle: {
     ...typography.caption,
-    color: colors.textSecondary,
   },
   placeholderLabel: {
     ...typography.caption,
-    color: colors.warning,
     fontWeight: '700',
     marginBottom: spacing.sm,
     textTransform: 'uppercase',
@@ -185,13 +178,11 @@ const styles = StyleSheet.create({
   },
   smallCardValue: {
     ...typography.h2,
-    color: colors.textPrimary,
     marginTop: spacing.sm,
     marginBottom: 2,
   },
   smallCardLabel: {
     ...typography.caption,
-    color: colors.textSecondary,
   },
   progressCard: {
     padding: spacing.lg,
@@ -204,26 +195,21 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     ...typography.body,
-    color: colors.textSecondary,
   },
   progressValue: {
     ...typography.h3,
-    color: colors.textPrimary,
   },
   progressBarBg: {
     height: 8,
-    backgroundColor: colors.border,
     borderRadius: radius.round,
     marginBottom: spacing.xs,
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: colors.highlight,
     borderRadius: radius.round,
   },
   progressGoal: {
     ...typography.caption,
-    color: colors.textMuted,
     textAlign: 'right',
   }
 });

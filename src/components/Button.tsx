@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, TouchableOpacityProps } from 'react-native';
-import { colors, radius, spacing, typography } from '@/utils/theme';
+import { useAppTheme } from '@/hooks/useTheme';
+import { radius, spacing, typography } from '@/utils/theme';
 
 interface ButtonProps extends TouchableOpacityProps {
   label: string;
@@ -9,12 +10,18 @@ interface ButtonProps extends TouchableOpacityProps {
 }
 
 export function Button({ label, variant = 'primary', loading, disabled, style, ...rest }: ButtonProps) {
+  const { colors } = useAppTheme();
+
   return (
     <TouchableOpacity
       style={[
         styles.button,
+        variant === 'primary' && { backgroundColor: colors.primary },
         variant === 'secondary' && styles.secondaryButton,
-        variant === 'outline' && styles.outlineButton,
+        variant === 'outline' && [
+          styles.outlineButton,
+          { borderColor: colors.primary },
+        ],
         (disabled || loading) && styles.disabledButton,
         style,
       ]}
@@ -22,13 +29,12 @@ export function Button({ label, variant = 'primary', loading, disabled, style, .
       {...rest}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.white : colors.primary} />
+        <ActivityIndicator color={variant === 'primary' ? colors.primaryText : colors.primary} />
       ) : (
         <Text
           style={[
             styles.label,
-            variant === 'secondary' && styles.secondaryLabel,
-            variant === 'outline' && styles.outlineLabel,
+            { color: variant === 'primary' ? colors.primaryText : colors.primary },
           ]}
         >
           {label}
@@ -40,7 +46,6 @@ export function Button({ label, variant = 'primary', loading, disabled, style, .
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: colors.primary,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     borderRadius: radius.md,
@@ -54,7 +59,6 @@ const styles = StyleSheet.create({
   outlineButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: colors.primary,
   },
   disabledButton: {
     opacity: 0.6,
@@ -62,12 +66,5 @@ const styles = StyleSheet.create({
   label: {
     ...typography.body,
     fontWeight: '700',
-    color: colors.white,
-  },
-  secondaryLabel: {
-    color: colors.primary,
-  },
-  outlineLabel: {
-    color: colors.primary,
   },
 });

@@ -7,7 +7,8 @@ import { Screen } from '@/components/Screen';
 import CoachDashboardScreen from '@/screens/coach/CoachDashboardScreen';
 import CoachClientsScreen from '@/screens/coach/CoachClientsScreen';
 import { ProfileScreen } from '@/screens/common/ProfileScreen';
-import { colors, spacing, typography } from '@/utils/theme';
+import { useAppTheme } from '@/hooks/useTheme';
+import { spacing, typography } from '@/utils/theme';
 import { CoachTabsParamList } from '@/types';
 
 function PlaceholderScreen({
@@ -17,11 +18,13 @@ function PlaceholderScreen({
   title: string;
   subtitle?: string;
 }) {
+  const { colors } = useAppTheme();
+
   return (
     <Screen>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
       <Card>
-        <Text style={styles.cardSubtitle}>{subtitle}</Text>
+        <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
       </Card>
     </Screen>
   );
@@ -30,6 +33,8 @@ function PlaceholderScreen({
 const Tab = createBottomTabNavigator<CoachTabsParamList>();
 
 export function CoachTabs() {
+  const { colors } = useAppTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -75,7 +80,6 @@ export function CoachTabs() {
 const styles = StyleSheet.create({
   title: {
     ...typography.h1,
-    color: colors.textPrimary,
     marginBottom: spacing.md,
   },
   list: {
@@ -86,10 +90,8 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     ...typography.h3,
-    color: colors.textPrimary,
   },
   cardSubtitle: {
     ...typography.body,
-    color: colors.textSecondary,
   },
 });

@@ -47,6 +47,60 @@ export async function getMeasurements(clientId: string) {
   return data ?? [];
 }
 
+export async function getFitnessProfileSummaries(clientIds: string[]) {
+  const uniqueClientIds = Array.from(new Set(clientIds)).filter(Boolean);
+
+  if (uniqueClientIds.length === 0) {
+    return new Map<string, FitnessProfileSummary | null>();
+  }
+
+  const [questionnairesResult, measurementsResult] = await Promise.all([
+    supabase
+      .from('medical_questionnaire')
+      .select('*')
+      .in('client_id', uniqueClientIds),
+    supabase
+      .from('measurements')
+      .select('*')
+      .in('client_id', uniqueClientIds)
+      .order('date', { ascending: true }),
+  ]);
+
+  throwIfSupabaseError(
+    questionnairesResult.error,
+    'Unable to load client assessments.'
+  );
+  throwIfSupabaseError(
+    measurementsResult.error,
+    'Unable to load client measurements.'
+  );
+
+  const assessmentsByClientId = new Map(
+    (questionnairesResult.data ?? []).map((row) => [
+      row.client_id,
+      parseAssessment(row.responses),
+    ])
+  );
+  const measurementsByClientId = new Map<string, Measurement[]>();
+
+  for (const measurement of measurementsResult.data ?? []) {
+    if (!measurement.client_id) continue;
+
+    const existing = measurementsByClientId.get(measurement.client_id) ?? [];
+    existing.push(measurement);
+    measurementsByClientId.set(measurement.client_id, existing);
+  }
+
+  return new Map(
+    uniqueClientIds.map((clientId) => {
+      const assessment = assessmentsByClientId.get(clientId);
+      const measurements = measurementsByClientId.get(clientId) ?? [];
+
+      return [clientId, buildSummary(assessment, measurements)];
+    })
+  );
+}
+
 export async function addMeasurement({
   clientId,
   weight,
@@ -140,14 +194,36 @@ export async function getFitnessProfileSummary(
   }
 
   const latestMeasurement = measurements[0];
+  return buildSummary(assessment, measurements);
+}
+
+function buildSummary(
+  assessment: FitnessAssessment | null | undefined,
+  measurements: Measurement[]
+): FitnessProfileSummary | null {
+  if (!assessment) {
+    return null;
+  }
+
+  const sortedMeasurements = [...measurements].sort((a, b) =>
+    String(a.date ?? '').localeCompare(String(b.date ?? ''))
+  );
+  const firstMeasurement = sortedMeasurements.find(
+    (measurement) => measurement.weight != null
+  );
+  const latestMeasurement = [...sortedMeasurements]
+    .reverse()
+    .find((measurement) => measurement.weight != null);
   const currentWeightKg =
     latestMeasurement?.weight ?? assessment.currentWeightKg;
+  const startingWeightKg =
+    firstMeasurement?.weight ?? assessment.startingWeightKg;
 
   return {
     assessment,
-    latestMeasurement,
+    latestMeasurement: latestMeasurement ?? null,
     measurementCount: measurements.length,
-    startingWeightKg: assessment.startingWeightKg,
+    startingWeightKg,
     currentWeightKg,
     goalWeightKg: assessment.goalWeightKg,
     bmi: calculateBmi(assessment.heightCm, currentWeightKg ?? undefined),

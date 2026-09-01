@@ -7,7 +7,7 @@ import {
   RefreshControlProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '@/utils/theme';
+import { useAppTheme } from '@/hooks/useTheme';
 
 interface ScreenProps extends ViewProps {
   children: React.ReactNode;
@@ -24,6 +24,7 @@ export function Screen({
   style,
   ...rest
 }: ScreenProps) {
+  const { colors } = useAppTheme();
   const content = (
     <View style={[styles.container, padded && styles.padded, style]} {...rest}>
       {children}
@@ -31,7 +32,7 @@ export function Screen({
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {scroll ? (
         <ScrollView
           contentContainerStyle={styles.scroll}
@@ -50,7 +51,6 @@ export function Screen({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scroll: {
     flexGrow: 1,

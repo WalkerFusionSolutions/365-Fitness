@@ -78,6 +78,12 @@ export interface FitnessProfileSummary {
   bmi: number | null;
 }
 
+export interface CoachVisibleClient {
+  profile: Profile;
+  fitnessSummary: FitnessProfileSummary | null;
+  assignment: CoachClientAssignment;
+}
+
 export interface ProgressPhoto {
   id: string;
   client_id: string;

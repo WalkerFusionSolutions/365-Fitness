@@ -4,9 +4,11 @@ import { Screen } from '@/components/Screen';
 import { Button } from '@/components/Button';
 import { signInWithEmail as signInWithEmailService } from '@/services/auth.service';
 import { AppServiceError } from '@/services/errors';
-import { colors, radius, spacing, typography } from '@/utils/theme';
+import { useAppTheme } from '@/hooks/useTheme';
+import { radius, spacing, typography } from '@/utils/theme';
 
 export function LoginScreen({ navigation }: any) {
+  const { colors } = useAppTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,11 +32,18 @@ export function LoginScreen({ navigation }: any) {
   return (
     <Screen padded>
       <View style={styles.container}>
-        <Text style={styles.title}>365 FITNESS</Text>
-        <Text style={styles.subtitle}>Sign in to continue</Text>
+        <Text style={[styles.title, { color: colors.primary }]}>365 FITNESS</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Sign in to continue</Text>
 
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: colors.inputBackground,
+              borderColor: colors.border,
+              color: colors.textPrimary,
+            },
+          ]}
           placeholder="Email"
           placeholderTextColor={colors.textMuted}
           autoCapitalize="none"
@@ -43,7 +52,14 @@ export function LoginScreen({ navigation }: any) {
           onChangeText={setEmail}
         />
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: colors.inputBackground,
+              borderColor: colors.border,
+              color: colors.textPrimary,
+            },
+          ]}
           placeholder="Password"
           placeholderTextColor={colors.textMuted}
           secureTextEntry
@@ -71,22 +87,17 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.h1,
-    color: colors.primary,
     marginBottom: spacing.xs,
     textAlign: 'center',
     fontStyle: 'italic',
   },
   subtitle: {
     ...typography.body,
-    color: colors.textSecondary,
     marginBottom: spacing.xl,
     textAlign: 'center',
   },
   input: {
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
-    color: colors.textPrimary,
     borderRadius: radius.md,
     padding: spacing.md,
     marginBottom: spacing.md,

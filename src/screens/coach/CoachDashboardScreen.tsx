@@ -1,19 +1,23 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import { useAuth } from '@/hooks/useAuth';
-import { useCoachAssignments } from '@/hooks/useAssignments';
-import { colors, spacing, typography } from '@/utils/theme';
+import { useCoachClientSummaries } from '@/hooks/useAssignments';
+import { useAppTheme } from '@/hooks/useTheme';
+import { CoachVisibleClient } from '@/types';
+import { formatWeight } from '@/utils/fitness';
+import { spacing, typography } from '@/utils/theme';
 
 export default function CoachDashboardScreen({ navigation }: any) {
+  const { colors } = useAppTheme();
   const { profile } = useAuth();
-  const { data, error, isLoading, refresh } = useCoachAssignments();
+  const { data, error, isLoading, refresh } = useCoachClientSummaries();
   const coachName = profile?.full_name?.trim() || 'Coach';
-  const activeCount = data.filter((item) => item.status === 'active').length;
-  const pendingCount = data.filter((item) => item.status === 'pending').length;
+  const completeProfiles = data.filter((item) => item.fitnessSummary).length;
+  const incompleteProfiles = data.length - completeProfiles;
 
   if (isLoading) {
     return <LoadingView label="Loading coach dashboard..." />;
@@ -33,28 +37,45 @@ export default function CoachDashboardScreen({ navigation }: any) {
 
   return (
     <Screen>
-      <Text style={styles.brand}>365 FITNESS</Text>
-      <Text style={styles.title}>Coach Dashboard</Text>
-      <Text style={styles.subtitle}>Welcome back, {coachName}</Text>
+      <Text style={[styles.brand, { color: colors.primary }]}>365 FITNESS</Text>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>Coach Dashboard</Text>
+      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Welcome back, {coachName}</Text>
 
-      <Text style={styles.sectionTitle}>Clients</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Your Clients</Text>
       <View style={styles.statsRow}>
         <Card style={styles.statCard}>
-          <Text style={styles.statValue}>{activeCount}</Text>
-          <Text style={styles.statLabel}>Active Clients</Text>
+          <Text style={[styles.statValue, { color: colors.primary }]}>{data.length}</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Active Clients</Text>
         </Card>
         <Card style={styles.statCard}>
-          <Text style={styles.statValue}>{pendingCount}</Text>
-          <Text style={styles.statLabel}>Pending Assignments</Text>
+          <Text style={[styles.statValue, { color: colors.primary }]}>{completeProfiles}</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Fitness Profiles</Text>
+        </Card>
+        <Card style={styles.statCard}>
+          <Text style={[styles.statValue, { color: colors.primary }]}>{incompleteProfiles}</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Incomplete</Text>
         </Card>
       </View>
       <Button
-        label="View Clients"
+        label="View All"
         onPress={() => navigation.navigate('Clients')}
         style={styles.viewButton}
       />
 
-      <Text style={styles.sectionTitle}>Phase Roadmap</Text>
+      {data.slice(0, 3).map((client) => (
+        <ClientPreview
+          key={client.profile.id}
+          client={client}
+          onPress={() =>
+            navigation.navigate('CoachClientDetail', {
+              clientId: client.profile.id,
+              clientName: client.profile.full_name,
+            })
+          }
+        />
+      ))}
+
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Phase Roadmap</Text>
       <RoadmapCard title="Workout Plans" subtitle="Connected in Phase 3." />
       <RoadmapCard title="Nutrition" subtitle="Coming soon." />
       <RoadmapCard title="Messages" subtitle="Coming soon." />
@@ -63,11 +84,49 @@ export default function CoachDashboardScreen({ navigation }: any) {
   );
 }
 
+function ClientPreview({
+  client,
+  onPress,
+}: {
+  client: CoachVisibleClient;
+  onPress: () => void;
+}) {
+  const { colors } = useAppTheme();
+  const initials = client.profile.full_name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+  const summary = client.fitnessSummary;
+
+  return (
+    <Pressable onPress={onPress}>
+      <Card style={styles.clientPreview}>
+        <View style={[styles.avatar, { backgroundColor: colors.primaryDark }]}>
+          <Text style={styles.avatarText}>{initials || 'CL'}</Text>
+        </View>
+        <View style={styles.clientText}>
+          <Text style={[styles.clientName, { color: colors.textPrimary }]}>{client.profile.full_name || 'Client'}</Text>
+          <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+            {summary
+              ? `${summary.assessment.primaryGoal} • ${formatWeight(summary.currentWeightKg)} to ${formatWeight(summary.goalWeightKg)}`
+              : 'Fitness profile incomplete'}
+          </Text>
+        </View>
+        <Text style={[styles.viewText, { color: colors.primary }]}>View</Text>
+      </Card>
+    </Pressable>
+  );
+}
+
 function RoadmapCard({ title, subtitle }: { title: string; subtitle: string }) {
+  const { colors } = useAppTheme();
+
   return (
     <Card style={styles.roadmapCard}>
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.cardSubtitle}>{subtitle}</Text>
+      <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>{title}</Text>
+      <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
     </Card>
   );
 }
@@ -75,22 +134,18 @@ function RoadmapCard({ title, subtitle }: { title: string; subtitle: string }) {
 const styles = StyleSheet.create({
   brand: {
     ...typography.caption,
-    color: colors.primary,
     fontWeight: '700',
     marginBottom: spacing.xs,
   },
   title: {
     ...typography.h1,
-    color: colors.textPrimary,
   },
   subtitle: {
     ...typography.body,
-    color: colors.textSecondary,
     marginBottom: spacing.lg,
   },
   sectionTitle: {
     ...typography.h3,
-    color: colors.textPrimary,
     marginBottom: spacing.md,
     marginTop: spacing.md,
   },
@@ -101,14 +156,13 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     gap: spacing.xs,
+    padding: spacing.sm,
   },
   statValue: {
     ...typography.h1,
-    color: colors.primary,
   },
   statLabel: {
     ...typography.caption,
-    color: colors.textSecondary,
   },
   viewButton: {
     marginTop: spacing.md,
@@ -117,12 +171,38 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     marginBottom: spacing.sm,
   },
+  clientPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginTop: spacing.sm,
+  },
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    ...typography.caption,
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  clientText: {
+    flex: 1,
+  },
+  clientName: {
+    ...typography.h3,
+  },
+  viewText: {
+    ...typography.caption,
+    fontWeight: '700',
+  },
   cardTitle: {
     ...typography.h3,
-    color: colors.textPrimary,
   },
   cardSubtitle: {
     ...typography.body,
-    color: colors.textSecondary,
   },
 });

@@ -4,10 +4,12 @@ import {
   archiveAssignment,
   AssignmentWithProfile,
   createPendingAssignment,
+  getCoachClientSummaries,
   getCurrentClientAssignments,
   getCurrentCoachAssignments,
 } from '@/services/assignments.service';
 import { AppServiceError } from '@/services/errors';
+import { CoachVisibleClient } from '@/types';
 
 function getUserMessage(error: unknown, fallback: string) {
   if (error instanceof AppServiceError) {
@@ -174,5 +176,44 @@ export function useClientAssignments() {
     refresh: () => load(true),
     approve,
     archive,
+  };
+}
+
+export function useCoachClientSummaries() {
+  const [data, setData] = useState<CoachVisibleClient[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async (refreshing = false) => {
+    if (refreshing) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
+
+    setError(null);
+
+    try {
+      setData(await getCoachClientSummaries());
+    } catch (loadError) {
+      console.error('Unable to load visible clients:', loadError);
+      setError(getUserMessage(loadError, 'Unable to load clients.'));
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return {
+    data,
+    isLoading,
+    isRefreshing,
+    error,
+    refresh: () => load(true),
   };
 }

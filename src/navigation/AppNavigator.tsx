@@ -20,7 +20,7 @@ import ClientOnboardingScreen from '@/screens/client/ClientOnboardingScreen';
 import AssessmentScreen from '@/screens/common/AssessmentScreen';
 import MeasurementsScreen from '@/screens/common/MeasurementsScreen';
 import CoachClientDetailScreen from '@/screens/coach/CoachClientDetailScreen';
-import { colors } from '@/utils/theme';
+import { useAppTheme } from '@/hooks/useTheme';
 import { ClientStackParamList } from '@/types';
 
 type RootStackParamList = ClientStackParamList & {
@@ -33,6 +33,8 @@ type RootStackParamList = ClientStackParamList & {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function AppNavigator() {
+  const theme = useAppTheme();
+  const { colors } = theme;
   const {
     profile,
     setSession,
@@ -178,7 +180,25 @@ export function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      theme={{
+        dark: theme.name === 'dark',
+        colors: {
+          primary: colors.primary,
+          background: colors.background,
+          card: colors.surface,
+          text: colors.textPrimary,
+          border: colors.border,
+          notification: colors.primary,
+        },
+        fonts: {
+          regular: { fontFamily: 'System', fontWeight: '400' },
+          medium: { fontFamily: 'System', fontWeight: '500' },
+          bold: { fontFamily: 'System', fontWeight: '700' },
+          heavy: { fontFamily: 'System', fontWeight: '800' },
+        },
+      }}
+    >
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
@@ -208,17 +228,17 @@ export function AppNavigator() {
             <Stack.Screen
               name="CoachClientDetail"
               component={CoachClientDetailScreen}
-              options={detailHeaderOptions('Client')}
+              options={detailHeaderOptions('Client', colors)}
             />
             <Stack.Screen
               name="CoachClientAssessment"
               component={AssessmentScreen}
-              options={detailHeaderOptions('Assessment')}
+              options={detailHeaderOptions('Assessment', colors)}
             />
             <Stack.Screen
               name="CoachClientMeasurements"
               component={MeasurementsScreen}
-              options={detailHeaderOptions('Measurements')}
+              options={detailHeaderOptions('Measurements', colors)}
             />
           </>
         ) : (
@@ -231,22 +251,22 @@ export function AppNavigator() {
             <Stack.Screen
               name="ExerciseDetail"
               component={ExerciseDetailScreen}
-              options={detailHeaderOptions('Workout')}
+              options={detailHeaderOptions('Workout', colors)}
             />
             <Stack.Screen
               name="ClientOnboarding"
               component={ClientOnboardingScreen}
-              options={detailHeaderOptions('Fitness Profile')}
+              options={detailHeaderOptions('Fitness Profile', colors)}
             />
             <Stack.Screen
               name="ClientAssessment"
               component={AssessmentScreen}
-              options={detailHeaderOptions('Assessment')}
+              options={detailHeaderOptions('Assessment', colors)}
             />
             <Stack.Screen
               name="ClientMeasurements"
               component={MeasurementsScreen}
-              options={detailHeaderOptions('Measurements')}
+              options={detailHeaderOptions('Measurements', colors)}
             />
           </>
         )}
@@ -255,7 +275,10 @@ export function AppNavigator() {
   );
 }
 
-function detailHeaderOptions(title: string) {
+function detailHeaderOptions(
+  title: string,
+  colors: ReturnType<typeof useAppTheme>['colors']
+) {
   return {
     headerShown: true,
     title,

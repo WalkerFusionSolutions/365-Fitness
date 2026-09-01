@@ -1,22 +1,35 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
+import { useAppTheme } from '@/hooks/useTheme';
 import { ClientStackParamList } from '@/types';
-import { formatWeight } from '@/utils/fitness';
-import { colors, spacing, typography } from '@/utils/theme';
+import { formatHeight, formatWeight } from '@/utils/fitness';
+import { spacing, typography } from '@/utils/theme';
 
 type DetailRoute = RouteProp<ClientStackParamList, 'CoachClientDetail'>;
 
 export default function CoachClientDetailScreen() {
+  const { colors } = useAppTheme();
   const navigation = useNavigation<any>();
   const route = useRoute<DetailRoute>();
   const { clientId, clientName = 'Client' } = route.params;
   const { data, error, isLoading, refresh } = useFitnessProfile(clientId);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
 
   if (isLoading) {
     return <LoadingView label="Loading client overview..." />;
@@ -37,7 +50,7 @@ export default function CoachClientDetailScreen() {
   if (!data) {
     return (
       <Screen>
-        <Text style={styles.title}>{clientName}</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>{clientName}</Text>
         <EmptyState
           icon="clipboard-outline"
           title="No fitness profile yet."
@@ -49,33 +62,73 @@ export default function CoachClientDetailScreen() {
 
   return (
     <Screen>
-      <Text style={styles.eyebrow}>Client Overview</Text>
-      <Text style={styles.title}>{clientName}</Text>
+      <Text style={[styles.eyebrow, { color: colors.primary }]}>Client Overview</Text>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>{clientName}</Text>
+
+      <View style={styles.weightRow}>
+        <Card style={styles.weightCard}>
+          <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Starting</Text>
+          <Text style={[styles.weightValue, { color: colors.textPrimary }]}>{formatWeight(data.startingWeightKg)}</Text>
+        </Card>
+        <Card style={styles.weightCard}>
+          <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Current</Text>
+          <Text style={[styles.weightValue, { color: colors.primary }]}>{formatWeight(data.currentWeightKg)}</Text>
+        </Card>
+        <Card style={styles.weightCard}>
+          <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Goal</Text>
+          <Text style={[styles.weightValue, { color: colors.textPrimary }]}>{formatWeight(data.goalWeightKg)}</Text>
+        </Card>
+      </View>
 
       <Card style={styles.card}>
-        <Text style={styles.sectionTitle}>Progress</Text>
-        <Metric label="Starting Weight" value={formatWeight(data.startingWeightKg)} />
-        <Metric label="Current Weight" value={formatWeight(data.currentWeightKg)} />
-        <Metric label="Goal Weight" value={formatWeight(data.goalWeightKg)} />
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Fitness Overview</Text>
+        <Metric label="Height" value={formatHeight(data.assessment.heightCm)} />
+        <Metric label="BMI" value={data.bmi?.toFixed(1) ?? 'Not available'} />
+        <Metric label="Primary Goal" value={data.assessment.primaryGoal} />
+        <Metric label="Experience" value={data.assessment.experienceLevel} />
+        <Metric label="Activity Level" value={data.assessment.activityLevel} />
+        <Metric label="Training Frequency" value={data.assessment.trainingFrequency} />
+        <Metric label="Preferred Session" value={data.assessment.sessionDuration} />
       </Card>
 
       <Card style={styles.card}>
-        <Text style={styles.sectionTitle}>Training Profile</Text>
-        <Metric label="Primary Goal" value={data.assessment.primaryGoal} />
-        <Metric label="Experience" value={data.assessment.experienceLevel} />
-        <Metric label="Activity" value={data.assessment.activityLevel} />
-        <Metric label="Training" value={data.assessment.trainingFrequency} />
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Training Preferences</Text>
+        <Metric label="Workout Location" value={data.assessment.workoutLocation} />
+        <Metric label="Equipment" value={data.assessment.equipment.join(', ') || 'None selected'} />
+        <Metric label="Focus Areas" value={data.assessment.focusAreas.join(', ') || 'None selected'} />
+      </Card>
+
+      <Card style={styles.card}>
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Progress</Text>
+        <Metric label="Starting Weight" value={formatWeight(data.startingWeightKg)} />
+        <Metric label="Current Weight" value={formatWeight(data.currentWeightKg)} />
+        <Metric label="Goal Weight" value={formatWeight(data.goalWeightKg)} />
+        <Metric label="Latest Body Fat" value={formatMetric(data.latestMeasurement?.body_fat, '%')} />
+        <Metric label="Latest Chest" value={formatMetric(data.latestMeasurement?.chest, 'in')} />
+        <Metric label="Latest Waist" value={formatMetric(data.latestMeasurement?.waist, 'in')} />
+      </Card>
+
+      <Card style={styles.card}>
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Health & Safety</Text>
+        <Metric
+          label="Status"
+          value={
+            data.assessment.healthNotes || data.assessment.limitations.length > 0
+              ? 'Health assessment completed'
+              : 'No limitations shared'
+          }
+        />
       </Card>
 
       <View style={styles.actions}>
         <Button
-          label="View Assessment"
+          label="View Full Assessment"
           onPress={() =>
             navigation.navigate('CoachClientAssessment', { clientId, clientName })
           }
         />
         <Button
-          label="View Measurements"
+          label="Add / View Measurements"
           variant="secondary"
           onPress={() =>
             navigation.navigate('CoachClientMeasurements', { clientId, clientName })
@@ -87,25 +140,43 @@ export default function CoachClientDetailScreen() {
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
+  const { colors } = useAppTheme();
+
   return (
     <View style={styles.metricRow}>
-      <Text style={styles.metricLabel}>{label}</Text>
-      <Text style={styles.metricValue}>{value}</Text>
+      <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>{label}</Text>
+      <Text style={[styles.metricValue, { color: colors.textPrimary }]}>{value}</Text>
     </View>
   );
+}
+
+function formatMetric(value?: number | null, suffix = '') {
+  return value == null ? 'Not recorded' : `${value}${suffix ? ` ${suffix}` : ''}`;
 }
 
 const styles = StyleSheet.create({
   eyebrow: {
     ...typography.caption,
-    color: colors.primary,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   title: {
     ...typography.h1,
-    color: colors.textPrimary,
     marginBottom: spacing.lg,
+  },
+  weightRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  weightCard: {
+    flex: 1,
+    gap: spacing.xs,
+    padding: spacing.sm,
+  },
+  weightValue: {
+    ...typography.h3,
+    fontWeight: '800',
   },
   card: {
     gap: spacing.sm,
@@ -113,7 +184,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.h3,
-    color: colors.primary,
   },
   metricRow: {
     flexDirection: 'row',
@@ -122,12 +192,10 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     ...typography.body,
-    color: colors.textSecondary,
     flex: 1,
   },
   metricValue: {
     ...typography.body,
-    color: colors.textPrimary,
     fontWeight: '700',
     flex: 1,
     textAlign: 'right',

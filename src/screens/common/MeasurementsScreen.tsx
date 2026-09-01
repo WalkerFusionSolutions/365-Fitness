@@ -8,9 +8,10 @@ import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useAuth } from '@/hooks/useAuth';
 import { useMeasurements } from '@/hooks/useFitnessProfile';
+import { useAppTheme } from '@/hooks/useTheme';
 import { ClientStackParamList, Measurement, WeightUnit } from '@/types';
 import { formatWeight, weightToKg } from '@/utils/fitness';
-import { colors, radius, spacing, typography } from '@/utils/theme';
+import { radius, spacing, typography } from '@/utils/theme';
 
 type MeasurementsRoute = RouteProp<
   ClientStackParamList,
@@ -18,11 +19,13 @@ type MeasurementsRoute = RouteProp<
 >;
 
 export default function MeasurementsScreen() {
+  const { colors } = useAppTheme();
   const route = useRoute<MeasurementsRoute>();
   const { profile } = useAuth();
   const params = route.params as { clientId?: string; clientName?: string } | undefined;
   const clientId = params?.clientId ?? profile?.id;
-  const canAdd = !params?.clientId || params.clientId === profile?.id;
+  const canAdd =
+    !params?.clientId || params.clientId === profile?.id || profile?.role === 'coach';
   const { data, error, isLoading, isSaving, refresh, saveMeasurement } =
     useMeasurements(clientId);
   const [weight, setWeight] = useState('');
@@ -83,15 +86,15 @@ export default function MeasurementsScreen() {
         }
         ListHeaderComponent={
           <View>
-            <Text style={styles.title}>Measurements</Text>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>Measurements</Text>
             {params?.clientName ? (
-              <Text style={styles.subtitle}>{params.clientName}</Text>
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{params.clientName}</Text>
             ) : null}
             {canAdd ? (
               <Card style={styles.form}>
-                <Text style={styles.cardTitle}>Add Measurement</Text>
-                <Text style={styles.cardSubtitle}>
-                  Supported fields: weight, waist, chest, body fat.
+                <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Add Measurement</Text>
+                <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+                  Supported fields: weight, waist, chest, body fat. Coach entries require backend permission.
                 </Text>
                 <UnitToggle
                   options={['lb', 'kg']}
@@ -102,7 +105,7 @@ export default function MeasurementsScreen() {
                 <Input label="Waist" value={waist} onChangeText={setWaist} suffix="in" />
                 <Input label="Chest" value={chest} onChangeText={setChest} suffix="in" />
                 <Input label="Body Fat" value={bodyFat} onChangeText={setBodyFat} suffix="%" />
-                {error ? <Text style={styles.inlineError}>{error}</Text> : null}
+                {error ? <Text style={[styles.inlineError, { color: colors.error }]}>{error}</Text> : null}
                 <Button label="Save Measurement" onPress={onSave} loading={isSaving} />
               </Card>
             ) : null}
@@ -132,28 +135,39 @@ function Input({
   value: string;
   onChangeText: (value: string) => void;
 }) {
+  const { colors } = useAppTheme();
+
   return (
     <View style={styles.inputGroup}>
-      <Text style={styles.inputLabel}>{label}</Text>
+      <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{label}</Text>
       <View style={styles.inputRow}>
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: colors.inputBackground,
+              borderColor: colors.border,
+              color: colors.textPrimary,
+            },
+          ]}
           keyboardType="decimal-pad"
           value={value}
           onChangeText={onChangeText}
           placeholder="0"
           placeholderTextColor={colors.textMuted}
         />
-        <Text style={styles.suffix}>{suffix}</Text>
+        <Text style={[styles.suffix, { color: colors.textSecondary }]}>{suffix}</Text>
       </View>
     </View>
   );
 }
 
 function MeasurementRow({ measurement }: { measurement: Measurement }) {
+  const { colors } = useAppTheme();
+
   return (
     <Card style={styles.measurementCard}>
-      <Text style={styles.date}>{formatDate(measurement.date)}</Text>
+      <Text style={[styles.date, { color: colors.textPrimary }]}>{formatDate(measurement.date)}</Text>
       <Metric label="Weight" value={formatWeight(measurement.weight)} />
       <Metric label="Waist" value={measurement.waist} suffix="in" />
       <Metric label="Chest" value={measurement.chest} suffix="in" />
@@ -171,11 +185,13 @@ function Metric({
   value?: number | string | null;
   suffix?: string;
 }) {
+  const { colors } = useAppTheme();
+
   if (value == null) return null;
   return (
     <View style={styles.metricRow}>
-      <Text style={styles.metricLabel}>{label}</Text>
-      <Text style={styles.metricValue}>
+      <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>{label}</Text>
+      <Text style={[styles.metricValue, { color: colors.textPrimary }]}>
         {value}
         {suffix ? ` ${suffix}` : ''}
       </Text>
@@ -199,28 +215,25 @@ function formatDate(value?: string | null) {
 
 const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xxl },
-  title: { ...typography.h1, color: colors.textPrimary },
-  subtitle: { ...typography.body, color: colors.textSecondary, marginBottom: spacing.md },
+  title: { ...typography.h1 },
+  subtitle: { ...typography.body, marginBottom: spacing.md },
   form: { gap: spacing.sm, marginBottom: spacing.lg },
-  cardTitle: { ...typography.h3, color: colors.textPrimary },
-  cardSubtitle: { ...typography.caption, color: colors.textSecondary },
+  cardTitle: { ...typography.h3 },
+  cardSubtitle: { ...typography.caption },
   inputGroup: { gap: spacing.xs },
-  inputLabel: { ...typography.caption, color: colors.textSecondary, fontWeight: '700' },
+  inputLabel: { ...typography.caption, fontWeight: '700' },
   inputRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   input: {
     flex: 1,
-    backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.md,
-    color: colors.textPrimary,
     padding: spacing.md,
   },
-  suffix: { ...typography.body, color: colors.textSecondary, width: 32 },
-  inlineError: { ...typography.caption, color: colors.error },
+  suffix: { ...typography.body, width: 32 },
+  inlineError: { ...typography.caption },
   measurementCard: { gap: spacing.sm, marginBottom: spacing.sm },
-  date: { ...typography.h3, color: colors.textPrimary },
+  date: { ...typography.h3 },
   metricRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  metricLabel: { ...typography.body, color: colors.textSecondary },
-  metricValue: { ...typography.body, color: colors.textPrimary, fontWeight: '600' },
+  metricLabel: { ...typography.body },
+  metricValue: { ...typography.body, fontWeight: '600' },
 });

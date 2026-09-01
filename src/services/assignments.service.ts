@@ -1,6 +1,12 @@
-import { AssignmentStatus, CoachClientAssignment, Profile } from '@/types';
+import {
+  AssignmentStatus,
+  CoachClientAssignment,
+  CoachVisibleClient,
+  Profile,
+} from '@/types';
 import { supabase } from '@/services/supabase';
 import { AppServiceError, throwIfSupabaseError } from '@/services/errors';
+import { getFitnessProfileSummaries } from '@/services/fitness.service';
 
 export type AssignmentWithProfile = CoachClientAssignment & {
   coach?: Profile | null;
@@ -102,6 +108,22 @@ export async function getCurrentClientAssignments() {
 export async function getActiveClientsForCoach() {
   const assignments = await getCurrentCoachAssignments();
   return assignments.filter((assignment) => assignment.status === 'active');
+}
+
+export async function getCoachClientSummaries(): Promise<CoachVisibleClient[]> {
+  const assignments = await getCurrentCoachAssignments();
+  const activeAssignments = assignments.filter(
+    (assignment) => assignment.status === 'active' && assignment.client
+  );
+  const summariesByClientId = await getFitnessProfileSummaries(
+    activeAssignments.map((assignment) => assignment.client_id)
+  );
+
+  return activeAssignments.map((assignment) => ({
+    profile: assignment.client!,
+    fitnessSummary: summariesByClientId.get(assignment.client_id) ?? null,
+    assignment,
+  }));
 }
 
 export async function createPendingAssignment(clientId: string) {

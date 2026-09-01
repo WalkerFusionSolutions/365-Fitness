@@ -6,9 +6,9 @@ import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useAuth } from '@/hooks/useAuth';
 import { useFitnessAssessment } from '@/hooks/useFitnessProfile';
+import { useAppTheme } from '@/hooks/useTheme';
 import { ClientStackParamList } from '@/types';
-import { summarizeAssessment } from '@/utils/fitness';
-import { colors, spacing, typography } from '@/utils/theme';
+import { spacing, typography } from '@/utils/theme';
 
 type AssessmentRoute = RouteProp<
   ClientStackParamList,
@@ -16,6 +16,7 @@ type AssessmentRoute = RouteProp<
 >;
 
 export default function AssessmentScreen() {
+  const { colors } = useAppTheme();
   const route = useRoute<AssessmentRoute>();
   const { profile } = useAuth();
   const params = route.params as { clientId?: string; clientName?: string } | undefined;
@@ -55,8 +56,8 @@ export default function AssessmentScreen() {
     <Screen
       refreshControl={<RefreshControl refreshing={false} onRefresh={refresh} />}
     >
-      <Text style={styles.title}>Assessment</Text>
-      <Text style={styles.subtitle}>{clientName}</Text>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>Assessment</Text>
+      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{clientName}</Text>
 
       <Section
         title="Goals"
@@ -109,13 +110,15 @@ function Section({
   title: string;
   rows: readonly (readonly [string, string])[];
 }) {
+  const { colors } = useAppTheme();
+
   return (
     <Card style={styles.card}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.primary }]}>{title}</Text>
       {rows.map(([label, value]) => (
         <View key={label} style={styles.row}>
-          <Text style={styles.label}>{label}</Text>
-          <Text style={styles.value}>{value}</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
+          <Text style={[styles.value, { color: colors.textPrimary }]}>{value}</Text>
         </View>
       ))}
     </Card>
@@ -123,15 +126,14 @@ function Section({
 }
 
 const styles = StyleSheet.create({
-  title: { ...typography.h1, color: colors.textPrimary },
+  title: { ...typography.h1 },
   subtitle: {
     ...typography.body,
-    color: colors.textSecondary,
     marginBottom: spacing.lg,
   },
   card: { gap: spacing.sm, marginBottom: spacing.md },
-  sectionTitle: { ...typography.h3, color: colors.primary },
+  sectionTitle: { ...typography.h3 },
   row: { gap: spacing.xs },
-  label: { ...typography.caption, color: colors.textSecondary },
-  value: { ...typography.body, color: colors.textPrimary, fontWeight: '600' },
+  label: { ...typography.caption },
+  value: { ...typography.body, fontWeight: '600' },
 });

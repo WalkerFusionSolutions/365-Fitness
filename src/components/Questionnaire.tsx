@@ -2,7 +2,8 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
-import { colors, radius, spacing, typography } from '@/utils/theme';
+import { useAppTheme } from '@/hooks/useTheme';
+import { radius, spacing, typography } from '@/utils/theme';
 
 export function ProgressIndicator({
   current,
@@ -11,15 +12,16 @@ export function ProgressIndicator({
   current: number;
   total: number;
 }) {
+  const { colors } = useAppTheme();
   const progress = Math.min(current / total, 1);
 
   return (
     <View style={styles.progressWrap}>
-      <Text style={styles.progressText}>
+      <Text style={[styles.progressText, { color: colors.textSecondary }]}>
         Step {current} of {total}
       </Text>
-      <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { flex: progress }]} />
+      <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
+        <View style={[styles.progressFill, { flex: progress, backgroundColor: colors.primary }]} />
         <View style={{ flex: 1 - progress }} />
       </View>
     </View>
@@ -33,10 +35,12 @@ export function SectionHeader({
   title: string;
   subtitle?: string;
 }) {
+  const { colors } = useAppTheme();
+
   return (
     <View style={styles.header}>
-      <Text style={styles.title}>{title}</Text>
-      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+      <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+      {subtitle ? <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{subtitle}</Text> : null}
     </View>
   );
 }
@@ -50,6 +54,8 @@ export function SingleSelectCards<T extends string>({
   value: T;
   onChange: (value: T) => void;
 }) {
+  const { colors } = useAppTheme();
+
   return (
     <View style={styles.optionList}>
       {options.map((option) => {
@@ -57,12 +63,20 @@ export function SingleSelectCards<T extends string>({
 
         return (
           <Pressable key={option.value} onPress={() => onChange(option.value)}>
-            <Card style={[styles.optionCard, selected && styles.selectedCard]}>
-              <Text style={[styles.optionLabel, selected && styles.selectedText]}>
+            <Card
+              style={[
+                styles.optionCard,
+                selected && {
+                  borderColor: colors.primary,
+                  backgroundColor: colors.surfaceElevated,
+                },
+              ]}
+            >
+              <Text style={[styles.optionLabel, { color: selected ? colors.primary : colors.textPrimary }]}>
                 {option.label}
               </Text>
               {option.description ? (
-                <Text style={styles.optionDescription}>
+                  <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
                   {option.description}
                 </Text>
               ) : null}
@@ -83,8 +97,10 @@ export function MultiSelectCards<T extends string>({
   values: T[];
   onChange: (values: T[]) => void;
 }) {
+  const { colors } = useAppTheme();
+
   return (
-    <View style={styles.optionList}>
+    <View style={styles.chipList}>
       {options.map((option) => {
         const selected = values.includes(option.value);
 
@@ -99,8 +115,16 @@ export function MultiSelectCards<T extends string>({
               )
             }
           >
-            <Card style={[styles.optionCard, selected && styles.selectedCard]}>
-              <Text style={[styles.optionLabel, selected && styles.selectedText]}>
+            <Card
+              style={[
+                styles.chipCard,
+                selected && {
+                  borderColor: colors.primary,
+                  backgroundColor: colors.surfaceElevated,
+                },
+              ]}
+            >
+              <Text style={[styles.optionLabel, { color: selected ? colors.primary : colors.textPrimary }]}>
                 {option.label}
               </Text>
             </Card>
@@ -120,17 +144,22 @@ export function UnitToggle<T extends string>({
   value: T;
   onChange: (value: T) => void;
 }) {
+  const { colors } = useAppTheme();
+
   return (
-    <View style={styles.toggle}>
+    <View style={[styles.toggle, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       {options.map((option) => {
         const selected = option === value;
         return (
           <Pressable
             key={option}
             onPress={() => onChange(option)}
-            style={[styles.toggleItem, selected && styles.toggleItemActive]}
+            style={[
+              styles.toggleItem,
+              selected && { backgroundColor: colors.primary },
+            ]}
           >
-            <Text style={[styles.toggleText, selected && styles.toggleTextActive]}>
+            <Text style={[styles.toggleText, { color: selected ? colors.primaryText : colors.textSecondary }]}>
               {option.toUpperCase().replace('_', ' / ')}
             </Text>
           </Pressable>
@@ -153,19 +182,28 @@ export function NumericInput({
   suffix?: string;
   placeholder?: string;
 }) {
+  const { colors } = useAppTheme();
+
   return (
     <View style={styles.inputGroup}>
-      <Text style={styles.inputLabel}>{label}</Text>
+      <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{label}</Text>
       <View style={styles.inputRow}>
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: colors.inputBackground,
+              borderColor: colors.border,
+              color: colors.textPrimary,
+            },
+          ]}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
           placeholderTextColor={colors.textMuted}
           keyboardType="decimal-pad"
         />
-        {suffix ? <Text style={styles.suffix}>{suffix}</Text> : null}
+        {suffix ? <Text style={[styles.suffix, { color: colors.textSecondary }]}>{suffix}</Text> : null}
       </View>
     </View>
   );
@@ -210,18 +248,15 @@ const styles = StyleSheet.create({
   },
   progressText: {
     ...typography.caption,
-    color: colors.textSecondary,
     fontWeight: '700',
   },
   progressTrack: {
     height: 6,
     flexDirection: 'row',
     borderRadius: radius.round,
-    backgroundColor: colors.border,
     overflow: 'hidden',
   },
   progressFill: {
-    backgroundColor: colors.primary,
   },
   header: {
     gap: spacing.xs,
@@ -229,39 +264,34 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.h1,
-    color: colors.textPrimary,
   },
   subtitle: {
     ...typography.body,
-    color: colors.textSecondary,
   },
   optionList: {
+    gap: spacing.sm,
+  },
+  chipList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.sm,
   },
   optionCard: {
     gap: spacing.xs,
   },
-  selectedCard: {
-    borderColor: colors.primary,
-    backgroundColor: colors.surfaceElevated,
+  chipCard: {
+    minWidth: '46%',
   },
   optionLabel: {
     ...typography.h3,
-    color: colors.textPrimary,
-  },
-  selectedText: {
-    color: colors.primary,
   },
   optionDescription: {
     ...typography.caption,
-    color: colors.textSecondary,
   },
   toggle: {
     flexDirection: 'row',
-    backgroundColor: colors.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
     padding: 4,
     marginBottom: spacing.md,
   },
@@ -271,16 +301,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: radius.sm,
   },
-  toggleItemActive: {
-    backgroundColor: colors.primary,
-  },
   toggleText: {
     ...typography.caption,
-    color: colors.textSecondary,
     fontWeight: '700',
-  },
-  toggleTextActive: {
-    color: colors.white,
   },
   inputGroup: {
     gap: spacing.xs,
@@ -288,7 +311,6 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     ...typography.caption,
-    color: colors.textSecondary,
     fontWeight: '700',
   },
   inputRow: {
@@ -298,10 +320,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
-    color: colors.textPrimary,
     borderRadius: radius.md,
     padding: spacing.md,
     fontSize: 24,
@@ -309,7 +328,6 @@ const styles = StyleSheet.create({
   },
   suffix: {
     ...typography.h3,
-    color: colors.textSecondary,
     width: 48,
   },
   nav: {

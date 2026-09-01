@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
@@ -8,10 +8,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import { AppServiceError } from '@/services/errors';
+import { ThemePreference, useAppTheme } from '@/hooks/useTheme';
 import { formatHeight, formatWeight } from '@/utils/fitness';
-import { colors, spacing, typography } from '@/utils/theme';
+import { spacing, typography } from '@/utils/theme';
 
 export function ProfileScreen() {
+  const { colors, themePreference, setThemePreference } = useAppTheme();
   const { session, profile, error, isLoading, signOut } = useAuth();
   const navigation = useNavigation<any>();
   const fitness = useFitnessProfile(
@@ -63,8 +65,8 @@ export function ProfileScreen() {
 
   return (
     <Screen>
-      <Text style={styles.brand}>365 FITNESS</Text>
-      <Text style={styles.title}>Profile</Text>
+      <Text style={[styles.brand, { color: colors.primary }]}>365 FITNESS</Text>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>Profile</Text>
 
       <Card style={styles.card}>
         <ProfileField label="Full Name" value={displayName} />
@@ -72,6 +74,11 @@ export function ProfileScreen() {
         <ProfileField label="Email" value={email} />
         <ProfileField label="Account Status" value="Active" />
       </Card>
+
+      <AppearanceSection
+        value={themePreference}
+        onChange={setThemePreference}
+      />
 
       {profile?.role === 'client' ? (
         <FitnessProfileSection
@@ -114,11 +121,13 @@ function FitnessProfileSection({
   onMeasurements: () => void;
   onRetry: () => void;
 }) {
+  const { colors } = useAppTheme();
+
   if (isLoading) {
     return (
       <Card style={styles.fitnessCard}>
-        <Text style={styles.sectionTitle}>Fitness Profile</Text>
-        <Text style={styles.meta}>Loading fitness profile...</Text>
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Fitness Profile</Text>
+        <Text style={[styles.meta, { color: colors.textSecondary }]}>Loading fitness profile...</Text>
       </Card>
     );
   }
@@ -126,8 +135,8 @@ function FitnessProfileSection({
   if (error) {
     return (
       <Card style={styles.fitnessCard}>
-        <Text style={styles.sectionTitle}>Fitness Profile</Text>
-        <Text style={styles.errorText}>Unable to load your fitness profile.</Text>
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Fitness Profile</Text>
+        <Text style={[styles.errorText, { color: colors.error }]}>Unable to load your fitness profile.</Text>
         <Button label="Try Again" variant="secondary" onPress={onRetry} />
       </Card>
     );
@@ -136,8 +145,8 @@ function FitnessProfileSection({
   if (!summary) {
     return (
       <Card style={styles.fitnessCard}>
-        <Text style={styles.sectionTitle}>Complete Your Fitness Profile</Text>
-        <Text style={styles.meta}>
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Complete Your Fitness Profile</Text>
+        <Text style={[styles.meta, { color: colors.textSecondary }]}>
           Help your coach personalize your plan and track your progress.
         </Text>
         <Button label="Get Started" onPress={onStart} />
@@ -147,7 +156,7 @@ function FitnessProfileSection({
 
   return (
     <Card style={styles.fitnessCard}>
-      <Text style={styles.sectionTitle}>Fitness Profile</Text>
+      <Text style={[styles.sectionTitle, { color: colors.primary }]}>Fitness Profile</Text>
       <ProfileField label="Starting Weight" value={formatWeight(summary.startingWeightKg)} />
       <ProfileField label="Current Weight" value={formatWeight(summary.currentWeightKg)} />
       <ProfileField label="Goal Weight" value={formatWeight(summary.goalWeightKg)} />
@@ -164,24 +173,65 @@ function FitnessProfileSection({
 }
 
 function ProfileField({ label, value }: { label: string; value: string }) {
+  const { colors } = useAppTheme();
+
   return (
     <View style={styles.field}>
-      <Text style={styles.meta}>{label}</Text>
-      <Text style={styles.name}>{value}</Text>
+      <Text style={[styles.meta, { color: colors.textSecondary }]}>{label}</Text>
+      <Text style={[styles.name, { color: colors.textPrimary }]}>{value}</Text>
     </View>
+  );
+}
+
+function AppearanceSection({
+  value,
+  onChange,
+}: {
+  value: ThemePreference;
+  onChange: (value: ThemePreference) => void;
+}) {
+  const { colors } = useAppTheme();
+  const options: ThemePreference[] = ['system', 'light', 'dark'];
+
+  return (
+    <Card style={styles.appearanceCard}>
+      <Text style={[styles.sectionTitle, { color: colors.primary }]}>Appearance</Text>
+      <View style={[styles.segmented, { backgroundColor: colors.surfaceSecondary }]}>
+        {options.map((option) => {
+          const selected = option === value;
+          return (
+            <Pressable
+              key={option}
+              onPress={() => onChange(option)}
+              style={[
+                styles.segment,
+                selected && { backgroundColor: colors.primary },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.segmentText,
+                  { color: selected ? colors.primaryText : colors.textSecondary },
+                ]}
+              >
+                {option.charAt(0).toUpperCase() + option.slice(1)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
   brand: {
     ...typography.caption,
-    color: colors.primary,
     fontWeight: '700',
     marginBottom: spacing.xs,
   },
   title: {
     ...typography.h1,
-    color: colors.textPrimary,
     marginBottom: spacing.md,
   },
   card: {
@@ -192,11 +242,9 @@ const styles = StyleSheet.create({
   },
   name: {
     ...typography.h3,
-    color: colors.textPrimary,
   },
   meta: {
     ...typography.body,
-    color: colors.textSecondary,
   },
   actions: {
     marginTop: spacing.lg,
@@ -207,11 +255,28 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.h3,
-    color: colors.primary,
   },
   errorText: {
     ...typography.body,
-    color: colors.error,
+  },
+  appearanceCard: {
+    gap: spacing.md,
+    marginTop: spacing.md,
+  },
+  segmented: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    padding: 4,
+  },
+  segment: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: 4,
+    paddingVertical: spacing.sm,
+  },
+  segmentText: {
+    ...typography.caption,
+    fontWeight: '700',
   },
   errorLogout: {
     marginTop: spacing.md,

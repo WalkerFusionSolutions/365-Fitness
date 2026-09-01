@@ -1,10 +1,20 @@
 import React from 'react';
 import { View, StyleSheet, ViewProps } from 'react-native';
-import { colors, radius, shadows, spacing } from '@/utils/theme';
+import { useAppTheme } from '@/hooks/useTheme';
+import { radius, shadows, spacing } from '@/utils/theme';
 
 export function Card({ children, style, ...rest }: ViewProps) {
+  const { colors } = useAppTheme();
+
   return (
-    <View style={[styles.card, style]} {...rest}>
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: colors.cardBackground, borderColor: colors.border },
+        style,
+      ]}
+      {...rest}
+    >
       {children}
     </View>
   );
@@ -12,11 +22,9 @@ export function Card({ children, style, ...rest }: ViewProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
     borderRadius: radius.md,
     padding: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
     ...shadows.sm,
   }
 });

@@ -4,13 +4,15 @@ import { Screen } from '@/components/Screen';
 import { Button } from '@/components/Button';
 import { signUpWithEmail as signUpWithEmailService } from '@/services/auth.service';
 import { AppServiceError } from '@/services/errors';
-import { colors, radius, spacing, typography } from '@/utils/theme';
+import { useAppTheme } from '@/hooks/useTheme';
+import { radius, spacing, typography } from '@/utils/theme';
 
 const emailRedirectTo =
   process.env.EXPO_PUBLIC_EMAIL_CONFIRMATION_URL ??
   'fitness365://auth/callback';
 
 export function SignupScreen({ navigation }: any) {
+  const { colors } = useAppTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -47,17 +49,31 @@ export function SignupScreen({ navigation }: any) {
   return (
     <Screen padded>
       <View style={styles.container}>
-        <Text style={styles.title}>Join 365 FITNESS</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Join 365 FITNESS</Text>
 
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: colors.inputBackground,
+              borderColor: colors.border,
+              color: colors.textPrimary,
+            },
+          ]}
           placeholder="Full Name"
           placeholderTextColor={colors.textMuted}
           value={fullName}
           onChangeText={setFullName}
         />
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: colors.inputBackground,
+              borderColor: colors.border,
+              color: colors.textPrimary,
+            },
+          ]}
           placeholder="Email"
           placeholderTextColor={colors.textMuted}
           autoCapitalize="none"
@@ -66,7 +82,14 @@ export function SignupScreen({ navigation }: any) {
           onChangeText={setEmail}
         />
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              backgroundColor: colors.inputBackground,
+              borderColor: colors.border,
+              color: colors.textPrimary,
+            },
+          ]}
           placeholder="Password"
           placeholderTextColor={colors.textMuted}
           secureTextEntry
@@ -94,15 +117,11 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.h2,
-    color: colors.textPrimary,
     marginBottom: spacing.xl,
     textAlign: 'center',
   },
   input: {
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
-    color: colors.textPrimary,
     borderRadius: radius.md,
     padding: spacing.md,
     marginBottom: spacing.md,
