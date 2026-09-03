@@ -326,7 +326,7 @@ type PublicTables = {
         Row: {
           id: string;
           client_id: string;
-          workout_id: string;
+          workout_id: string | null;
           started_at: string;
           completed_at: string | null;
           duration_minutes: number | null;
@@ -335,7 +335,7 @@ type PublicTables = {
         Insert: {
           id?: string;
           client_id: string;
-          workout_id: string;
+          workout_id?: string | null;
           started_at?: string;
           completed_at?: string | null;
           duration_minutes?: number | null;
@@ -344,7 +344,7 @@ type PublicTables = {
         Update: {
           id?: string;
           client_id?: string;
-          workout_id?: string;
+          workout_id?: string | null;
           started_at?: string;
           completed_at?: string | null;
           duration_minutes?: number | null;
@@ -356,8 +356,9 @@ type PublicTables = {
           id: string;
           session_id: string;
           client_id: string;
-          workout_id: string;
+          workout_id: string | null;
           workout_exercise_id: string | null;
+          library_exercise_id: string | null;
           exercise_name_snapshot: string;
           set_number: number;
           target_reps: string | null;
@@ -370,8 +371,9 @@ type PublicTables = {
           id?: string;
           session_id: string;
           client_id: string;
-          workout_id: string;
+          workout_id?: string | null;
           workout_exercise_id?: string | null;
+          library_exercise_id?: string | null;
           exercise_name_snapshot: string;
           set_number: number;
           target_reps?: string | null;
@@ -384,8 +386,9 @@ type PublicTables = {
           id?: string;
           session_id?: string;
           client_id?: string;
-          workout_id?: string;
+          workout_id?: string | null;
           workout_exercise_id?: string | null;
+          library_exercise_id?: string | null;
           exercise_name_snapshot?: string;
           set_number?: number;
           target_reps?: string | null;
@@ -424,24 +427,51 @@ type PublicTables = {
           coach_id: string | null;
           client_id: string | null;
           name: string;
+          description: string | null;
+          instructions: string | null;
           start_date: string | null;
           end_date: string | null;
+          target_calories: number | null;
+          target_protein_g: number | null;
+          target_carbs_g: number | null;
+          target_fat_g: number | null;
+          status: string;
+          assigned_at: string | null;
+          updated_at: string;
         };
         Insert: {
           id?: string;
           coach_id?: string | null;
           client_id?: string | null;
           name: string;
+          description?: string | null;
+          instructions?: string | null;
           start_date?: string | null;
           end_date?: string | null;
+          target_calories?: number | null;
+          target_protein_g?: number | null;
+          target_carbs_g?: number | null;
+          target_fat_g?: number | null;
+          status?: string;
+          assigned_at?: string | null;
+          updated_at?: string;
         };
         Update: {
           id?: string;
           coach_id?: string | null;
           client_id?: string | null;
           name?: string;
+          description?: string | null;
+          instructions?: string | null;
           start_date?: string | null;
           end_date?: string | null;
+          target_calories?: number | null;
+          target_protein_g?: number | null;
+          target_carbs_g?: number | null;
+          target_fat_g?: number | null;
+          status?: string;
+          assigned_at?: string | null;
+          updated_at?: string;
         };
       };
       meal_plan_meals: {
@@ -450,7 +480,10 @@ type PublicTables = {
           meal_plan_id: string | null;
           day: number;
           meal_type: string;
+          meal_label: string | null;
           food_items: Json;
+          notes: string | null;
+          sort_order: number;
           total_calories: number;
           total_protein_g: number;
           total_carbs_g: number;
@@ -461,7 +494,10 @@ type PublicTables = {
           meal_plan_id?: string | null;
           day: number;
           meal_type: string;
+          meal_label?: string | null;
           food_items?: Json;
+          notes?: string | null;
+          sort_order?: number;
           total_calories?: number;
           total_protein_g?: number;
           total_carbs_g?: number;
@@ -472,7 +508,10 @@ type PublicTables = {
           meal_plan_id?: string | null;
           day?: number;
           meal_type?: string;
+          meal_label?: string | null;
           food_items?: Json;
+          notes?: string | null;
+          sort_order?: number;
           total_calories?: number;
           total_protein_g?: number;
           total_carbs_g?: number;
@@ -483,20 +522,29 @@ type PublicTables = {
         Row: {
           id: string;
           client_id: string | null;
+          meal_plan_id: string | null;
+          title: string;
           items: Json;
           generated_date: string;
+          updated_at: string;
         };
         Insert: {
           id?: string;
           client_id?: string | null;
+          meal_plan_id?: string | null;
+          title?: string;
           items?: Json;
           generated_date?: string;
+          updated_at?: string;
         };
         Update: {
           id?: string;
           client_id?: string | null;
+          meal_plan_id?: string | null;
+          title?: string;
           items?: Json;
           generated_date?: string;
+          updated_at?: string;
         };
       };
       water_tracker: {
@@ -526,26 +574,44 @@ type PublicTables = {
         Row: {
           id: string;
           client_id: string | null;
+          coach_id: string | null;
           supplement_name: string;
           dosage: string;
           frequency: string;
           time_of_day: Json;
+          notes: string | null;
+          start_date: string | null;
+          end_date: string | null;
+          is_active: boolean;
+          updated_at: string;
         };
         Insert: {
           id?: string;
           client_id?: string | null;
+          coach_id?: string | null;
           supplement_name: string;
           dosage: string;
           frequency: string;
           time_of_day?: Json;
+          notes?: string | null;
+          start_date?: string | null;
+          end_date?: string | null;
+          is_active?: boolean;
+          updated_at?: string;
         };
         Update: {
           id?: string;
           client_id?: string | null;
+          coach_id?: string | null;
           supplement_name?: string;
           dosage?: string;
           frequency?: string;
           time_of_day?: Json;
+          notes?: string | null;
+          start_date?: string | null;
+          end_date?: string | null;
+          is_active?: boolean;
+          updated_at?: string;
         };
       };
       messages: {

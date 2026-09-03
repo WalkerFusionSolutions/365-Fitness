@@ -13,6 +13,7 @@ import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
 import { useAppTheme } from '@/hooks/useTheme';
 import { useClientWorkouts, useWorkoutHistory } from '@/hooks/useWorkout';
+import { useActiveMealPlan, useTodaysWater } from '@/hooks/useMealPlan';
 import { ClientStackParamList } from '@/types';
 import { formatFriendlyDate } from '@/utils/date';
 import { formatHeight, formatWeight } from '@/utils/fitness';
@@ -28,13 +29,17 @@ export default function CoachClientDetailScreen() {
   const { data, error, isLoading, refresh } = useFitnessProfile(clientId);
   const workouts = useClientWorkouts(clientId);
   const history = useWorkoutHistory(clientId);
+  const mealPlan = useActiveMealPlan(clientId);
+  const water = useTodaysWater(clientId);
 
   useFocusEffect(
     React.useCallback(() => {
       refresh();
       workouts.refresh();
       history.refresh();
-    }, [history.refresh, refresh, workouts.refresh])
+      mealPlan.refresh();
+      water.refresh();
+    }, [history.refresh, mealPlan.refresh, refresh, water.refresh, workouts.refresh])
   );
 
   if (isLoading) {
@@ -153,12 +158,31 @@ export default function CoachClientDetailScreen() {
         )}
       </Card>
 
+      <Card style={styles.card}>
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Nutrition</Text>
+        <Metric
+          label="Meal Plan"
+          value={mealPlan.data?.name ?? 'None assigned'}
+        />
+        <Metric
+          label="Water Today"
+          value={`${water.data?.cups_consumed ?? 0} / ${water.data?.daily_goal_cups ?? 8} cups`}
+        />
+      </Card>
+
       <View style={styles.actions}>
         <Button
           label="Create Workout"
           variant="outline"
           onPress={() =>
             navigation.navigate('CoachWorkoutBuilder', { clientId })
+          }
+        />
+        <Button
+          label="Create Meal Plan"
+          variant="outline"
+          onPress={() =>
+            navigation.navigate('CoachMealPlanBuilder', { clientId })
           }
         />
         <Button

@@ -32,7 +32,7 @@ export default function ActiveWorkoutScreen({ route, navigation }: any) {
   const [restSeconds, setRestSeconds] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const exercise = workout?.exercises[exerciseIndex];
-  const previous = usePreviousPerformance(profile?.id, exercise?.id);
+  const previous = usePreviousPerformance(profile?.id, exercise?.library_exercise_id);
   const totalSets = useMemo(
     () => workout?.exercises.reduce((total, item) => total + item.sets, 0) ?? 0,
     [workout?.exercises]

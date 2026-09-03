@@ -1,35 +1,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
-import { Card } from '@/components/Card';
-import { Screen } from '@/components/Screen';
 import CoachDashboardScreen from '@/screens/coach/CoachDashboardScreen';
 import CoachClientsScreen from '@/screens/coach/CoachClientsScreen';
 import CoachProgramsScreen from '@/screens/coach/CoachProgramsScreen';
+import CoachNutritionScreen from '@/screens/coach/CoachNutritionScreen';
 import { ProfileScreen } from '@/screens/common/ProfileScreen';
 import { useAppTheme } from '@/hooks/useTheme';
-import { spacing, typography } from '@/utils/theme';
 import { CoachTabsParamList } from '@/types';
-
-function PlaceholderScreen({
-  title,
-  subtitle = 'Development placeholder',
-}: {
-  title: string;
-  subtitle?: string;
-}) {
-  const { colors } = useAppTheme();
-
-  return (
-    <Screen>
-      <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
-      <Card>
-        <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
-      </Card>
-    </Screen>
-  );
-}
 
 const Tab = createBottomTabNavigator<CoachTabsParamList>();
 
@@ -53,9 +31,26 @@ export function CoachTabs() {
         tabBarActiveTintColor: colors.highlight,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
+          position: 'absolute',
+          left: 16,
+          right: 16,
+          bottom: 12,
+          minHeight: 68,
+          paddingTop: 8,
+          paddingBottom: 10,
+          borderRadius: 24,
           backgroundColor: colors.primaryDark,
-          borderTopColor: colors.border,
-        }
+          borderTopWidth: 0,
+          elevation: 8,
+          shadowColor: '#000000',
+          shadowOpacity: 0.14,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 6 },
+        },
+        tabBarLabelStyle: {
+          fontWeight: '700',
+          fontSize: 12,
+        },
       })}
     >
       <Tab.Screen name="Coach" component={CoachDashboardScreen} />
@@ -66,28 +61,9 @@ export function CoachTabs() {
       />
       <Tab.Screen
         name="Nutrition"
-        children={() => <PlaceholderScreen title="Meal Plans" subtitle="Nutrition management coming soon." />}
+        component={CoachNutritionScreen}
       />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    ...typography.h1,
-    marginBottom: spacing.md,
-  },
-  list: {
-    gap: spacing.sm,
-  },
-  card: {
-    gap: spacing.xs,
-  },
-  cardTitle: {
-    ...typography.h3,
-  },
-  cardSubtitle: {
-    ...typography.body,
-  },
-});

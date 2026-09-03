@@ -76,8 +76,16 @@ export default function CoachDashboardScreen({ navigation }: any) {
       ))}
 
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Coach Tools</Text>
-      <RoadmapCard title="Workout Programs" subtitle="Create workouts from the Programs tab." />
-      <RoadmapCard title="Nutrition" subtitle="Coming soon." />
+      <RoadmapCard
+        title="Workout Programs"
+        subtitle="Create workouts from the Programs tab."
+        onPress={() => navigation.navigate('Programs')}
+      />
+      <RoadmapCard
+        title="Nutrition"
+        subtitle="Create meal plans and assign nutrition from the Nutrition tab."
+        onPress={() => navigation.navigate('Nutrition')}
+      />
       <RoadmapCard title="Messages" subtitle="Coming soon." />
       <RoadmapCard title="Reports" subtitle="Coming soon." />
     </Screen>
@@ -120,15 +128,25 @@ function ClientPreview({
   );
 }
 
-function RoadmapCard({ title, subtitle }: { title: string; subtitle: string }) {
+function RoadmapCard({
+  title,
+  subtitle,
+  onPress,
+}: {
+  title: string;
+  subtitle: string;
+  onPress?: () => void;
+}) {
   const { colors } = useAppTheme();
 
-  return (
+  const content = (
     <Card style={styles.roadmapCard}>
       <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>{title}</Text>
       <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
     </Card>
   );
+
+  return onPress ? <Pressable onPress={onPress}>{content}</Pressable> : content;
 }
 
 const styles = StyleSheet.create({

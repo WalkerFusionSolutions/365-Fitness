@@ -306,23 +306,23 @@ export function useWorkoutHistory(clientId?: string) {
 
 export function usePreviousPerformance(
   clientId?: string,
-  workoutExerciseId?: string
+  libraryExerciseId?: string | null
 ) {
   const [data, setData] = useState<WorkoutSetLog[]>([]);
 
   useEffect(() => {
-    if (!clientId || !workoutExerciseId) {
+    if (!clientId || !libraryExerciseId) {
       setData([]);
       return;
     }
 
-    getPreviousPerformance(clientId, workoutExerciseId)
+    getPreviousPerformance(clientId, libraryExerciseId)
       .then(setData)
       .catch((error) => {
         console.error('Unable to load previous performance:', error);
         setData([]);
       });
-  }, [clientId, workoutExerciseId]);
+  }, [clientId, libraryExerciseId]);
 
   return { data };
 }

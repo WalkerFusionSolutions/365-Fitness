@@ -18,12 +18,14 @@ import { ErrorState, LoadingView } from '@/components/StateViews';
 import ExerciseDetailScreen from '@/screens/client/ExerciseDetailScreen';
 import WorkoutDetailScreen from '@/screens/client/WorkoutDetailScreen';
 import ActiveWorkoutScreen from '@/screens/client/ActiveWorkoutScreen';
+import MealPlanDetailScreen from '@/screens/client/MealPlanDetailScreen';
 import ClientOnboardingScreen from '@/screens/client/ClientOnboardingScreen';
 import AssessmentScreen from '@/screens/common/AssessmentScreen';
 import MeasurementsScreen from '@/screens/common/MeasurementsScreen';
 import CoachClientDetailScreen from '@/screens/coach/CoachClientDetailScreen';
 import CoachExerciseEditorScreen from '@/screens/coach/CoachExerciseEditorScreen';
 import CoachWorkoutBuilderScreen from '@/screens/coach/CoachWorkoutBuilderScreen';
+import CoachMealPlanBuilderScreen from '@/screens/coach/CoachMealPlanBuilderScreen';
 import { useAppTheme } from '@/hooks/useTheme';
 import { ClientStackParamList, CoachStackParamList } from '@/types';
 
@@ -254,6 +256,11 @@ export function AppNavigator() {
               component={CoachWorkoutBuilderScreen}
               options={detailHeaderOptions('Workout Builder', colors)}
             />
+            <Stack.Screen
+              name="CoachMealPlanBuilder"
+              component={CoachMealPlanBuilderScreen}
+              options={detailHeaderOptions('Meal Plan Builder', colors)}
+            />
           </>
         ) : (
           <>
@@ -276,6 +283,11 @@ export function AppNavigator() {
               name="ExerciseDetail"
               component={ExerciseDetailScreen}
               options={detailHeaderOptions('Exercise', colors)}
+            />
+            <Stack.Screen
+              name="MealPlanDetail"
+              component={MealPlanDetailScreen}
+              options={detailHeaderOptions('Meal Plan', colors)}
             />
             <Stack.Screen
               name="ClientOnboarding"

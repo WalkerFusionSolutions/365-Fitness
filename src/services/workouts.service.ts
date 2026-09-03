@@ -320,6 +320,7 @@ export async function logWorkoutSet(input: {
     client_id: input.clientId,
     workout_id: input.workoutId,
     workout_exercise_id: input.exercise.id,
+    library_exercise_id: input.exercise.library_exercise_id ?? null,
     exercise_name_snapshot: input.exercise.exercise_name,
     set_number: input.setNumber,
     target_reps: input.exercise.reps,
@@ -419,13 +420,13 @@ export async function getWorkoutHistory(
 
 export async function getPreviousPerformance(
   clientId: string,
-  workoutExerciseId: string
+  libraryExerciseId: string
 ) {
   const { data, error } = await supabase
     .from('workout_set_logs')
     .select('*')
     .eq('client_id', clientId)
-    .eq('workout_exercise_id', workoutExerciseId)
+    .eq('library_exercise_id', libraryExerciseId)
     .order('completed_at', { ascending: false })
     .limit(6);
 

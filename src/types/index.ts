@@ -145,7 +145,7 @@ export interface WorkoutWithExercises extends Workout {
 export interface WorkoutSession {
   id: string;
   client_id: string;
-  workout_id: string;
+  workout_id?: string | null;
   started_at: string;
   completed_at?: string | null;
   duration_minutes?: number | null;
@@ -156,8 +156,9 @@ export interface WorkoutSetLog {
   id: string;
   session_id: string;
   client_id: string;
-  workout_id: string;
+  workout_id?: string | null;
   workout_exercise_id?: string | null;
+  library_exercise_id?: string | null;
   exercise_name_snapshot: string;
   set_number: number;
   target_reps?: string | null;
@@ -206,19 +207,29 @@ export interface MealPlan {
   coach_id?: string | null;
   client_id?: string | null;
   name: string;
-  start_date: string;
-  end_date: string;
+  description?: string | null;
+  instructions?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  target_calories?: number | null;
+  target_protein_g?: number | null;
+  target_carbs_g?: number | null;
+  target_fat_g?: number | null;
+  status?: 'draft' | 'assigned' | 'archived' | string;
+  assigned_at?: string | null;
+  updated_at?: string;
 }
 
-export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'custom';
 
 export interface FoodItem {
   name: string;
-  portion: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
+  portion?: string;
+  calories?: number | null;
+  protein?: number | null;
+  carbs?: number | null;
+  fat?: number | null;
+  category?: string;
 }
 
 export interface MealPlanMeal {
@@ -226,7 +237,10 @@ export interface MealPlanMeal {
   meal_plan_id?: string | null;
   day: number; // 1-7
   meal_type: MealType;
+  meal_label?: string | null;
   food_items: FoodItem[]; // JSON
+  notes?: string | null;
+  sort_order?: number;
   total_calories: number;
   total_protein_g: number;
   total_carbs_g: number;
@@ -235,16 +249,19 @@ export interface MealPlanMeal {
 
 export interface GroceryItem {
   name: string;
-  quantity: string;
-  category: string;
+  quantity?: string;
+  category?: string;
   checked?: boolean;
 }
 
 export interface GroceryList {
   id: string;
   client_id?: string | null;
+  meal_plan_id?: string | null;
+  title?: string;
   items: GroceryItem[]; // JSON
   generated_date: string;
+  updated_at?: string;
 }
 
 export interface WaterTracker {
@@ -258,10 +275,20 @@ export interface WaterTracker {
 export interface Supplement {
   id: string;
   client_id?: string | null;
+  coach_id?: string | null;
   supplement_name: string;
   dosage: string;
   frequency: string;
   time_of_day: string[];
+  notes?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  is_active?: boolean;
+  updated_at?: string;
+}
+
+export interface MealPlanWithMeals extends MealPlan {
+  meals: MealPlanMeal[];
 }
 
 export interface Message {
@@ -308,6 +335,7 @@ export type ClientStackParamList = {
   ActiveWorkout: { workoutId: string };
   ExerciseDetail: { workoutId?: string; exerciseId?: string; workoutExerciseId?: string };
   WorkoutHistoryDetail: { completedWorkoutId: string };
+  MealPlanDetail: { mealPlanId: string };
   ClientOnboarding: undefined;
   ClientAssessment: undefined;
   ClientMeasurements: { clientId?: string; clientName?: string } | undefined;
@@ -330,6 +358,7 @@ export type CoachStackParamList = {
   ClientDetail: { clientId: string };
   CoachExerciseEditor: { exerciseId?: string } | undefined;
   CoachWorkoutBuilder: { workoutId?: string; clientId?: string } | undefined;
+  CoachMealPlanBuilder: { mealPlanId?: string; clientId?: string } | undefined;
   CoachWorkoutDetail: { workoutId: string };
   // add others later
 };

@@ -9,6 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
 import { useAppTheme } from '@/hooks/useTheme';
 import { useClientWorkouts } from '@/hooks/useWorkout';
+import { useActiveMealPlan, useTodaysWater } from '@/hooks/useMealPlan';
+import { AppHeader, Avatar, ProgressBar, StatCard } from '@/components/AppUI';
 
 export default function DashboardScreen({ navigation }: any) {
   const { colors } = useAppTheme();
@@ -16,6 +18,8 @@ export default function DashboardScreen({ navigation }: any) {
   const { data: fitnessProfile, isLoading: fitnessLoading } =
     useFitnessProfile(profile?.id);
   const { data: workouts } = useClientWorkouts(profile?.id);
+  const mealPlan = useActiveMealPlan(profile?.id);
+  const water = useTodaysWater(profile?.id);
   const nextWorkout = workouts[0];
   const firstName = profile?.full_name?.split(' ')[0] || 'Athlete';
   const currentWeightLb = fitnessProfile?.currentWeightKg
@@ -27,15 +31,11 @@ export default function DashboardScreen({ navigation }: any) {
 
   return (
     <Screen padded>
-      <View style={styles.header}>
-        <View>
-          <Text style={[styles.greeting, { color: colors.textSecondary }]}>Welcome back,</Text>
-          <Text style={[styles.name, { color: colors.textPrimary }]}>{firstName}</Text>
-        </View>
-        <Pressable style={[styles.avatarPlaceholder, { backgroundColor: colors.primaryDark }]}>
-          <Text style={styles.avatarText}>{firstName[0]}</Text>
-        </Pressable>
-      </View>
+      <AppHeader
+        title={firstName}
+        subtitle="Welcome back"
+        action={<Avatar name={profile?.full_name} />}
+      />
 
       {!fitnessLoading && !fitnessProfile ? (
         <Card style={styles.onboardingCard}>
@@ -78,18 +78,44 @@ export default function DashboardScreen({ navigation }: any) {
         ) : null}
       </Card>
 
+      <Card style={[styles.workoutCard, { backgroundColor: colors.surfaceElevated }]}>
+        <View style={styles.cardHeader}>
+          <View style={[styles.iconContainer, { backgroundColor: colors.surfaceSecondary }]}>
+            <Ionicons name="restaurant" size={24} color={colors.primary} />
+          </View>
+          <View style={styles.cardTextContainer}>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+              {mealPlan.data?.name ?? 'No meal plan assigned'}
+            </Text>
+            <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+              {mealPlan.data
+                ? mealPlan.data.description || 'Your assigned nutrition plan is ready.'
+                : "Your coach hasn't assigned nutrition yet."}
+            </Text>
+          </View>
+        </View>
+        {mealPlan.data ? (
+          <Button
+            label="View Meal Plan"
+            variant="outline"
+            onPress={() => navigation.navigate('MealPlanDetail', { mealPlanId: mealPlan.data!.id })}
+            style={styles.actionButton}
+          />
+        ) : null}
+      </Card>
+
       <View style={styles.row}>
-        <Card style={styles.smallCard}>
-          <Ionicons name="water-outline" size={24} color={colors.primary} />
-          <Text style={[styles.smallCardValue, { color: colors.textPrimary }]}>3 / 8</Text>
-          <Text style={[styles.smallCardLabel, { color: colors.textSecondary }]}>Placeholder Water</Text>
-        </Card>
-        
-        <Card style={styles.smallCard}>
-          <Ionicons name="flame-outline" size={24} color={colors.warning} />
-          <Text style={[styles.smallCardValue, { color: colors.textPrimary }]}>Day 4</Text>
-          <Text style={[styles.smallCardLabel, { color: colors.textSecondary }]}>Streak</Text>
-        </Card>
+        <StatCard
+          icon="water-outline"
+          label="Water"
+          value={`${water.data?.cups_consumed ?? 0} / ${water.data?.daily_goal_cups ?? 8}`}
+        />
+        <StatCard
+          icon="restaurant-outline"
+          label="Meals Today"
+          value={mealPlan.data?.meals.length ?? 0}
+          tone="success"
+        />
       </View>
 
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Progress Snapshot</Text>
@@ -101,18 +127,12 @@ export default function DashboardScreen({ navigation }: any) {
           </Text>
         </View>
         <View style={[styles.progressBarBg, { backgroundColor: colors.border }]}>
-          <View
-            style={[
-              styles.progressBarFill,
-              {
-                width: `${getProgressPercent(
-                  fitnessProfile?.startingWeightKg,
-                  fitnessProfile?.currentWeightKg,
-                  fitnessProfile?.goalWeightKg
-                )}%`,
-                backgroundColor: colors.highlight,
-              },
-            ]}
+          <ProgressBar
+            value={getProgressPercent(
+              fitnessProfile?.startingWeightKg,
+              fitnessProfile?.currentWeightKg,
+              fitnessProfile?.goalWeightKg
+            )}
           />
         </View>
         <Text style={[styles.progressGoal, { color: colors.textMuted }]}>
