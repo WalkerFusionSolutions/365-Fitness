@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
+import { AppHeader, AppInput, Badge } from '@/components/AppUI';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import { useAppTheme } from '@/hooks/useTheme';
 import {
@@ -11,7 +12,7 @@ import {
   useSaveExercise,
   useUploadExerciseVideo,
 } from '@/hooks/useWorkout';
-import { radius, spacing, typography } from '@/utils/theme';
+import { spacing, typography } from '@/utils/theme';
 
 export default function CoachExerciseEditorScreen({ route, navigation }: any) {
   const { colors } = useAppTheme();
@@ -94,9 +95,11 @@ export default function CoachExerciseEditorScreen({ route, navigation }: any) {
 
   return (
     <Screen>
-      <Text style={[styles.title, { color: colors.textPrimary }]}>
-        {exerciseId ? 'Edit Exercise' : 'Create Exercise'}
-      </Text>
+      <AppHeader
+        title={exerciseId ? 'Edit Exercise' : 'Create Exercise'}
+        subtitle="Keep cues clear for client training sessions."
+        action={videoPath ? <Badge label="Video" /> : undefined}
+      />
       <Card style={styles.form}>
         <Field label="Name" value={name} onChangeText={setName} />
         <Field label="Muscle Group" value={muscleGroup} onChangeText={setMuscleGroup} />
@@ -146,52 +149,21 @@ function Field({
   onChangeText: (value: string) => void;
   multiline?: boolean;
 }) {
-  const { colors } = useAppTheme();
-
   return (
     <>
-      <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
-      <TextInput
+      <AppInput
+        label={label}
         value={value}
         onChangeText={onChangeText}
         multiline={multiline}
-        placeholderTextColor={colors.textMuted}
-        style={[
-          styles.input,
-          multiline && styles.multiline,
-          {
-            color: colors.textPrimary,
-            backgroundColor: colors.inputBackground,
-            borderColor: colors.border,
-          },
-        ]}
       />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  title: {
-    ...typography.h1,
-    marginBottom: spacing.lg,
-  },
   form: {
-    gap: spacing.sm,
-  },
-  label: {
-    ...typography.caption,
-    fontWeight: '700',
-  },
-  input: {
-    ...typography.body,
-    borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  multiline: {
-    minHeight: 96,
-    textAlignVertical: 'top',
+    gap: spacing.md,
   },
   videoNote: {
     ...typography.caption,

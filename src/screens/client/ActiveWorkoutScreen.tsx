@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
+import { ProgressBar } from '@/components/AppUI';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -38,6 +39,7 @@ export default function ActiveWorkoutScreen({ route, navigation }: any) {
     [workout?.exercises]
   );
   const completedSets = logs.length;
+  const progressPercent = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
 
   useEffect(() => {
     if (!workoutId || sessionId) return;
@@ -149,6 +151,9 @@ export default function ActiveWorkoutScreen({ route, navigation }: any) {
           {completedSets}/{totalSets}
         </Text>
       </View>
+      <View style={styles.progressTrack}>
+        <ProgressBar value={progressPercent} />
+      </View>
 
       <Card style={styles.currentCard}>
         <Text style={[styles.setTitle, { color: colors.textPrimary }]}>
@@ -257,6 +262,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: spacing.lg,
   },
+  progressTrack: {
+    marginBottom: spacing.lg,
+  },
   eyebrow: {
     ...typography.caption,
     textTransform: 'uppercase',
@@ -270,7 +278,7 @@ const styles = StyleSheet.create({
   },
   currentCard: {
     gap: spacing.lg,
-    padding: spacing.lg,
+    padding: spacing.xl,
   },
   setTitle: {
     ...typography.h2,
@@ -314,6 +322,7 @@ const styles = StyleSheet.create({
   },
   completeButton: {
     marginTop: spacing.sm,
+    minHeight: 58,
   },
   restCard: {
     alignItems: 'center',

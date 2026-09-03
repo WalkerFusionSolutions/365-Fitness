@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/Screen';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
+import { AppHeader, Badge, SectionHeader } from '@/components/AppUI';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useAppTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/hooks/useAuth';
@@ -55,12 +56,12 @@ export default function ClientWorkoutScreen({ navigation }: any) {
         <RefreshControl refreshing={isRefreshing} onRefresh={refresh} />
       }
     >
-      <Text style={[styles.title, { color: colors.textPrimary }]}>Workout</Text>
-      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-        Your assigned training and completed sessions.
-      </Text>
+      <AppHeader
+        title="Training"
+        subtitle="Assigned workouts and completed sessions."
+      />
 
-      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Today</Text>
+      <SectionHeader title="Today" />
       {firstWorkout ? (
         <WorkoutHero
           workout={firstWorkout}
@@ -81,7 +82,7 @@ export default function ClientWorkoutScreen({ navigation }: any) {
         </Card>
       )}
 
-      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Upcoming</Text>
+      <SectionHeader title="Upcoming" />
       <FlatList
         data={workouts.data.slice(1, 4)}
         keyExtractor={(item) => item.id}
@@ -99,7 +100,7 @@ export default function ClientWorkoutScreen({ navigation }: any) {
         )}
       />
 
-      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Recent</Text>
+      <SectionHeader title="Recent" />
       <FlatList
         data={history.data.slice(0, 4)}
         keyExtractor={(item) => item.id}
@@ -140,6 +141,7 @@ function WorkoutHero({
             {workout.estimated_minutes ? `${workout.estimated_minutes} min` : 'Ready when you are'}
           </Text>
         </View>
+        <Badge label={workout.status || 'assigned'} />
       </View>
       {workout.description ? (
         <Text style={[styles.description, { color: colors.textSecondary }]}>
@@ -194,18 +196,6 @@ function HistoryRow({ entry }: { entry: WorkoutHistoryItem }) {
 }
 
 const styles = StyleSheet.create({
-  title: {
-    ...typography.h1,
-  },
-  subtitle: {
-    ...typography.body,
-    marginTop: spacing.xs,
-  },
-  sectionTitle: {
-    ...typography.h3,
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
-  },
   hero: {
     gap: spacing.md,
     padding: spacing.lg,

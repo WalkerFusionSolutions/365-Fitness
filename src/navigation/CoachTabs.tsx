@@ -4,10 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import CoachDashboardScreen from '@/screens/coach/CoachDashboardScreen';
 import CoachClientsScreen from '@/screens/coach/CoachClientsScreen';
 import CoachProgramsScreen from '@/screens/coach/CoachProgramsScreen';
-import CoachNutritionScreen from '@/screens/coach/CoachNutritionScreen';
 import { ProfileScreen } from '@/screens/common/ProfileScreen';
 import { useAppTheme } from '@/hooks/useTheme';
 import { CoachTabsParamList } from '@/types';
+import { Screen } from '@/components/Screen';
+import { AppHeader, IconRow } from '@/components/AppUI';
 
 const Tab = createBottomTabNavigator<CoachTabsParamList>();
 
@@ -23,7 +24,7 @@ export function CoachTabs() {
           if (route.name === 'Coach') iconName = focused ? 'grid' : 'grid-outline';
           if (route.name === 'Clients') iconName = focused ? 'people' : 'people-outline';
           else if (route.name === 'Programs') iconName = focused ? 'barbell' : 'barbell-outline';
-          else if (route.name === 'Nutrition') iconName = focused ? 'restaurant' : 'restaurant-outline';
+          else if (route.name === 'Messages') iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
           else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
           
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -51,6 +52,10 @@ export function CoachTabs() {
           fontWeight: '700',
           fontSize: 12,
         },
+        tabBarLabel:
+          route.name === 'Coach'
+            ? 'Home'
+            : route.name,
       })}
     >
       <Tab.Screen name="Coach" component={CoachDashboardScreen} />
@@ -60,10 +65,27 @@ export function CoachTabs() {
         component={CoachProgramsScreen}
       />
       <Tab.Screen
-        name="Nutrition"
-        component={CoachNutritionScreen}
+        name="Messages"
+        component={CoachMessagesScreen}
       />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
+  );
+}
+
+function CoachMessagesScreen() {
+  return (
+    <Screen>
+      <AppHeader
+        title="Messages"
+        subtitle="Client messaging is not enabled yet."
+      />
+      <IconRow
+        icon="chatbubbles-outline"
+        title="Messages coming later"
+        subtitle="Workout and nutrition tools are available now from Programs and client detail."
+        right={null}
+      />
+    </Screen>
   );
 }

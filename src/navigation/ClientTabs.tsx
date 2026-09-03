@@ -51,6 +51,10 @@ export function ClientTabs() {
           fontWeight: '700',
           fontSize: 12,
         },
+        tabBarLabel:
+          route.name === 'Workouts'
+            ? 'Workout'
+            : route.name,
       })}
     >
       <Tab.Screen name="Home" component={DashboardScreen} />

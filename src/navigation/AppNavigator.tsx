@@ -26,6 +26,7 @@ import CoachClientDetailScreen from '@/screens/coach/CoachClientDetailScreen';
 import CoachExerciseEditorScreen from '@/screens/coach/CoachExerciseEditorScreen';
 import CoachWorkoutBuilderScreen from '@/screens/coach/CoachWorkoutBuilderScreen';
 import CoachMealPlanBuilderScreen from '@/screens/coach/CoachMealPlanBuilderScreen';
+import CoachNutritionScreen from '@/screens/coach/CoachNutritionScreen';
 import { useAppTheme } from '@/hooks/useTheme';
 import { ClientStackParamList, CoachStackParamList } from '@/types';
 
@@ -255,6 +256,11 @@ export function AppNavigator() {
               name="CoachWorkoutBuilder"
               component={CoachWorkoutBuilderScreen}
               options={detailHeaderOptions('Workout Builder', colors)}
+            />
+            <Stack.Screen
+              name="CoachNutrition"
+              component={CoachNutritionScreen}
+              options={detailHeaderOptions('Nutrition', colors)}
             />
             <Stack.Screen
               name="CoachMealPlanBuilder"

@@ -349,7 +349,7 @@ export type CoachTabsParamList = {
   Coach: undefined;
   Clients: undefined;
   Programs: undefined;
-  Nutrition: undefined;
+  Messages: undefined;
   Profile: undefined;
 };
 
@@ -359,6 +359,7 @@ export type CoachStackParamList = {
   CoachExerciseEditor: { exerciseId?: string } | undefined;
   CoachWorkoutBuilder: { workoutId?: string; clientId?: string } | undefined;
   CoachMealPlanBuilder: { mealPlanId?: string; clientId?: string } | undefined;
+  CoachNutrition: undefined;
   CoachWorkoutDetail: { workoutId: string };
   // add others later
 };

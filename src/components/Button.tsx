@@ -46,9 +46,10 @@ export function Button({ label, variant = 'primary', loading, disabled, style, .
 
 const styles = StyleSheet.create({
   button: {
+    minHeight: 52,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
-    borderRadius: radius.md,
+    borderRadius: radius.round,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',

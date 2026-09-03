@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Card } from '@/components/Card';
+import { AppHeader, Badge, ProfileAvatar, SearchInput } from '@/components/AppUI';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useAppTheme } from '@/hooks/useTheme';
@@ -27,6 +28,12 @@ export default function CoachClientsScreen() {
     isRefreshing,
     refresh,
   } = useCoachVisibleClients();
+  const [search, setSearch] = React.useState('');
+  const filtered = data.filter((item) =>
+    (item.profile.full_name || 'Client')
+      .toLowerCase()
+      .includes(search.trim().toLowerCase())
+  );
 
   if (isLoading) {
     return <LoadingView label="Loading clients..." />;
@@ -47,7 +54,7 @@ export default function CoachClientsScreen() {
   return (
     <Screen scroll={false} padded={false}>
       <FlatList
-        data={data}
+        data={filtered}
         keyExtractor={(item) => item.profile.id}
         contentContainerStyle={styles.content}
         refreshControl={
@@ -55,10 +62,16 @@ export default function CoachClientsScreen() {
         }
         ListHeaderComponent={
           <View>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>Your Clients</Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Supabase permissions decide whether this shows assigned clients or all development clients.
-            </Text>
+            <AppHeader
+              eyebrow=""
+              title="Clients"
+              subtitle="Review progress, workouts, and nutrition."
+            />
+            <SearchInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Search clients"
+            />
             {error ? (
               <Text style={[styles.inlineError, { color: colors.error }]}>{error}</Text>
             ) : null}
@@ -67,8 +80,8 @@ export default function CoachClientsScreen() {
         ListEmptyComponent={
           <EmptyState
             icon="people-outline"
-            title="No active clients yet."
-            subtitle="Assigned clients or development-visible clients will appear here."
+            title={search ? 'No clients found.' : 'No active clients yet.'}
+            subtitle={search ? 'Try a different name.' : 'Assigned or visible clients will appear here.'}
           />
         }
         renderItem={({ item }) => (
@@ -96,20 +109,12 @@ function ClientRow({
 }) {
   const { colors } = useAppTheme();
   const name = client.profile.full_name?.trim() || 'Client';
-  const initials = name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
   const summary = client.fitnessSummary;
 
   return (
     <Pressable onPress={onPress}>
       <Card style={styles.clientCard}>
-        <View style={[styles.avatar, { backgroundColor: colors.primaryDark }]}>
-          <Text style={styles.avatarText}>{initials || 'CL'}</Text>
-        </View>
+        <ProfileAvatar name={name} uri={client.profile.avatar_url} size={50} />
         <View style={styles.clientText}>
           <Text style={[styles.clientName, { color: colors.textPrimary }]}>{name}</Text>
           <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
@@ -118,7 +123,7 @@ function ClientRow({
               : 'Fitness profile incomplete'}
           </Text>
         </View>
-        <Text style={[styles.viewText, { color: colors.primary }]}>View</Text>
+        <Badge label={client.isPrivilegedAccess ? 'Visible' : 'Assigned'} tone={client.isPrivilegedAccess ? 'warning' : 'success'} />
       </Card>
     </Pressable>
   );
@@ -127,14 +132,10 @@ function ClientRow({
 const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
-    paddingBottom: spacing.xxl,
+    paddingBottom: 120,
   },
   title: {
     ...typography.h1,
-    marginBottom: spacing.md,
-  },
-  subtitle: {
-    ...typography.caption,
     marginBottom: spacing.md,
   },
   cardTitle: {
@@ -153,26 +154,10 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginBottom: spacing.sm,
   },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    ...typography.caption,
-    color: '#FFFFFF',
-    fontWeight: '800',
-  },
   clientText: {
     flex: 1,
   },
   clientName: {
     ...typography.h3,
-  },
-  viewText: {
-    ...typography.caption,
-    fontWeight: '700',
   },
 });

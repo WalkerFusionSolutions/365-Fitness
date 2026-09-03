@@ -9,6 +9,7 @@ import {
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
+import { AppHeader, IconRow, ProfileAvatar, StatCard } from '@/components/AppUI';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
 import { useAppTheme } from '@/hooks/useTheme';
@@ -73,66 +74,40 @@ export default function CoachClientDetailScreen() {
 
   return (
     <Screen>
-      <Text style={[styles.eyebrow, { color: colors.primary }]}>Client Overview</Text>
-      <Text style={[styles.title, { color: colors.textPrimary }]}>{clientName}</Text>
+      <AppHeader
+        title={clientName}
+        subtitle={data.assessment.primaryGoal}
+        action={<ProfileAvatar name={clientName} size={58} />}
+      />
 
       <View style={styles.weightRow}>
-        <Card style={styles.weightCard}>
-          <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Starting</Text>
-          <Text style={[styles.weightValue, { color: colors.textPrimary }]}>{formatWeight(data.startingWeightKg)}</Text>
-        </Card>
-        <Card style={styles.weightCard}>
-          <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Current</Text>
-          <Text style={[styles.weightValue, { color: colors.primary }]}>{formatWeight(data.currentWeightKg)}</Text>
-        </Card>
-        <Card style={styles.weightCard}>
-          <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Goal</Text>
-          <Text style={[styles.weightValue, { color: colors.textPrimary }]}>{formatWeight(data.goalWeightKg)}</Text>
-        </Card>
+        <StatCard icon="scale-outline" label="Current" value={formatWeight(data.currentWeightKg)} />
+        <StatCard icon="flag-outline" label="Goal" value={formatWeight(data.goalWeightKg)} tone="success" />
       </View>
 
       <Card style={styles.card}>
-        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Fitness Overview</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Overview</Text>
         <Metric label="Height" value={formatHeight(data.assessment.heightCm)} />
         <Metric label="BMI" value={data.bmi?.toFixed(1) ?? 'Not available'} />
-        <Metric label="Primary Goal" value={data.assessment.primaryGoal} />
         <Metric label="Experience" value={data.assessment.experienceLevel} />
-        <Metric label="Activity Level" value={data.assessment.activityLevel} />
-        <Metric label="Training Frequency" value={data.assessment.trainingFrequency} />
-        <Metric label="Preferred Session" value={data.assessment.sessionDuration} />
+        <Metric label="Training" value={data.assessment.trainingFrequency} />
       </Card>
 
-      <Card style={styles.card}>
-        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Training Preferences</Text>
-        <Metric label="Workout Location" value={data.assessment.workoutLocation} />
-        <Metric label="Equipment" value={data.assessment.equipment.join(', ') || 'None selected'} />
-        <Metric label="Focus Areas" value={data.assessment.focusAreas.join(', ') || 'None selected'} />
-      </Card>
+      <IconRow
+        icon="clipboard-outline"
+        title="Assessment"
+        subtitle={`${data.assessment.workoutLocation} • ${data.assessment.sessionDuration}`}
+        onPress={() => navigation.navigate('CoachClientAssessment', { clientId, clientName })}
+      />
+      <IconRow
+        icon="body-outline"
+        title="Measurements"
+        subtitle={`Latest: ${formatWeight(data.currentWeightKg)}${data.latestMeasurement?.body_fat ? ` • ${data.latestMeasurement.body_fat}% body fat` : ''}`}
+        onPress={() => navigation.navigate('CoachClientMeasurements', { clientId, clientName })}
+      />
 
       <Card style={styles.card}>
-        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Progress</Text>
-        <Metric label="Starting Weight" value={formatWeight(data.startingWeightKg)} />
-        <Metric label="Current Weight" value={formatWeight(data.currentWeightKg)} />
-        <Metric label="Goal Weight" value={formatWeight(data.goalWeightKg)} />
-        <Metric label="Latest Body Fat" value={formatMetric(data.latestMeasurement?.body_fat, '%')} />
-        <Metric label="Latest Chest" value={formatMetric(data.latestMeasurement?.chest, 'in')} />
-        <Metric label="Latest Waist" value={formatMetric(data.latestMeasurement?.waist, 'in')} />
-      </Card>
-
-      <Card style={styles.card}>
-        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Health & Safety</Text>
-        <Metric
-          label="Status"
-          value={
-            data.assessment.healthNotes || data.assessment.limitations.length > 0
-              ? 'Health assessment completed'
-              : 'No limitations shared'
-          }
-        />
-      </Card>
-
-      <Card style={styles.card}>
-        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Workouts</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Workouts</Text>
         {workouts.data.length > 0 ? (
           workouts.data.slice(0, 3).map((workout) => (
             <Metric
@@ -159,7 +134,7 @@ export default function CoachClientDetailScreen() {
       </Card>
 
       <Card style={styles.card}>
-        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Nutrition</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Nutrition</Text>
         <Metric
           label="Meal Plan"
           value={mealPlan.data?.name ?? 'None assigned'}
@@ -185,19 +160,6 @@ export default function CoachClientDetailScreen() {
             navigation.navigate('CoachMealPlanBuilder', { clientId })
           }
         />
-        <Button
-          label="View Full Assessment"
-          onPress={() =>
-            navigation.navigate('CoachClientAssessment', { clientId, clientName })
-          }
-        />
-        <Button
-          label="Add / View Measurements"
-          variant="secondary"
-          onPress={() =>
-            navigation.navigate('CoachClientMeasurements', { clientId, clientName })
-          }
-        />
       </View>
     </Screen>
   );
@@ -219,11 +181,6 @@ function formatMetric(value?: number | null, suffix = '') {
 }
 
 const styles = StyleSheet.create({
-  eyebrow: {
-    ...typography.caption,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
   title: {
     ...typography.h1,
     marginBottom: spacing.lg,
@@ -232,15 +189,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.sm,
     marginBottom: spacing.md,
-  },
-  weightCard: {
-    flex: 1,
-    gap: spacing.xs,
-    padding: spacing.sm,
-  },
-  weightValue: {
-    ...typography.h3,
-    fontWeight: '800',
   },
   card: {
     gap: spacing.sm,

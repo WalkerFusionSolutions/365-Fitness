@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '@/hooks/useTheme';
+import { spacing } from '@/utils/theme';
 
 interface ScreenProps extends ViewProps {
   children: React.ReactNode;
@@ -54,11 +55,12 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flexGrow: 1,
+    paddingBottom: 104,
   },
   container: {
     flex: 1,
   },
   padded: {
-    padding: 16,
+    padding: spacing.lg,
   }
 });

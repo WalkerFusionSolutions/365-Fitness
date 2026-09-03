@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Pressable,
   PressableProps,
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -88,6 +89,58 @@ export function Avatar({ name, size = 48 }: { name?: string | null; size?: numbe
   );
 }
 
+export function ProfileAvatar({
+  name,
+  uri,
+  size = 72,
+}: {
+  name?: string | null;
+  uri?: string | null;
+  size?: number;
+}) {
+  const { colors } = useAppTheme();
+
+  if (uri) {
+    return (
+      <Image
+        source={{ uri }}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: colors.surfaceSecondary,
+        }}
+      />
+    );
+  }
+
+  return <Avatar name={name} size={size} />;
+}
+
+export function Badge({
+  label,
+  tone = 'primary',
+}: {
+  label: string;
+  tone?: 'primary' | 'muted' | 'success' | 'warning';
+}) {
+  const { colors } = useAppTheme();
+  const foreground =
+    tone === 'muted'
+      ? colors.textSecondary
+      : tone === 'success'
+        ? colors.success
+        : tone === 'warning'
+          ? colors.warning
+          : colors.primary;
+
+  return (
+    <View style={[styles.badge, { backgroundColor: colors.surfaceSecondary }]}>
+      <Text style={[styles.badgeText, { color: foreground }]}>{label}</Text>
+    </View>
+  );
+}
+
 export function StatCard({
   icon,
   label,
@@ -153,6 +206,21 @@ export function AppInput({ label, style, ...props }: TextInputProps & { label: s
   );
 }
 
+export function SearchInput(props: TextInputProps) {
+  const { colors } = useAppTheme();
+
+  return (
+    <View style={[styles.searchWrap, { backgroundColor: colors.inputBackground, borderColor: colors.border }]}>
+      <Ionicons name="search" size={18} color={colors.textMuted} />
+      <TextInput
+        placeholderTextColor={colors.textMuted}
+        style={[styles.searchInput, { color: colors.textPrimary }]}
+        {...props}
+      />
+    </View>
+  );
+}
+
 export function FilterChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   const { colors } = useAppTheme();
 
@@ -187,7 +255,7 @@ export function IconRow({
 }) {
   const { colors } = useAppTheme();
   const content = (
-    <View style={[styles.iconRow, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+      <View style={[styles.iconRow, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
       <View style={[styles.iconBadge, { backgroundColor: colors.surfaceSecondary }]}>
         <Ionicons name={icon} size={20} color={colors.primary} />
       </View>
@@ -223,7 +291,7 @@ const styles = StyleSheet.create({
     ...typography.h1,
   },
   subtitle: {
-    ...typography.caption,
+    ...typography.body,
     marginTop: spacing.xs,
   },
   sectionHeader: {
@@ -248,11 +316,21 @@ const styles = StyleSheet.create({
     ...typography.caption,
     fontWeight: '900',
   },
+  badge: {
+    alignSelf: 'flex-start',
+    borderRadius: radius.round,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  badgeText: {
+    ...typography.caption,
+    fontWeight: '800',
+  },
   stat: {
     flex: 1,
     minHeight: 110,
     borderWidth: 1,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     padding: spacing.md,
     justifyContent: 'space-between',
   },
@@ -281,9 +359,9 @@ const styles = StyleSheet.create({
   },
   input: {
     ...typography.body,
-    minHeight: 48,
+    minHeight: 54,
     borderWidth: 1,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
@@ -295,7 +373,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: radius.round,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: 10,
+    minHeight: 42,
+    justifyContent: 'center',
   },
   chipText: {
     ...typography.caption,
@@ -306,7 +386,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     borderWidth: 1,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     padding: spacing.md,
     marginBottom: spacing.sm,
   },
@@ -324,6 +404,19 @@ const styles = StyleSheet.create({
     ...typography.caption,
   },
   flex: {
+    flex: 1,
+  },
+  searchWrap: {
+    minHeight: 52,
+    borderWidth: 1,
+    borderRadius: radius.round,
+    paddingHorizontal: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  searchInput: {
+    ...typography.body,
     flex: 1,
   },
 });

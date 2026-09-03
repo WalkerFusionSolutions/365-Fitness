@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
+import { AppHeader, Badge, StatCard } from '@/components/AppUI';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useWorkoutDetail } from '@/hooks/useWorkout';
 import { useAppTheme } from '@/hooks/useTheme';
@@ -31,16 +32,15 @@ export default function WorkoutDetailScreen({ route, navigation }: any) {
 
   return (
     <Screen>
-      <Text style={[styles.title, { color: colors.textPrimary }]}>{data.name}</Text>
-      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-        {data.exercises.length} exercises
-        {data.estimated_minutes ? ` • ~${data.estimated_minutes} min` : ''}
-      </Text>
-      {data.description ? (
-        <Text style={[styles.description, { color: colors.textSecondary }]}>
-          {data.description}
-        </Text>
-      ) : null}
+      <AppHeader
+        title={data.name}
+        subtitle={data.description || 'Training prescription'}
+        action={<Badge label={data.status || 'assigned'} />}
+      />
+      <View style={styles.statsRow}>
+        <StatCard icon="barbell-outline" label="Exercises" value={data.exercises.length} />
+        <StatCard icon="time-outline" label="Duration" value={data.estimated_minutes ? `${data.estimated_minutes} min` : 'Open'} tone="success" />
+      </View>
 
       <Button
         label="Start Workout"
@@ -103,6 +103,9 @@ function ExerciseRow({
             {exercise.sets} x {exercise.reps} • {exercise.rest_seconds}s rest
           </Text>
         </View>
+        {exercise.video_url || exercise.library_exercise_id ? (
+          <Ionicons name="videocam-outline" size={18} color={colors.primary} />
+        ) : null}
         <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
       </Card>
     </Pressable>
@@ -110,16 +113,10 @@ function ExerciseRow({
 }
 
 const styles = StyleSheet.create({
-  title: {
-    ...typography.h1,
-  },
-  subtitle: {
-    ...typography.body,
-    marginTop: spacing.xs,
-  },
-  description: {
-    ...typography.body,
-    marginTop: spacing.md,
+  statsRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
   },
   startButton: {
     marginTop: spacing.lg,

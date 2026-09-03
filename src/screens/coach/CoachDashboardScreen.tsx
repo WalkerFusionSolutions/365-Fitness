@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
+import { AppHeader, Avatar, IconRow, StatCard } from '@/components/AppUI';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import { useAuth } from '@/hooks/useAuth';
 import { useCoachVisibleClients } from '@/hooks/useAssignments';
@@ -37,31 +38,23 @@ export default function CoachDashboardScreen({ navigation }: any) {
 
   return (
     <Screen>
-      <Text style={[styles.brand, { color: colors.primary }]}>365 FITNESS</Text>
-      <Text style={[styles.title, { color: colors.textPrimary }]}>Coach Dashboard</Text>
-      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Welcome back, {coachName}</Text>
-
-      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Your Clients</Text>
-      <View style={styles.statsRow}>
-        <Card style={styles.statCard}>
-          <Text style={[styles.statValue, { color: colors.primary }]}>{data.length}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Visible Clients</Text>
-        </Card>
-        <Card style={styles.statCard}>
-          <Text style={[styles.statValue, { color: colors.primary }]}>{completeProfiles}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Fitness Profiles</Text>
-        </Card>
-        <Card style={styles.statCard}>
-          <Text style={[styles.statValue, { color: colors.primary }]}>{incompleteProfiles}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Incomplete</Text>
-        </Card>
-      </View>
-      <Button
-        label="View All"
-        onPress={() => navigation.navigate('Clients')}
-        style={styles.viewButton}
+      <AppHeader
+        title={`Coach ${coachName.split(' ')[0]}`}
+        subtitle="Client overview and coaching tools"
+        action={<Avatar name={coachName} />}
       />
 
+      <View style={styles.statsRow}>
+        <StatCard icon="people-outline" label="Visible Clients" value={data.length} />
+        <StatCard icon="clipboard-outline" label="Profiles" value={completeProfiles} tone="success" />
+      </View>
+      {incompleteProfiles > 0 ? (
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          {incompleteProfiles} client{incompleteProfiles === 1 ? '' : 's'} still need a fitness profile.
+        </Text>
+      ) : null}
+
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Recent Clients</Text>
       {data.slice(0, 3).map((client) => (
         <ClientPreview
           key={client.profile.id}
@@ -74,20 +67,31 @@ export default function CoachDashboardScreen({ navigation }: any) {
           }
         />
       ))}
+      <Button
+        label="View All Clients"
+        onPress={() => navigation.navigate('Clients')}
+        style={styles.viewButton}
+      />
 
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Coach Tools</Text>
-      <RoadmapCard
+      <IconRow
+        icon="barbell-outline"
         title="Workout Programs"
-        subtitle="Create workouts from the Programs tab."
+        subtitle="Create workouts and manage exercises"
         onPress={() => navigation.navigate('Programs')}
       />
-      <RoadmapCard
+      <IconRow
+        icon="restaurant-outline"
         title="Nutrition"
-        subtitle="Create meal plans and assign nutrition from the Nutrition tab."
-        onPress={() => navigation.navigate('Nutrition')}
+        subtitle="Create and assign meal plans"
+        onPress={() => navigation.navigate('CoachNutrition')}
       />
-      <RoadmapCard title="Messages" subtitle="Coming soon." />
-      <RoadmapCard title="Reports" subtitle="Coming soon." />
+      <IconRow
+        icon="chatbubbles-outline"
+        title="Messages"
+        subtitle="Messaging is not enabled yet"
+        onPress={() => navigation.navigate('Messages')}
+      />
     </Screen>
   );
 }
@@ -128,38 +132,9 @@ function ClientPreview({
   );
 }
 
-function RoadmapCard({
-  title,
-  subtitle,
-  onPress,
-}: {
-  title: string;
-  subtitle: string;
-  onPress?: () => void;
-}) {
-  const { colors } = useAppTheme();
-
-  const content = (
-    <Card style={styles.roadmapCard}>
-      <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>{title}</Text>
-      <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
-    </Card>
-  );
-
-  return onPress ? <Pressable onPress={onPress}>{content}</Pressable> : content;
-}
-
 const styles = StyleSheet.create({
-  brand: {
-    ...typography.caption,
-    fontWeight: '700',
-    marginBottom: spacing.xs,
-  },
-  title: {
-    ...typography.h1,
-  },
   subtitle: {
-    ...typography.body,
+    ...typography.caption,
     marginBottom: spacing.lg,
   },
   sectionTitle: {
@@ -169,25 +144,11 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: 'row',
-    gap: spacing.md,
-  },
-  statCard: {
-    flex: 1,
-    gap: spacing.xs,
-    padding: spacing.sm,
-  },
-  statValue: {
-    ...typography.h1,
-  },
-  statLabel: {
-    ...typography.caption,
+    gap: spacing.sm,
+    marginBottom: spacing.md,
   },
   viewButton: {
     marginTop: spacing.md,
-  },
-  roadmapCard: {
-    gap: spacing.xs,
-    marginBottom: spacing.sm,
   },
   clientPreview: {
     flexDirection: 'row',

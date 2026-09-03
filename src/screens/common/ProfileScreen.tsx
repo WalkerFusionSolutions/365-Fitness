@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Card } from '@/components/Card';
+import { Ionicons } from '@expo/vector-icons';
+import { Avatar, Badge, IconRow, ProfileAvatar, SectionHeader } from '@/components/AppUI';
 import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/hooks/useAuth';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import { AppServiceError } from '@/services/errors';
 import { ThemePreference, useAppTheme } from '@/hooks/useTheme';
-import { formatHeight, formatWeight } from '@/utils/fitness';
-import { spacing, typography } from '@/utils/theme';
+import { formatWeight } from '@/utils/fitness';
+import { radius, spacing, typography } from '@/utils/theme';
 
 export function ProfileScreen() {
   const { colors, themePreference, setThemePreference } = useAppTheme();
@@ -65,23 +67,15 @@ export function ProfileScreen() {
 
   return (
     <Screen>
-      <Text style={[styles.brand, { color: colors.primary }]}>365 FITNESS</Text>
-      <Text style={[styles.title, { color: colors.textPrimary }]}>Profile</Text>
-
-      <Card style={styles.card}>
-        <ProfileField label="Full Name" value={displayName} />
-        <ProfileField label="Account Type" value={accountType} />
-        <ProfileField label="Email" value={email} />
-        <ProfileField label="Account Status" value="Active" />
-      </Card>
-
-      <AppearanceSection
-        value={themePreference}
-        onChange={setThemePreference}
-      />
+      <View style={[styles.profileHero, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+        <ProfileAvatar name={displayName} uri={profile?.avatar_url} size={86} />
+        <Text style={[styles.name, { color: colors.textPrimary }]}>{displayName}</Text>
+        <Badge label={accountType} />
+        <Text style={[styles.email, { color: colors.textSecondary }]}>{email}</Text>
+      </View>
 
       {profile?.role === 'client' ? (
-        <FitnessProfileSection
+        <ClientSnapshot
           isLoading={fitness.isLoading}
           error={fitness.error}
           summary={fitness.data}
@@ -90,7 +84,61 @@ export function ProfileScreen() {
           onMeasurements={() => navigation.navigate('ClientMeasurements')}
           onRetry={fitness.refresh}
         />
-      ) : null}
+      ) : (
+        <Card style={styles.coachCard}>
+          <View style={styles.coachRow}>
+            <Avatar name={displayName} size={44} />
+            <View style={styles.flex}>
+              <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Coach Workspace</Text>
+              <Text style={[styles.meta, { color: colors.textSecondary }]}>
+                Clients, programs, and nutrition are managed from the main tabs.
+              </Text>
+            </View>
+          </View>
+        </Card>
+      )}
+
+      <SectionHeader title="Personal" />
+      {profile?.role === 'client' ? (
+        <>
+          <IconRow
+            icon="clipboard-outline"
+            title="Fitness Assessment"
+            subtitle={fitness.data ? fitness.data.assessment.primaryGoal : 'Complete your assessment'}
+            onPress={() => navigation.navigate(fitness.data ? 'ClientAssessment' : 'ClientOnboarding')}
+          />
+          <IconRow
+            icon="scale-outline"
+            title="Measurements"
+            subtitle={fitness.data ? `${fitness.data.measurementCount} records` : 'Start tracking progress'}
+            onPress={() => navigation.navigate('ClientMeasurements')}
+          />
+        </>
+      ) : (
+        <IconRow
+          icon="people-outline"
+          title="Client Management"
+          subtitle="Review assigned and visible clients"
+          onPress={() => navigation.navigate('Clients')}
+        />
+      )}
+
+      <SectionHeader title="Preferences" />
+      <Card style={styles.preferenceCard}>
+        <View style={styles.settingTop}>
+          <View>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Theme</Text>
+            <Text style={[styles.meta, { color: colors.textSecondary }]}>
+              Current: {labelTheme(themePreference)}
+            </Text>
+          </View>
+          <Ionicons name={themePreference === 'dark' ? 'moon' : 'sunny'} size={22} color={colors.primary} />
+        </View>
+        <AppearanceSection value={themePreference} onChange={setThemePreference} />
+      </Card>
+
+      <SectionHeader title="App" />
+      <IconRow icon="information-circle-outline" title="About 365 Fitness" subtitle="Production-minded coaching app" right={null} />
 
       <View style={styles.actions}>
         <Button
@@ -104,7 +152,7 @@ export function ProfileScreen() {
   );
 }
 
-function FitnessProfileSection({
+function ClientSnapshot({
   isLoading,
   error,
   summary,
@@ -125,29 +173,29 @@ function FitnessProfileSection({
 
   if (isLoading) {
     return (
-      <Card style={styles.fitnessCard}>
-        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Fitness Profile</Text>
-        <Text style={[styles.meta, { color: colors.textSecondary }]}>Loading fitness profile...</Text>
+      <Card style={styles.snapshot}>
+        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Fitness Profile</Text>
+        <Text style={[styles.meta, { color: colors.textSecondary }]}>Loading your profile...</Text>
       </Card>
     );
   }
 
   if (error) {
     return (
-      <Card style={styles.fitnessCard}>
-        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Fitness Profile</Text>
+      <Card style={styles.snapshot}>
+        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Fitness Profile</Text>
         <Text style={[styles.errorText, { color: colors.error }]}>Unable to load your fitness profile.</Text>
-        <Button label="Try Again" variant="secondary" onPress={onRetry} />
+        <Button label="Try Again" variant="outline" onPress={onRetry} />
       </Card>
     );
   }
 
   if (!summary) {
     return (
-      <Card style={styles.fitnessCard}>
-        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Complete Your Fitness Profile</Text>
+      <Card style={styles.snapshot}>
+        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Complete Your Fitness Profile</Text>
         <Text style={[styles.meta, { color: colors.textSecondary }]}>
-          Help your coach personalize your plan and track your progress.
+          Your coach can personalize workouts and nutrition after this is complete.
         </Text>
         <Button label="Get Started" onPress={onStart} />
       </Card>
@@ -155,30 +203,29 @@ function FitnessProfileSection({
   }
 
   return (
-    <Card style={styles.fitnessCard}>
-      <Text style={[styles.sectionTitle, { color: colors.primary }]}>Fitness Profile</Text>
-      <ProfileField label="Starting Weight" value={formatWeight(summary.startingWeightKg)} />
-      <ProfileField label="Current Weight" value={formatWeight(summary.currentWeightKg)} />
-      <ProfileField label="Goal Weight" value={formatWeight(summary.goalWeightKg)} />
-      <ProfileField label="Height" value={formatHeight(summary.assessment.heightCm)} />
-      <ProfileField label="BMI" value={summary.bmi?.toFixed(1) ?? 'Not available'} />
-      <ProfileField label="Primary Goal" value={summary.assessment.primaryGoal} />
-      <ProfileField label="Experience" value={summary.assessment.experienceLevel} />
-      <ProfileField label="Activity" value={summary.assessment.activityLevel} />
-      <ProfileField label="Training" value={summary.assessment.trainingFrequency} />
-      <Button label="View Full Assessment" variant="outline" onPress={onAssessment} />
-      <Button label="View Measurements" variant="secondary" onPress={onMeasurements} />
+    <Card style={styles.snapshot}>
+      <View style={styles.metricRow}>
+        <Metric label="Current" value={formatWeight(summary.currentWeightKg)} />
+        <Metric label="Goal" value={formatWeight(summary.goalWeightKg)} />
+      </View>
+      <IconRow
+        icon="analytics-outline"
+        title={summary.assessment.primaryGoal}
+        subtitle={`${summary.assessment.experienceLevel} • ${summary.assessment.trainingFrequency}`}
+        onPress={onAssessment}
+      />
+      <Button label="View Measurements" variant="outline" onPress={onMeasurements} />
     </Card>
   );
 }
 
-function ProfileField({ label, value }: { label: string; value: string }) {
+function Metric({ label, value }: { label: string; value: string }) {
   const { colors } = useAppTheme();
 
   return (
-    <View style={styles.field}>
+    <View style={styles.metric}>
+      <Text style={[styles.metricValue, { color: colors.textPrimary }]}>{value}</Text>
       <Text style={[styles.meta, { color: colors.textSecondary }]}>{label}</Text>
-      <Text style={[styles.name, { color: colors.textPrimary }]}>{value}</Text>
     </View>
   );
 }
@@ -194,91 +241,118 @@ function AppearanceSection({
   const options: ThemePreference[] = ['system', 'light', 'dark'];
 
   return (
-    <Card style={styles.appearanceCard}>
-      <Text style={[styles.sectionTitle, { color: colors.primary }]}>Appearance</Text>
-      <View style={[styles.segmented, { backgroundColor: colors.surfaceSecondary }]}>
-        {options.map((option) => {
-          const selected = option === value;
-          return (
-            <Pressable
-              key={option}
-              onPress={() => onChange(option)}
+    <View style={[styles.segmented, { backgroundColor: colors.surfaceSecondary }]}>
+      {options.map((option) => {
+        const selected = option === value;
+        return (
+          <Pressable
+            key={option}
+            onPress={() => onChange(option)}
+            style={[
+              styles.segment,
+              selected && { backgroundColor: colors.primary },
+            ]}
+          >
+            <Text
               style={[
-                styles.segment,
-                selected && { backgroundColor: colors.primary },
+                styles.segmentText,
+                { color: selected ? colors.primaryText : colors.textSecondary },
               ]}
             >
-              <Text
-                style={[
-                  styles.segmentText,
-                  { color: selected ? colors.primaryText : colors.textSecondary },
-                ]}
-              >
-                {option.charAt(0).toUpperCase() + option.slice(1)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    </Card>
+              {labelTheme(option)}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }
 
+function labelTheme(value: ThemePreference) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 const styles = StyleSheet.create({
-  brand: {
-    ...typography.caption,
-    fontWeight: '700',
-    marginBottom: spacing.xs,
-  },
-  title: {
-    ...typography.h1,
-    marginBottom: spacing.md,
-  },
-  card: {
-    gap: spacing.md,
-  },
-  field: {
-    gap: spacing.xs,
+  profileHero: {
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    gap: spacing.sm,
   },
   name: {
-    ...typography.h3,
+    ...typography.h2,
+    textAlign: 'center',
   },
-  meta: {
-    ...typography.body,
+  email: {
+    ...typography.caption,
+    textAlign: 'center',
   },
-  actions: {
-    marginTop: spacing.lg,
-  },
-  fitnessCard: {
+  snapshot: {
     gap: spacing.md,
     marginTop: spacing.md,
   },
-  sectionTitle: {
+  coachCard: {
+    gap: spacing.md,
+    marginTop: spacing.md,
+  },
+  coachRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  cardTitle: {
     ...typography.h3,
+  },
+  meta: {
+    ...typography.caption,
   },
   errorText: {
     ...typography.body,
   },
-  appearanceCard: {
+  metricRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  metric: {
+    flex: 1,
+  },
+  metricValue: {
+    ...typography.h2,
+  },
+  preferenceCard: {
     gap: spacing.md,
-    marginTop: spacing.md,
+  },
+  settingTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: spacing.md,
   },
   segmented: {
     flexDirection: 'row',
-    borderRadius: 8,
+    borderRadius: radius.round,
     padding: 4,
   },
   segment: {
     flex: 1,
     alignItems: 'center',
-    borderRadius: 4,
+    borderRadius: radius.round,
     paddingVertical: spacing.sm,
+    minHeight: 42,
+    justifyContent: 'center',
   },
   segmentText: {
     ...typography.caption,
-    fontWeight: '700',
+    fontWeight: '800',
+  },
+  actions: {
+    marginTop: spacing.lg,
   },
   errorLogout: {
     marginTop: spacing.md,
+  },
+  flex: {
+    flex: 1,
   },
 });

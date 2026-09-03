@@ -5,6 +5,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingView } from '@/components/StateViews';
+import { AppHeader, Badge } from '@/components/AppUI';
 import { useCoachVisibleClients } from '@/hooks/useAssignments';
 import { useAppTheme } from '@/hooks/useTheme';
 import {
@@ -138,9 +139,11 @@ export default function CoachWorkoutBuilderScreen({ route, navigation }: any) {
 
   return (
     <Screen>
-      <Text style={[styles.title, { color: colors.textPrimary }]}>
-        {workoutId ? 'Edit Workout' : 'Create Workout'}
-      </Text>
+      <AppHeader
+        title={workoutId ? 'Workout Builder' : 'Create Workout'}
+        subtitle="Build a training prescription and assign it when ready."
+        action={<Badge label={clientId ? 'Assigned' : 'Draft'} tone={clientId ? 'success' : 'warning'} />}
+      />
       <Card style={styles.form}>
         <Field label="Workout Name" value={name} onChangeText={setName} />
         <Field label="Description" value={description} onChangeText={setDescription} multiline />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppHeader, IconRow, SectionHeader, StatCard } from '@/components/AppUI';
+import { AppHeader, Badge, IconRow, SectionHeader, StatCard } from '@/components/AppUI';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
@@ -124,10 +124,14 @@ function MealPlanRow({ mealPlan, onPress }: { mealPlan: MealPlan; onPress: () =>
         <View style={styles.flex}>
           <Text style={[styles.planTitle, { color: colors.textPrimary }]}>{mealPlan.name}</Text>
           <Text style={[styles.meta, { color: colors.textSecondary }]}>
-            {assigned ? 'Assigned plan' : 'Draft plan'}
+            {mealPlan.status === 'archived' ? 'Read-only history' : assigned ? 'Read-only assigned plan' : 'Editable draft'}
             {mealPlan.target_calories ? ` • ${Math.round(mealPlan.target_calories)} kcal target` : ''}
           </Text>
         </View>
+        <Badge
+          label={mealPlan.status || 'draft'}
+          tone={mealPlan.status === 'assigned' ? 'success' : mealPlan.status === 'archived' ? 'muted' : 'warning'}
+        />
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </Card>
     </Pressable>
@@ -137,7 +141,7 @@ function MealPlanRow({ mealPlan, onPress }: { mealPlan: MealPlan; onPress: () =>
 const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
-    paddingBottom: spacing.xxl,
+    paddingBottom: 120,
   },
   statsRow: {
     flexDirection: 'row',

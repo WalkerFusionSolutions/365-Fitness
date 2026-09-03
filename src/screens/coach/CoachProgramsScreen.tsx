@@ -5,10 +5,10 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { AppHeader, FilterChip, SearchInput, SectionHeader } from '@/components/AppUI';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
@@ -19,7 +19,7 @@ import {
   useExerciseLibrary,
 } from '@/hooks/useWorkout';
 import { ExerciseLibraryItem, Workout } from '@/types';
-import { radius, spacing, typography } from '@/utils/theme';
+import { spacing, typography } from '@/utils/theme';
 
 const GROUPS = ['All', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core'];
 
@@ -74,25 +74,31 @@ export default function CoachProgramsScreen({ navigation }: any) {
         contentContainerStyle={styles.content}
         ListHeaderComponent={
           <View>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>Programs</Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Build reusable exercises, create workouts, and assign them to clients.
-            </Text>
+            <AppHeader
+              title="Programs"
+              subtitle="Build workouts, manage exercises, and launch nutrition plans."
+            />
             <View style={styles.actionRow}>
               <Button
-                label="Create Exercise"
-                onPress={() => navigation.navigate('CoachExerciseEditor')}
-                style={styles.action}
-              />
-              <Button
                 label="Create Workout"
-                variant="outline"
                 onPress={() => navigation.navigate('CoachWorkoutBuilder')}
                 style={styles.action}
               />
+              <Button
+                label="Create Exercise"
+                variant="outline"
+                onPress={() => navigation.navigate('CoachExerciseEditor')}
+                style={styles.action}
+              />
             </View>
+            <Button
+              label="Create Meal Plan"
+              variant="secondary"
+              onPress={() => navigation.navigate('CoachMealPlanBuilder')}
+              style={styles.nutritionAction}
+            />
 
-            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Workout Plans</Text>
+            <SectionHeader title="Workout Plans" />
             {workouts.data.length === 0 ? (
               <Card style={styles.emptyBlock}>
                 <EmptyState
@@ -113,44 +119,22 @@ export default function CoachProgramsScreen({ navigation }: any) {
               ))
             )}
 
-            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Exercise Library</Text>
-            <TextInput
+            <SectionHeader title="Exercise Library" />
+            <SearchInput
               value={search}
               onChangeText={setSearch}
               placeholder="Search exercises..."
-              placeholderTextColor={colors.textMuted}
-              style={[
-                styles.search,
-                {
-                  color: colors.textPrimary,
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.border,
-                },
-              ]}
             />
             <View style={styles.chips}>
               {GROUPS.map((item) => {
                 const active = group === item;
                 return (
-                  <Pressable
+                  <FilterChip
                     key={item}
+                    label={item}
+                    active={active}
                     onPress={() => setGroup(item)}
-                    style={[
-                      styles.chip,
-                      {
-                        backgroundColor: active ? colors.primary : colors.surfaceSecondary,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.chipText,
-                        { color: active ? colors.primaryText : colors.textSecondary },
-                      ]}
-                    >
-                      {item}
-                    </Text>
-                  </Pressable>
+                  />
                 );
               })}
             </View>
@@ -230,49 +214,24 @@ function ExerciseRow({
 const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
-    paddingBottom: spacing.xxl,
-  },
-  title: {
-    ...typography.h1,
-  },
-  subtitle: {
-    ...typography.body,
-    marginTop: spacing.xs,
+    paddingBottom: 120,
   },
   actionRow: {
     flexDirection: 'row',
     gap: spacing.sm,
-    marginTop: spacing.lg,
   },
   action: {
     flex: 1,
   },
-  sectionTitle: {
-    ...typography.h3,
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  search: {
-    ...typography.body,
-    borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.md,
+  nutritionAction: {
+    marginTop: spacing.sm,
   },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
+    marginTop: spacing.md,
     marginBottom: spacing.md,
-  },
-  chip: {
-    borderRadius: radius.round,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  chipText: {
-    ...typography.caption,
-    fontWeight: '700',
   },
   row: {
     flexDirection: 'row',

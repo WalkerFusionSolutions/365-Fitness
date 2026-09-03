@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TextInput, Text, Alert } from 'react-native';
+import { View, StyleSheet, Text, Alert } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { Button } from '@/components/Button';
+import { AppInput } from '@/components/AppUI';
+import { Card } from '@/components/Card';
 import { signUpWithEmail as signUpWithEmailService } from '@/services/auth.service';
 import { AppServiceError } from '@/services/errors';
 import { useAppTheme } from '@/hooks/useTheme';
-import { radius, spacing, typography } from '@/utils/theme';
+import { spacing, typography } from '@/utils/theme';
 
 const emailRedirectTo =
   process.env.EXPO_PUBLIC_EMAIL_CONFIRMATION_URL ??
@@ -49,53 +51,33 @@ export function SignupScreen({ navigation }: any) {
   return (
     <Screen padded>
       <View style={styles.container}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>Join 365 FITNESS</Text>
+        <Text style={[styles.brand, { color: colors.primary }]}>365 FITNESS</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Create Account</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Start your coaching journey.</Text>
 
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.inputBackground,
-              borderColor: colors.border,
-              color: colors.textPrimary,
-            },
-          ]}
-          placeholder="Full Name"
-          placeholderTextColor={colors.textMuted}
-          value={fullName}
-          onChangeText={setFullName}
-        />
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.inputBackground,
-              borderColor: colors.border,
-              color: colors.textPrimary,
-            },
-          ]}
-          placeholder="Email"
-          placeholderTextColor={colors.textMuted}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.inputBackground,
-              borderColor: colors.border,
-              color: colors.textPrimary,
-            },
-          ]}
-          placeholder="Password"
-          placeholderTextColor={colors.textMuted}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <Card style={styles.form}>
+          <AppInput
+            label="Full Name"
+            placeholder="Your name"
+            value={fullName}
+            onChangeText={setFullName}
+          />
+          <AppInput
+            label="Email"
+            placeholder="you@example.com"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <AppInput
+            label="Password"
+            placeholder="Create a password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+        </Card>
 
         <Button label="Sign Up" onPress={signUpWithEmail} loading={loading} style={styles.button} />
         
@@ -115,15 +97,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
+  brand: {
+    ...typography.caption,
+    fontWeight: '900',
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
   title: {
-    ...typography.h2,
+    ...typography.h1,
+    textAlign: 'center',
+  },
+  subtitle: {
+    ...typography.body,
     marginBottom: spacing.xl,
     textAlign: 'center',
   },
-  input: {
-    borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
+  form: {
+    gap: spacing.md,
     marginBottom: spacing.md,
   },
   button: {

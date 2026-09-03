@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TextInput, Text, Alert } from 'react-native';
+import { View, StyleSheet, Text, Alert } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { Button } from '@/components/Button';
+import { AppInput } from '@/components/AppUI';
+import { Card } from '@/components/Card';
 import { signInWithEmail as signInWithEmailService } from '@/services/auth.service';
 import { AppServiceError } from '@/services/errors';
 import { useAppTheme } from '@/hooks/useTheme';
-import { radius, spacing, typography } from '@/utils/theme';
+import { spacing, typography } from '@/utils/theme';
 
 export function LoginScreen({ navigation }: any) {
   const { colors } = useAppTheme();
@@ -32,40 +34,27 @@ export function LoginScreen({ navigation }: any) {
   return (
     <Screen padded>
       <View style={styles.container}>
-        <Text style={[styles.title, { color: colors.primary }]}>365 FITNESS</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Sign in to continue</Text>
+        <Text style={[styles.brand, { color: colors.primary }]}>365 FITNESS</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Welcome Back</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Continue your progress.</Text>
 
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.inputBackground,
-              borderColor: colors.border,
-              color: colors.textPrimary,
-            },
-          ]}
-          placeholder="Email"
-          placeholderTextColor={colors.textMuted}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.inputBackground,
-              borderColor: colors.border,
-              color: colors.textPrimary,
-            },
-          ]}
-          placeholder="Password"
-          placeholderTextColor={colors.textMuted}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <Card style={styles.form}>
+          <AppInput
+            label="Email"
+            placeholder="you@example.com"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <AppInput
+            label="Password"
+            placeholder="Enter your password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+        </Card>
 
         <Button label="Sign In" onPress={signInWithEmail} loading={loading} style={styles.button} />
         
@@ -85,21 +74,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
+  brand: {
+    ...typography.caption,
+    fontWeight: '900',
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
   title: {
     ...typography.h1,
-    marginBottom: spacing.xs,
     textAlign: 'center',
-    fontStyle: 'italic',
   },
   subtitle: {
     ...typography.body,
     marginBottom: spacing.xl,
     textAlign: 'center',
   },
-  input: {
-    borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
+  form: {
+    gap: spacing.md,
     marginBottom: spacing.md,
   },
   button: {

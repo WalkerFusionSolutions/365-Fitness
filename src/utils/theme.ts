@@ -96,14 +96,14 @@ export const colors = lightColors;
 
 export const typography = {
   h1: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '800' as const,
-    letterSpacing: -0.5,
+    letterSpacing: 0,
   },
   h2: {
     fontSize: 24,
     fontWeight: '700' as const,
-    letterSpacing: -0.5,
+    letterSpacing: 0,
   },
   h3: {
     fontSize: 18,
@@ -131,10 +131,10 @@ export const spacing = {
 };
 
 export const radius = {
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
+  sm: 8,
+  md: 14,
+  lg: 18,
+  xl: 24,
   round: 9999,
 };
 
@@ -143,14 +143,14 @@ export const shadows = {
     shadowColor: palette.neutral.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowRadius: 4,
     elevation: 2,
   },
   md: {
     shadowColor: palette.neutral.black,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
     elevation: 4,
   }
 };

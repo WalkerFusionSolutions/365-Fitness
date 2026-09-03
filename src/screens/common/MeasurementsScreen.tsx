@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Alert, FlatList, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
+import { AppHeader, AppInput } from '@/components/AppUI';
 import { UnitToggle } from '@/components/Questionnaire';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
@@ -11,7 +12,7 @@ import { useMeasurements } from '@/hooks/useFitnessProfile';
 import { useAppTheme } from '@/hooks/useTheme';
 import { ClientStackParamList, Measurement, WeightUnit } from '@/types';
 import { formatWeight, weightToKg } from '@/utils/fitness';
-import { radius, spacing, typography } from '@/utils/theme';
+import { spacing, typography } from '@/utils/theme';
 
 type MeasurementsRoute = RouteProp<
   ClientStackParamList,
@@ -86,10 +87,11 @@ export default function MeasurementsScreen() {
         }
         ListHeaderComponent={
           <View>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>Measurements</Text>
-            {params?.clientName ? (
-              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{params.clientName}</Text>
-            ) : null}
+            <AppHeader
+              eyebrow=""
+              title="Measurements"
+              subtitle={params?.clientName || 'Track progress over time.'}
+            />
             {canAdd ? (
               <Card style={styles.form}>
                 <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Add Measurement</Text>
@@ -139,17 +141,10 @@ function Input({
 
   return (
     <View style={styles.inputGroup}>
-      <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{label}</Text>
       <View style={styles.inputRow}>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.inputBackground,
-              borderColor: colors.border,
-              color: colors.textPrimary,
-            },
-          ]}
+        <AppInput
+          label={label}
+          style={styles.input}
           keyboardType="decimal-pad"
           value={value}
           onChangeText={onChangeText}
@@ -214,20 +209,14 @@ function formatDate(value?: string | null) {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.md, paddingBottom: spacing.xxl },
-  title: { ...typography.h1 },
-  subtitle: { ...typography.body, marginBottom: spacing.md },
-  form: { gap: spacing.sm, marginBottom: spacing.lg },
+  content: { padding: spacing.md, paddingBottom: 120 },
+  form: { gap: spacing.md, marginBottom: spacing.lg },
   cardTitle: { ...typography.h3 },
   cardSubtitle: { ...typography.caption },
   inputGroup: { gap: spacing.xs },
-  inputLabel: { ...typography.caption, fontWeight: '700' },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
   },
   suffix: { ...typography.body, width: 32 },
   inlineError: { ...typography.caption },
