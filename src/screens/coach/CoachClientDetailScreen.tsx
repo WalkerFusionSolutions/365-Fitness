@@ -12,7 +12,9 @@ import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
 import { useAppTheme } from '@/hooks/useTheme';
+import { useClientWorkouts, useWorkoutHistory } from '@/hooks/useWorkout';
 import { ClientStackParamList } from '@/types';
+import { formatFriendlyDate } from '@/utils/date';
 import { formatHeight, formatWeight } from '@/utils/fitness';
 import { spacing, typography } from '@/utils/theme';
 
@@ -24,11 +26,15 @@ export default function CoachClientDetailScreen() {
   const route = useRoute<DetailRoute>();
   const { clientId, clientName = 'Client' } = route.params;
   const { data, error, isLoading, refresh } = useFitnessProfile(clientId);
+  const workouts = useClientWorkouts(clientId);
+  const history = useWorkoutHistory(clientId);
 
   useFocusEffect(
     React.useCallback(() => {
       refresh();
-    }, [refresh])
+      workouts.refresh();
+      history.refresh();
+    }, [history.refresh, refresh, workouts.refresh])
   );
 
   if (isLoading) {
@@ -120,7 +126,41 @@ export default function CoachClientDetailScreen() {
         />
       </Card>
 
+      <Card style={styles.card}>
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>Workouts</Text>
+        {workouts.data.length > 0 ? (
+          workouts.data.slice(0, 3).map((workout) => (
+            <Metric
+              key={workout.id}
+              label={workout.name}
+              value={
+                workout.assigned_date
+                  ? formatFriendlyDate(workout.assigned_date)
+                  : 'Assigned'
+              }
+            />
+          ))
+        ) : (
+          <Metric label="Assigned Workouts" value="None yet" />
+        )}
+        {history.data.length > 0 ? (
+          <Metric
+            label="Recent Completion"
+            value={formatFriendlyDate(history.data[0].date_completed)}
+          />
+        ) : (
+          <Metric label="Completed Workouts" value="None yet" />
+        )}
+      </Card>
+
       <View style={styles.actions}>
+        <Button
+          label="Create Workout"
+          variant="outline"
+          onPress={() =>
+            navigation.navigate('CoachWorkoutBuilder', { clientId })
+          }
+        />
         <Button
           label="View Full Assessment"
           onPress={() =>

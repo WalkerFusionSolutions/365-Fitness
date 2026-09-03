@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '@/hooks/useTheme';
 import NutritionScreen from '@/screens/client/NutritionScreen';
-import WorkoutHistoryScreen from '@/screens/client/WorkoutHistoryScreen';
+import ClientWorkoutScreen from '@/screens/client/ClientWorkoutScreen';
 import DashboardScreen from '@/screens/client/DashboardScreen';
 import ClientCoachScreen from '@/screens/client/ClientCoachScreen';
 import { ProfileScreen } from '@/screens/common/ProfileScreen';
@@ -37,7 +37,7 @@ export function ClientTabs() {
       })}
     >
       <Tab.Screen name="Home" component={DashboardScreen} />
-      <Tab.Screen name="Workouts" component={WorkoutHistoryScreen} />
+      <Tab.Screen name="Workouts" component={ClientWorkoutScreen} />
       <Tab.Screen name="Nutrition" component={NutritionScreen} />
       <Tab.Screen name="Coach" component={ClientCoachScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />

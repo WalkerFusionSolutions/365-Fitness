@@ -75,8 +75,8 @@ export default function CoachDashboardScreen({ navigation }: any) {
         />
       ))}
 
-      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Phase Roadmap</Text>
-      <RoadmapCard title="Workout Plans" subtitle="Connected in Phase 3." />
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Coach Tools</Text>
+      <RoadmapCard title="Workout Programs" subtitle="Create workouts from the Programs tab." />
       <RoadmapCard title="Nutrition" subtitle="Coming soon." />
       <RoadmapCard title="Messages" subtitle="Coming soon." />
       <RoadmapCard title="Reports" subtitle="Coming soon." />

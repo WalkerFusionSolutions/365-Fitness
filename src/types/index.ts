@@ -106,11 +106,15 @@ export interface Workout {
   name: string;
   description?: string | null;
   assigned_date?: string | null;
+  status?: string;
+  estimated_minutes?: number | null;
+  updated_at?: string;
 }
 
 export interface WorkoutExercise {
   id: string;
   workout_id?: string | null;
+  library_exercise_id?: string | null;
   exercise_name: string;
   sets: number;
   reps: string;
@@ -118,6 +122,55 @@ export interface WorkoutExercise {
   video_url?: string | null;
   order_index: number;
   notes?: string | null;
+}
+
+export interface ExerciseLibraryItem {
+  id: string;
+  coach_id: string;
+  name: string;
+  description?: string | null;
+  instructions: string;
+  muscle_group: string;
+  equipment: string;
+  video_path?: string | null;
+  thumbnail_path?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkoutWithExercises extends Workout {
+  exercises: WorkoutExercise[];
+}
+
+export interface WorkoutSession {
+  id: string;
+  client_id: string;
+  workout_id: string;
+  started_at: string;
+  completed_at?: string | null;
+  duration_minutes?: number | null;
+  prescription_snapshot: any;
+}
+
+export interface WorkoutSetLog {
+  id: string;
+  session_id: string;
+  client_id: string;
+  workout_id: string;
+  workout_exercise_id?: string | null;
+  exercise_name_snapshot: string;
+  set_number: number;
+  target_reps?: string | null;
+  prescribed_rest_seconds?: number | null;
+  weight_used: number;
+  reps_completed: number;
+  completed_at: string;
+}
+
+export interface WorkoutHistoryItem extends CompletedWorkout {
+  workout?: Workout | null;
+  session?: WorkoutSession | null;
+  setLogs?: WorkoutSetLog[];
 }
 
 export interface WorkoutLog {
@@ -251,7 +304,10 @@ export type ClientTabsParamList = {
 
 export type ClientStackParamList = {
   ClientTabs: undefined;
-  ExerciseDetail: { workoutId: string };
+  WorkoutDetail: { workoutId: string };
+  ActiveWorkout: { workoutId: string };
+  ExerciseDetail: { workoutId?: string; exerciseId?: string; workoutExerciseId?: string };
+  WorkoutHistoryDetail: { completedWorkoutId: string };
   ClientOnboarding: undefined;
   ClientAssessment: undefined;
   ClientMeasurements: { clientId?: string; clientName?: string } | undefined;
@@ -264,7 +320,7 @@ export type ClientStackParamList = {
 export type CoachTabsParamList = {
   Coach: undefined;
   Clients: undefined;
-  Workouts: undefined;
+  Programs: undefined;
   Nutrition: undefined;
   Profile: undefined;
 };
@@ -272,5 +328,8 @@ export type CoachTabsParamList = {
 export type CoachStackParamList = {
   CoachTabs: undefined;
   ClientDetail: { clientId: string };
+  CoachExerciseEditor: { exerciseId?: string } | undefined;
+  CoachWorkoutBuilder: { workoutId?: string; clientId?: string } | undefined;
+  CoachWorkoutDetail: { workoutId: string };
   // add others later
 };

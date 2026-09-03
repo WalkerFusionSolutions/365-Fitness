@@ -4,13 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/Screen';
 import { Card } from '@/components/Card';
 import { EmptyState, LoadingView } from '@/components/StateViews';
-import { colors, spacing, typography } from '@/utils/theme';
+import { spacing, typography } from '@/utils/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { useWorkoutHistory } from '@/hooks/useWorkout';
 import { formatFriendlyDate } from '@/utils/date';
-import { CompletedWorkout } from '@/types';
+import { WorkoutHistoryItem } from '@/types';
+import { useAppTheme } from '@/hooks/useTheme';
 
 export default function WorkoutHistoryScreen() {
+  const { colors } = useAppTheme();
   const { profile } = useAuth();
   const { data: history, isLoading } = useWorkoutHistory(profile?.id);
 
@@ -18,7 +20,7 @@ export default function WorkoutHistoryScreen() {
 
   return (
     <Screen scroll={false} padded={false}>
-      <Text style={styles.title}>Workout History</Text>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>Workout History</Text>
       <FlatList
         data={history ?? []}
         keyExtractor={(item) => item.id}
@@ -30,32 +32,38 @@ export default function WorkoutHistoryScreen() {
   );
 }
 
-function HistoryRow({ entry }: { entry: CompletedWorkout }) {
+function HistoryRow({ entry }: { entry: WorkoutHistoryItem }) {
+  const { colors } = useAppTheme();
+
   return (
     <Card style={styles.row}>
-      <View style={styles.checkIcon}>
+      <View style={[styles.checkIcon, { backgroundColor: `${colors.success}22` }]}>
         <Ionicons name="checkmark" size={18} color={colors.success} />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={styles.date}>{formatFriendlyDate(entry.date_completed)}</Text>
-        {entry.duration_minutes ? <Text style={styles.duration}>{entry.duration_minutes} min</Text> : null}
+        <Text style={[styles.date, { color: colors.textPrimary }]}>
+          {entry.workout?.name || 'Completed workout'}
+        </Text>
+        <Text style={[styles.duration, { color: colors.textSecondary }]}>
+          {formatFriendlyDate(entry.date_completed)}
+          {entry.duration_minutes ? ` • ${entry.duration_minutes} min` : ''}
+        </Text>
       </View>
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  title: { ...typography.h1, color: colors.textPrimary, padding: spacing.md },
+  title: { ...typography.h1, padding: spacing.md },
   listContent: { paddingHorizontal: spacing.md, gap: spacing.sm, paddingBottom: spacing.xxl },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
   checkIcon: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#2ECC7133',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  date: { ...typography.body, color: colors.textPrimary, fontWeight: '600' },
-  duration: { ...typography.caption, color: colors.textSecondary },
+  date: { ...typography.body, fontWeight: '600' },
+  duration: { ...typography.caption },
 });

@@ -184,6 +184,9 @@ type PublicTables = {
           name: string;
           description: string | null;
           assigned_date: string | null;
+          status: string;
+          estimated_minutes: number | null;
+          updated_at: string;
         };
         Insert: {
           id?: string;
@@ -192,6 +195,9 @@ type PublicTables = {
           name: string;
           description?: string | null;
           assigned_date?: string | null;
+          status?: string;
+          estimated_minutes?: number | null;
+          updated_at?: string;
         };
         Update: {
           id?: string;
@@ -200,12 +206,16 @@ type PublicTables = {
           name?: string;
           description?: string | null;
           assigned_date?: string | null;
+          status?: string;
+          estimated_minutes?: number | null;
+          updated_at?: string;
         };
       };
       workout_exercises: {
         Row: {
           id: string;
           workout_id: string | null;
+          library_exercise_id: string | null;
           exercise_name: string;
           sets: number;
           reps: string;
@@ -217,6 +227,7 @@ type PublicTables = {
         Insert: {
           id?: string;
           workout_id?: string | null;
+          library_exercise_id?: string | null;
           exercise_name: string;
           sets: number;
           reps: string;
@@ -228,6 +239,7 @@ type PublicTables = {
         Update: {
           id?: string;
           workout_id?: string | null;
+          library_exercise_id?: string | null;
           exercise_name?: string;
           sets?: number;
           reps?: string;
@@ -267,6 +279,120 @@ type PublicTables = {
           weight_used?: number;
           reps_completed?: number;
           date?: string;
+        };
+      };
+      exercise_library: {
+        Row: {
+          id: string;
+          coach_id: string;
+          name: string;
+          description: string | null;
+          instructions: string;
+          muscle_group: string;
+          equipment: string;
+          video_path: string | null;
+          thumbnail_path: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          coach_id: string;
+          name: string;
+          description?: string | null;
+          instructions?: string;
+          muscle_group?: string;
+          equipment?: string;
+          video_path?: string | null;
+          thumbnail_path?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          coach_id?: string;
+          name?: string;
+          description?: string | null;
+          instructions?: string;
+          muscle_group?: string;
+          equipment?: string;
+          video_path?: string | null;
+          thumbnail_path?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      workout_sessions: {
+        Row: {
+          id: string;
+          client_id: string;
+          workout_id: string;
+          started_at: string;
+          completed_at: string | null;
+          duration_minutes: number | null;
+          prescription_snapshot: Json;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          workout_id: string;
+          started_at?: string;
+          completed_at?: string | null;
+          duration_minutes?: number | null;
+          prescription_snapshot?: Json;
+        };
+        Update: {
+          id?: string;
+          client_id?: string;
+          workout_id?: string;
+          started_at?: string;
+          completed_at?: string | null;
+          duration_minutes?: number | null;
+          prescription_snapshot?: Json;
+        };
+      };
+      workout_set_logs: {
+        Row: {
+          id: string;
+          session_id: string;
+          client_id: string;
+          workout_id: string;
+          workout_exercise_id: string | null;
+          exercise_name_snapshot: string;
+          set_number: number;
+          target_reps: string | null;
+          prescribed_rest_seconds: number | null;
+          weight_used: number;
+          reps_completed: number;
+          completed_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          client_id: string;
+          workout_id: string;
+          workout_exercise_id?: string | null;
+          exercise_name_snapshot: string;
+          set_number: number;
+          target_reps?: string | null;
+          prescribed_rest_seconds?: number | null;
+          weight_used?: number;
+          reps_completed?: number;
+          completed_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          client_id?: string;
+          workout_id?: string;
+          workout_exercise_id?: string | null;
+          exercise_name_snapshot?: string;
+          set_number?: number;
+          target_reps?: string | null;
+          prescribed_rest_seconds?: number | null;
+          weight_used?: number;
+          reps_completed?: number;
+          completed_at?: string;
         };
       };
       completed_workouts: {
@@ -520,6 +646,14 @@ export type Database = {
       };
       can_view_all_clients: {
         Args: Record<string, never>;
+        Returns: boolean;
+      };
+      can_access_client: {
+        Args: { client_uuid: string };
+        Returns: boolean;
+      };
+      can_coach_client: {
+        Args: { client_uuid: string };
         Returns: boolean;
       };
       is_client_profile: {

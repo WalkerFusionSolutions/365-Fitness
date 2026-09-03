@@ -16,14 +16,18 @@ import { ClientTabs } from './ClientTabs';
 import { CoachTabs } from './CoachTabs';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import ExerciseDetailScreen from '@/screens/client/ExerciseDetailScreen';
+import WorkoutDetailScreen from '@/screens/client/WorkoutDetailScreen';
+import ActiveWorkoutScreen from '@/screens/client/ActiveWorkoutScreen';
 import ClientOnboardingScreen from '@/screens/client/ClientOnboardingScreen';
 import AssessmentScreen from '@/screens/common/AssessmentScreen';
 import MeasurementsScreen from '@/screens/common/MeasurementsScreen';
 import CoachClientDetailScreen from '@/screens/coach/CoachClientDetailScreen';
+import CoachExerciseEditorScreen from '@/screens/coach/CoachExerciseEditorScreen';
+import CoachWorkoutBuilderScreen from '@/screens/coach/CoachWorkoutBuilderScreen';
 import { useAppTheme } from '@/hooks/useTheme';
-import { ClientStackParamList } from '@/types';
+import { ClientStackParamList, CoachStackParamList } from '@/types';
 
-type RootStackParamList = ClientStackParamList & {
+type RootStackParamList = ClientStackParamList & CoachStackParamList & {
   Login: undefined;
   Signup: undefined;
   ClientApp: undefined;
@@ -240,6 +244,16 @@ export function AppNavigator() {
               component={MeasurementsScreen}
               options={detailHeaderOptions('Measurements', colors)}
             />
+            <Stack.Screen
+              name="CoachExerciseEditor"
+              component={CoachExerciseEditorScreen}
+              options={detailHeaderOptions('Exercise', colors)}
+            />
+            <Stack.Screen
+              name="CoachWorkoutBuilder"
+              component={CoachWorkoutBuilderScreen}
+              options={detailHeaderOptions('Workout Builder', colors)}
+            />
           </>
         ) : (
           <>
@@ -249,9 +263,19 @@ export function AppNavigator() {
             />
 
             <Stack.Screen
+              name="WorkoutDetail"
+              component={WorkoutDetailScreen}
+              options={detailHeaderOptions('Workout', colors)}
+            />
+            <Stack.Screen
+              name="ActiveWorkout"
+              component={ActiveWorkoutScreen}
+              options={detailHeaderOptions('Active Workout', colors)}
+            />
+            <Stack.Screen
               name="ExerciseDetail"
               component={ExerciseDetailScreen}
-              options={detailHeaderOptions('Workout', colors)}
+              options={detailHeaderOptions('Exercise', colors)}
             />
             <Stack.Screen
               name="ClientOnboarding"

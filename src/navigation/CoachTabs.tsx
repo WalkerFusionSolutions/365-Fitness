@@ -6,6 +6,7 @@ import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import CoachDashboardScreen from '@/screens/coach/CoachDashboardScreen';
 import CoachClientsScreen from '@/screens/coach/CoachClientsScreen';
+import CoachProgramsScreen from '@/screens/coach/CoachProgramsScreen';
 import { ProfileScreen } from '@/screens/common/ProfileScreen';
 import { useAppTheme } from '@/hooks/useTheme';
 import { spacing, typography } from '@/utils/theme';
@@ -43,7 +44,7 @@ export function CoachTabs() {
           let iconName: keyof typeof Ionicons.glyphMap = 'people';
           if (route.name === 'Coach') iconName = focused ? 'grid' : 'grid-outline';
           if (route.name === 'Clients') iconName = focused ? 'people' : 'people-outline';
-          else if (route.name === 'Workouts') iconName = focused ? 'barbell' : 'barbell-outline';
+          else if (route.name === 'Programs') iconName = focused ? 'barbell' : 'barbell-outline';
           else if (route.name === 'Nutrition') iconName = focused ? 'restaurant' : 'restaurant-outline';
           else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
           
@@ -60,13 +61,8 @@ export function CoachTabs() {
       <Tab.Screen name="Coach" component={CoachDashboardScreen} />
       <Tab.Screen name="Clients" component={CoachClientsScreen} />
       <Tab.Screen
-        name="Workouts"
-        children={() => (
-          <PlaceholderScreen
-            title="Workout Plans"
-            subtitle="Workout management will be connected in Phase 3."
-          />
-        )}
+        name="Programs"
+        component={CoachProgramsScreen}
       />
       <Tab.Screen
         name="Nutrition"

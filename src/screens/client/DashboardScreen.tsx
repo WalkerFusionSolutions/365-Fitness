@@ -8,13 +8,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
 import { useAppTheme } from '@/hooks/useTheme';
+import { useClientWorkouts } from '@/hooks/useWorkout';
 
 export default function DashboardScreen({ navigation }: any) {
   const { colors } = useAppTheme();
   const { profile } = useAuth();
   const { data: fitnessProfile, isLoading: fitnessLoading } =
     useFitnessProfile(profile?.id);
+  const { data: workouts } = useClientWorkouts(profile?.id);
+  const nextWorkout = workouts[0];
   const firstName = profile?.full_name?.split(' ')[0] || 'Athlete';
+  const currentWeightLb = fitnessProfile?.currentWeightKg
+    ? Math.round(fitnessProfile.currentWeightKg * 2.20462)
+    : null;
+  const goalWeightLb = fitnessProfile?.goalWeightKg
+    ? Math.round(fitnessProfile.goalWeightKg * 2.20462)
+    : null;
 
   return (
     <Screen padded>
@@ -45,23 +54,28 @@ export default function DashboardScreen({ navigation }: any) {
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Today's Plan</Text>
       
       <Card style={[styles.workoutCard, { backgroundColor: colors.surfaceElevated }]}>
-        <Text style={[styles.placeholderLabel, { color: colors.warning }]}>Development placeholder data</Text>
         <View style={styles.cardHeader}>
           <View style={[styles.iconContainer, { backgroundColor: colors.primary }]}>
             <Ionicons name="barbell" size={24} color={colors.white} />
           </View>
           <View style={styles.cardTextContainer}>
-            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Leg Day (Hypertrophy)</Text>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+              {nextWorkout?.name ?? 'No workout assigned'}
+            </Text>
             <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
-              Workout assignment connects in Phase 3
+              {nextWorkout
+                ? nextWorkout.description || 'Your next assigned workout is ready.'
+                : "Your coach hasn't assigned a workout yet."}
             </Text>
           </View>
         </View>
-        <Button 
-          label="Start Workout" 
-          onPress={() => navigation.navigate('ExerciseDetail', { workoutId: 'w1' })} 
-          style={styles.actionButton}
-        />
+        {nextWorkout ? (
+          <Button
+            label="View Workout"
+            onPress={() => navigation.navigate('WorkoutDetail', { workoutId: nextWorkout.id })}
+            style={styles.actionButton}
+          />
+        ) : null}
       </Card>
 
       <View style={styles.row}>
@@ -80,15 +94,30 @@ export default function DashboardScreen({ navigation }: any) {
 
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Progress Snapshot</Text>
       <Card style={styles.progressCard}>
-        <Text style={[styles.placeholderLabel, { color: colors.warning }]}>Development placeholder data</Text>
         <View style={styles.progressRow}>
           <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>Current Weight</Text>
-          <Text style={[styles.progressValue, { color: colors.textPrimary }]}>185 lbs</Text>
+          <Text style={[styles.progressValue, { color: colors.textPrimary }]}>
+            {currentWeightLb ? `${currentWeightLb} lbs` : 'Not recorded'}
+          </Text>
         </View>
         <View style={[styles.progressBarBg, { backgroundColor: colors.border }]}>
-          <View style={[styles.progressBarFill, { width: '60%', backgroundColor: colors.highlight }]} />
+          <View
+            style={[
+              styles.progressBarFill,
+              {
+                width: `${getProgressPercent(
+                  fitnessProfile?.startingWeightKg,
+                  fitnessProfile?.currentWeightKg,
+                  fitnessProfile?.goalWeightKg
+                )}%`,
+                backgroundColor: colors.highlight,
+              },
+            ]}
+          />
         </View>
-        <Text style={[styles.progressGoal, { color: colors.textMuted }]}>Goal: 175 lbs</Text>
+        <Text style={[styles.progressGoal, { color: colors.textMuted }]}>
+          Goal: {goalWeightLb ? `${goalWeightLb} lbs` : 'Not set'}
+        </Text>
       </Card>
 
     </Screen>
@@ -213,3 +242,17 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   }
 });
+
+function getProgressPercent(
+  startingWeight?: number | null,
+  currentWeight?: number | null,
+  goalWeight?: number | null
+) {
+  if (!startingWeight || !currentWeight || !goalWeight) return 0;
+
+  const total = Math.abs(startingWeight - goalWeight);
+  if (total === 0) return 100;
+
+  const moved = Math.abs(startingWeight - currentWeight);
+  return Math.min(100, Math.max(0, Math.round((moved / total) * 100)));
+}
