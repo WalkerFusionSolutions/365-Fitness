@@ -4,7 +4,7 @@ import {
   archiveAssignment,
   AssignmentWithProfile,
   createPendingAssignment,
-  getCoachClientSummaries,
+  getCoachVisibleClients,
   getCurrentClientAssignments,
   getCurrentCoachAssignments,
 } from '@/services/assignments.service';
@@ -180,6 +180,10 @@ export function useClientAssignments() {
 }
 
 export function useCoachClientSummaries() {
+  return useCoachVisibleClients();
+}
+
+export function useCoachVisibleClients() {
   const [data, setData] = useState<CoachVisibleClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -195,7 +199,7 @@ export function useCoachClientSummaries() {
     setError(null);
 
     try {
-      setData(await getCoachClientSummaries());
+      setData(await getCoachVisibleClients());
     } catch (loadError) {
       console.error('Unable to load visible clients:', loadError);
       setError(getUserMessage(loadError, 'Unable to load clients.'));

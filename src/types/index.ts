@@ -81,7 +81,15 @@ export interface FitnessProfileSummary {
 export interface CoachVisibleClient {
   profile: Profile;
   fitnessSummary: FitnessProfileSummary | null;
-  assignment: CoachClientAssignment;
+  assignment: CoachClientAssignment | null;
+  isPrivilegedAccess?: boolean;
+}
+
+export interface StaffPermission {
+  user_id: string;
+  can_view_all_clients: boolean;
+  can_manage_all_client_measurements: boolean;
+  created_at: string;
 }
 
 export interface ProgressPhoto {

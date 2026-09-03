@@ -12,7 +12,7 @@ import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useAppTheme } from '@/hooks/useTheme';
-import { useCoachClientSummaries } from '@/hooks/useAssignments';
+import { useCoachVisibleClients } from '@/hooks/useAssignments';
 import { CoachVisibleClient } from '@/types';
 import { formatWeight } from '@/utils/fitness';
 import { spacing, typography } from '@/utils/theme';
@@ -26,7 +26,7 @@ export default function CoachClientsScreen() {
     isLoading,
     isRefreshing,
     refresh,
-  } = useCoachClientSummaries();
+  } = useCoachVisibleClients();
 
   if (isLoading) {
     return <LoadingView label="Loading clients..." />;
@@ -57,7 +57,7 @@ export default function CoachClientsScreen() {
           <View>
             <Text style={[styles.title, { color: colors.textPrimary }]}>Your Clients</Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              This list is filtered by active coach-client assignments in Supabase.
+              Supabase permissions decide whether this shows assigned clients or all development clients.
             </Text>
             {error ? (
               <Text style={[styles.inlineError, { color: colors.error }]}>{error}</Text>
@@ -68,7 +68,7 @@ export default function CoachClientsScreen() {
           <EmptyState
             icon="people-outline"
             title="No active clients yet."
-            subtitle="Clients you are coaching will appear here."
+            subtitle="Assigned clients or development-visible clients will appear here."
           />
         }
         renderItem={({ item }) => (

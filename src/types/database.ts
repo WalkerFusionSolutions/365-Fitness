@@ -79,6 +79,26 @@ type PublicTables = {
           created_at?: string;
         };
       };
+      staff_permissions: {
+        Row: {
+          user_id: string;
+          can_view_all_clients: boolean;
+          can_manage_all_client_measurements: boolean;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          can_view_all_clients?: boolean;
+          can_manage_all_client_measurements?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          can_view_all_clients?: boolean;
+          can_manage_all_client_measurements?: boolean;
+          created_at?: string;
+        };
+      };
       medical_questionnaire: {
         Row: { client_id: string; responses: Json; updated_at: string };
         Insert: { client_id: string; responses?: Json; updated_at?: string };
@@ -493,6 +513,18 @@ export type Database = {
       get_auth_role: {
         Args: Record<string, never>;
         Returns: Database['public']['Enums']['user_role'];
+      };
+      can_manage_all_client_measurements: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      can_view_all_clients: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_client_profile: {
+        Args: { client_uuid: string };
+        Returns: boolean;
       };
       is_assigned_coach: {
         Args: { coach_uuid: string; client_uuid: string };

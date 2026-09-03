@@ -110,20 +110,48 @@ export async function getActiveClientsForCoach() {
   return assignments.filter((assignment) => assignment.status === 'active');
 }
 
-export async function getCoachClientSummaries(): Promise<CoachVisibleClient[]> {
-  const assignments = await getCurrentCoachAssignments();
-  const activeAssignments = assignments.filter(
-    (assignment) => assignment.status === 'active' && assignment.client
+export async function getCoachVisibleClients(): Promise<CoachVisibleClient[]> {
+  const coachId = await getCurrentUserId();
+  const [profilesResult, assignmentsResult] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('role', 'client')
+      .order('full_name', { ascending: true }),
+    supabase
+      .from('coach_client_assignments')
+      .select('*')
+      .eq('coach_id', coachId)
+      .neq('status', 'archived'),
+  ]);
+
+  throwIfSupabaseError(profilesResult.error, 'Unable to load clients.');
+  throwIfSupabaseError(assignmentsResult.error, 'Unable to load assignments.');
+
+  const visibleClients = profilesResult.data ?? [];
+  const activeAssignmentsByClientId = new Map(
+    (assignmentsResult.data ?? [])
+      .filter((assignment) => assignment.status === 'active')
+      .map((assignment) => [assignment.client_id, assignment])
   );
   const summariesByClientId = await getFitnessProfileSummaries(
-    activeAssignments.map((assignment) => assignment.client_id)
+    visibleClients.map((client) => client.id)
   );
 
-  return activeAssignments.map((assignment) => ({
-    profile: assignment.client!,
-    fitnessSummary: summariesByClientId.get(assignment.client_id) ?? null,
-    assignment,
-  }));
+  return visibleClients.map((profile) => {
+    const assignment = activeAssignmentsByClientId.get(profile.id) ?? null;
+
+    return {
+      profile,
+      fitnessSummary: summariesByClientId.get(profile.id) ?? null,
+      assignment,
+      isPrivilegedAccess: !assignment,
+    };
+  });
+}
+
+export async function getCoachClientSummaries(): Promise<CoachVisibleClient[]> {
+  return getCoachVisibleClients();
 }
 
 export async function createPendingAssignment(clientId: string) {

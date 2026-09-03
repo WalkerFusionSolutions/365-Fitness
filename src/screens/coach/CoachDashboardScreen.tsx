@@ -5,7 +5,7 @@ import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import { useAuth } from '@/hooks/useAuth';
-import { useCoachClientSummaries } from '@/hooks/useAssignments';
+import { useCoachVisibleClients } from '@/hooks/useAssignments';
 import { useAppTheme } from '@/hooks/useTheme';
 import { CoachVisibleClient } from '@/types';
 import { formatWeight } from '@/utils/fitness';
@@ -14,7 +14,7 @@ import { spacing, typography } from '@/utils/theme';
 export default function CoachDashboardScreen({ navigation }: any) {
   const { colors } = useAppTheme();
   const { profile } = useAuth();
-  const { data, error, isLoading, refresh } = useCoachClientSummaries();
+  const { data, error, isLoading, refresh } = useCoachVisibleClients();
   const coachName = profile?.full_name?.trim() || 'Coach';
   const completeProfiles = data.filter((item) => item.fitnessSummary).length;
   const incompleteProfiles = data.length - completeProfiles;
@@ -45,7 +45,7 @@ export default function CoachDashboardScreen({ navigation }: any) {
       <View style={styles.statsRow}>
         <Card style={styles.statCard}>
           <Text style={[styles.statValue, { color: colors.primary }]}>{data.length}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Active Clients</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Visible Clients</Text>
         </Card>
         <Card style={styles.statCard}>
           <Text style={[styles.statValue, { color: colors.primary }]}>{completeProfiles}</Text>
