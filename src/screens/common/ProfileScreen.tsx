@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Avatar, Badge, IconRow, ProfileAvatar, SectionHeader } from '@/components/AppUI';
 import { Button } from '@/components/Button';
@@ -22,6 +22,12 @@ export function ProfileScreen() {
     profile?.role === 'client' ? profile.id : undefined
   );
   const [isSigningOut, setIsSigningOut] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fitness.refresh();
+    }, [fitness.refresh])
+  );
 
   async function handleLogout() {
     setIsSigningOut(true);

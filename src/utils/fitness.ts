@@ -33,9 +33,20 @@ export function formatHeight(cm?: number | null) {
 }
 
 export function calculateAge(dateOfBirth: string) {
-  const birthDate = new Date(dateOfBirth);
+  const [year, month, day] = dateOfBirth.split('-').map(Number);
 
-  if (Number.isNaN(birthDate.getTime())) {
+  if (!year || !month || !day) {
+    return 0;
+  }
+
+  const birthDate = new Date(year, month - 1, day);
+
+  if (
+    Number.isNaN(birthDate.getTime()) ||
+    birthDate.getFullYear() !== year ||
+    birthDate.getMonth() !== month - 1 ||
+    birthDate.getDate() !== day
+  ) {
     return 0;
   }
 

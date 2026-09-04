@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Screen } from '@/components/Screen';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
@@ -15,8 +16,11 @@ import { AppHeader, Avatar, ProgressBar, StatCard } from '@/components/AppUI';
 export default function DashboardScreen({ navigation }: any) {
   const { colors } = useAppTheme();
   const { profile } = useAuth();
-  const { data: fitnessProfile, isLoading: fitnessLoading } =
-    useFitnessProfile(profile?.id);
+  const {
+    data: fitnessProfile,
+    isLoading: fitnessLoading,
+    refresh: refreshFitnessProfile,
+  } = useFitnessProfile(profile?.id);
   const { data: workouts } = useClientWorkouts(profile?.id);
   const mealPlan = useActiveMealPlan(profile?.id);
   const water = useTodaysWater(profile?.id);
@@ -28,6 +32,12 @@ export default function DashboardScreen({ navigation }: any) {
   const goalWeightLb = fitnessProfile?.goalWeightKg
     ? Math.round(fitnessProfile.goalWeightKg * 2.20462)
     : null;
+
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshFitnessProfile();
+    }, [refreshFitnessProfile])
+  );
 
   return (
     <Screen padded>

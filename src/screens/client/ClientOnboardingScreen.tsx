@@ -42,6 +42,7 @@ const equipmentOptions = ['Dumbbells', 'Barbell', 'Machines', 'Bands', 'Kettlebe
 const focusOptions = ['Core', 'Upper Body', 'Lower Body', 'Mobility', 'Cardio', 'Full Body'] as const;
 const durations = ['30 min', '45 min', '60 min', '75+ min'] as const;
 const limitationOptions = ['Knee', 'Back', 'Shoulder', 'Wrist', 'Cardio limitation', 'None'] as const;
+const noneLimitation = 'None';
 
 export default function ClientOnboardingScreen({ navigation }: any) {
   const { colors } = useAppTheme();
@@ -50,7 +51,9 @@ export default function ClientOnboardingScreen({ navigation }: any) {
   const [step, setStep] = useState(1);
   const [isComplete, setIsComplete] = useState(false);
   const [primaryGoal, setPrimaryGoal] = useState<string>('Fat Loss');
-  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [birthMonth, setBirthMonth] = useState('');
+  const [birthDay, setBirthDay] = useState('');
+  const [birthYear, setBirthYear] = useState('');
   const [heightUnit, setHeightUnit] = useState<HeightUnit>('ft_in');
   const [feet, setFeet] = useState('5');
   const [inches, setInches] = useState('10');
@@ -68,32 +71,37 @@ export default function ClientOnboardingScreen({ navigation }: any) {
   const [limitations, setLimitations] = useState<string[]>(['None']);
   const [healthNotes, setHealthNotes] = useState('');
 
+  const dob = useMemo(
+    () => buildDateOfBirth(birthMonth, birthDay, birthYear),
+    [birthDay, birthMonth, birthYear]
+  );
   const heightCm = useMemo(() => {
     if (heightUnit === 'cm') {
-      return Number(heightCmInput);
+      return parsePositiveNumber(heightCmInput);
     }
 
-    return Number(feet) * 30.48 + Number(inches) * 2.54;
+    return getHeightCmFromImperial(feet, inches);
   }, [feet, heightCmInput, heightUnit, inches]);
-  const currentWeightNumber = Number(currentWeight);
-  const goalWeightNumber = Number(goalWeight);
-  const currentWeightKg = weightToKg(currentWeightNumber, weightUnit);
-  const goalWeightKg = weightToKg(goalWeightNumber, weightUnit);
-  const bmi = calculateBmi(heightCm, currentWeightKg);
+  const currentWeightNumber = parsePositiveNumber(currentWeight);
+  const goalWeightNumber = parsePositiveNumber(goalWeight);
+  const currentWeightKg = currentWeightNumber ? weightToKg(currentWeightNumber, weightUnit) : 0;
+  const goalWeightKg = goalWeightNumber ? weightToKg(goalWeightNumber, weightUnit) : 0;
+  const roundedHeightCm = heightCm ? Math.round(heightCm) : 0;
+  const bmi = calculateBmi(roundedHeightCm, currentWeightKg);
 
   const assessment: FitnessAssessment = {
     primaryGoal,
-    dateOfBirth,
-    age: calculateAge(dateOfBirth),
+    dateOfBirth: dob.value,
+    age: dob.age,
     heightUnit,
-    heightCm: Math.round(heightCm),
-    heightFeet: heightUnit === 'ft_in' ? Number(feet) : undefined,
-    heightInches: heightUnit === 'ft_in' ? Number(inches) : undefined,
+    heightCm: roundedHeightCm,
+    heightFeet: heightUnit === 'ft_in' ? parsePositiveNumber(feet) ?? undefined : undefined,
+    heightInches: heightUnit === 'ft_in' ? parseWholeNumber(inches) ?? undefined : undefined,
     startingWeightKg: currentWeightKg,
     currentWeightKg,
-    currentWeight: { value: currentWeightNumber, unit: weightUnit },
+    currentWeight: { value: currentWeightNumber ?? 0, unit: weightUnit },
     goalWeightKg,
-    goalWeight: { value: goalWeightNumber, unit: weightUnit },
+    goalWeight: { value: goalWeightNumber ?? 0, unit: weightUnit },
     bmi,
     experienceLevel,
     activityLevel,
@@ -103,15 +111,18 @@ export default function ClientOnboardingScreen({ navigation }: any) {
     focusAreas,
     sessionDuration,
     healthNotes,
-    limitations: limitations.includes('None') ? [] : limitations,
+    limitations: limitations.includes(noneLimitation) ? [] : limitations,
   };
 
   const canContinue = validateStep(step);
 
   const onSubmit = async () => {
+    if (isSaving) return;
+
     const saved = await saveAssessment(assessment);
     if (saved) {
       setIsComplete(true);
+      navigation.navigate('ClientApp', { screen: 'Home' });
     }
   };
 
@@ -161,13 +172,49 @@ export default function ClientOnboardingScreen({ navigation }: any) {
   );
 
   function validateStep(currentStep: number) {
-    if (currentStep === 2) return calculateAge(dateOfBirth) > 0;
-    if (currentStep === 3) return heightCm > 0;
-    if (currentStep === 4) return currentWeightNumber > 0;
-    if (currentStep === 5) return goalWeightNumber > 0;
+    if (currentStep === 2) return dob.isValid;
+    if (currentStep === 3) {
+      if (heightUnit === 'cm') return Boolean(heightCm && heightCm > 0);
+      return hasValidImperialHeight(feet, inches);
+    }
+    if (currentStep === 4) return Boolean(currentWeightNumber && currentWeightNumber > 0);
+    if (currentStep === 5) return Boolean(goalWeightNumber && goalWeightNumber > 0);
     if (currentStep === 10) return equipment.length > 0;
     if (currentStep === 11) return focusAreas.length > 0;
     return true;
+  }
+
+  function handleHeightUnitChange(nextUnit: HeightUnit) {
+    if (nextUnit === heightUnit) return;
+
+    if (nextUnit === 'ft_in') {
+      const cmValue = parsePositiveNumber(heightCmInput);
+      if (cmValue) {
+        const totalInches = Math.round(cmValue / 2.54);
+        setFeet(String(Math.floor(totalInches / 12)));
+        setInches(String(totalInches % 12));
+      }
+    } else {
+      const cmValue = getHeightCmFromImperial(feet, inches);
+      if (cmValue) {
+        setHeightCmInput(String(Math.round(cmValue)));
+      }
+    }
+
+    setHeightUnit(nextUnit);
+  }
+
+  function handleLimitationChange(values: string[]) {
+    const previous = limitations;
+    const selectedNoneNow =
+      values.includes(noneLimitation) && !previous.includes(noneLimitation);
+
+    if (selectedNoneNow || values.length === 0) {
+      setLimitations([noneLimitation]);
+      return;
+    }
+
+    setLimitations(values.filter((value) => value !== noneLimitation));
   }
 
   function renderStep() {
@@ -191,20 +238,45 @@ export default function ClientOnboardingScreen({ navigation }: any) {
       return (
         <>
           <SectionHeader title="Date of Birth" subtitle="Used to estimate age for your profile." />
-          <TextInput
-            style={[
-              styles.largeInput,
-              {
-                backgroundColor: colors.inputBackground,
-                borderColor: colors.border,
-                color: colors.textPrimary,
-              },
-            ]}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={colors.textMuted}
-            value={dateOfBirth}
-            onChangeText={setDateOfBirth}
-          />
+          <View style={styles.dobRow}>
+            <NumericInput
+              label="Month"
+              value={birthMonth}
+              onChangeText={(value) => setBirthMonth(cleanWholeNumberInput(value).slice(0, 2))}
+              placeholder="MM"
+              maxLength={2}
+              keyboardType="number-pad"
+              style={styles.dobField}
+            />
+            <NumericInput
+              label="Day"
+              value={birthDay}
+              onChangeText={(value) => setBirthDay(cleanWholeNumberInput(value).slice(0, 2))}
+              placeholder="DD"
+              maxLength={2}
+              keyboardType="number-pad"
+              style={styles.dobField}
+            />
+            <NumericInput
+              label="Year"
+              value={birthYear}
+              onChangeText={(value) => setBirthYear(cleanWholeNumberInput(value).slice(0, 4))}
+              placeholder="YYYY"
+              maxLength={4}
+              keyboardType="number-pad"
+              style={styles.yearField}
+            />
+          </View>
+          <Card style={styles.previewCard}>
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Date of Birth</Text>
+            <Text style={[styles.previewValue, { color: dob.isValid ? colors.textPrimary : colors.textMuted }]}>
+              {dob.isValid ? dob.label : 'Enter a valid date'}
+            </Text>
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Age</Text>
+            <Text style={[styles.previewValue, { color: dob.isValid ? colors.primary : colors.textMuted }]}>
+              {dob.isValid ? String(dob.age) : 'Not available'}
+            </Text>
+          </Card>
         </>
       );
     }
@@ -213,15 +285,37 @@ export default function ClientOnboardingScreen({ navigation }: any) {
       return (
         <>
           <SectionHeader title="Height" subtitle="Choose the unit that feels natural." />
-          <UnitToggle options={['ft_in', 'cm']} value={heightUnit} onChange={setHeightUnit} />
+          <UnitToggle options={['ft_in', 'cm']} value={heightUnit} onChange={handleHeightUnitChange} />
           {heightUnit === 'ft_in' ? (
             <View style={styles.row}>
-              <NumericInput label="Feet" value={feet} onChangeText={setFeet} suffix="ft" />
-              <NumericInput label="Inches" value={inches} onChangeText={setInches} suffix="in" />
+              <NumericInput
+                label="Feet"
+                value={feet}
+                onChangeText={(value) => setFeet(cleanWholeNumberInput(value).slice(0, 1))}
+                suffix="ft"
+                keyboardType="number-pad"
+                style={styles.rowField}
+              />
+              <NumericInput
+                label="Inches"
+                value={inches}
+                onChangeText={(value) => setInches(cleanWholeNumberInput(value).slice(0, 2))}
+                suffix="in"
+                keyboardType="number-pad"
+                style={styles.rowField}
+              />
             </View>
           ) : (
-            <NumericInput label="Height" value={heightCmInput} onChangeText={setHeightCmInput} suffix="cm" />
+            <NumericInput
+              label="Height"
+              value={heightCmInput}
+              onChangeText={setHeightCmInput}
+              suffix="cm"
+            />
           )}
+          {heightUnit === 'ft_in' && !hasValidImperialHeight(feet, inches) ? (
+            <Text style={[styles.inlineError, { color: colors.error }]}>Enter feet and inches from 0 to 11.</Text>
+          ) : null}
         </>
       );
     }
@@ -290,7 +384,7 @@ export default function ClientOnboardingScreen({ navigation }: any) {
           <MultiSelectCards
             options={limitationOptions.map(toOption)}
             values={limitations}
-            onChange={(values) => setLimitations(values.includes('None') ? ['None'] : values)}
+            onChange={handleLimitationChange}
           />
         <TextInput
           style={[
@@ -319,8 +413,8 @@ export default function ClientOnboardingScreen({ navigation }: any) {
         />
         <Card style={styles.reviewCard}>
           <Summary label="Goal" value={primaryGoal} />
-          <Summary label="DOB / Age" value={`${dateOfBirth} / ${assessment.age}`} />
-          <Summary label="Height" value={formatHeight(heightCm)} />
+          <Summary label="DOB / Age" value={`${dob.label} / ${assessment.age}`} />
+          <Summary label="Height" value={formatHeight(roundedHeightCm)} />
           <Summary label="Starting Weight" value={formatWeight(currentWeightKg)} />
           <Summary label="Current Weight" value={formatWeight(currentWeightKg)} />
           <Summary label="Goal Weight" value={formatWeight(goalWeightKg)} />
@@ -335,6 +429,95 @@ export default function ClientOnboardingScreen({ navigation }: any) {
       </>
     );
   }
+}
+
+function cleanWholeNumberInput(value: string) {
+  return value.replace(/\D/g, '');
+}
+
+function parsePositiveNumber(value: string) {
+  if (!value.trim()) return null;
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function parseWholeNumber(value: string) {
+  if (!value.trim()) return null;
+
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
+}
+
+function getHeightCmFromImperial(feet: string, inches: string) {
+  if (!hasValidImperialHeight(feet, inches)) return null;
+
+  return Number(feet) * 30.48 + Number(inches) * 2.54;
+}
+
+function hasValidImperialHeight(feet: string, inches: string) {
+  const feetValue = parsePositiveNumber(feet);
+  const inchesValue = parseWholeNumber(inches);
+
+  return Boolean(feetValue && inchesValue != null && inchesValue >= 0 && inchesValue <= 11);
+}
+
+function buildDateOfBirth(month: string, day: string, year: string) {
+  const emptyDob = {
+    age: 0,
+    isValid: false,
+    label: 'Enter a valid date',
+    value: '',
+  };
+
+  if (month.length < 1 || day.length < 1 || year.length !== 4) {
+    return emptyDob;
+  }
+
+  const monthNumber = Number(month);
+  const dayNumber = Number(day);
+  const yearNumber = Number(year);
+  const currentYear = new Date().getFullYear();
+
+  if (
+    !Number.isInteger(monthNumber) ||
+    !Number.isInteger(dayNumber) ||
+    !Number.isInteger(yearNumber) ||
+    yearNumber < 1900 ||
+    yearNumber > currentYear ||
+    monthNumber < 1 ||
+    monthNumber > 12
+  ) {
+    return emptyDob;
+  }
+
+  const birthDate = new Date(yearNumber, monthNumber - 1, dayNumber);
+  if (
+    birthDate.getFullYear() !== yearNumber ||
+    birthDate.getMonth() !== monthNumber - 1 ||
+    birthDate.getDate() !== dayNumber ||
+    birthDate > new Date()
+  ) {
+    return emptyDob;
+  }
+
+  const value = [
+    String(yearNumber).padStart(4, '0'),
+    String(monthNumber).padStart(2, '0'),
+    String(dayNumber).padStart(2, '0'),
+  ].join('-');
+  const label = birthDate.toLocaleDateString(undefined, {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+  return {
+    age: calculateAge(value),
+    isValid: true,
+    label,
+    value,
+  };
 }
 
 function selectStep<T extends string>(
@@ -375,9 +558,18 @@ function SummaryText({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: spacing.md },
+  rowField: { flex: 1 },
+  dobRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  dobField: { flex: 1 },
+  yearField: { flex: 1.35 },
   completionCard: { gap: spacing.sm, marginBottom: spacing.lg },
   bodyText: { ...typography.body },
   metricLabel: { ...typography.caption, fontWeight: '700' },
+  previewCard: { gap: spacing.xs, marginBottom: spacing.lg },
+  previewValue: { ...typography.h3 },
   bmiCard: { gap: spacing.sm },
   bmiValue: { ...typography.h1, fontSize: 44 },
   note: { ...typography.caption },

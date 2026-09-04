@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { AppHeader, IconRow, ProgressBar, SectionHeader, StatCard } from '@/components/AppUI';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -15,6 +16,12 @@ export default function ClientProgressScreen({ navigation }: any) {
   const { colors } = useAppTheme();
   const { profile } = useAuth();
   const fitness = useFitnessProfile(profile?.id);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fitness.refresh();
+    }, [fitness.refresh])
+  );
 
   if (fitness.isLoading) {
     return <LoadingView label="Loading progress..." />;

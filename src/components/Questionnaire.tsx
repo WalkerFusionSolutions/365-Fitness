@@ -1,5 +1,15 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardTypeOptions,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  ViewStyle,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { useAppTheme } from '@/hooks/useTheme';
@@ -120,13 +130,16 @@ export function MultiSelectCards<T extends string>({
                 styles.chipCard,
                 selected && {
                   borderColor: colors.primary,
-                  backgroundColor: colors.surfaceElevated,
+                  backgroundColor: colors.surfaceSecondary,
                 },
               ]}
             >
-              <Text style={[styles.optionLabel, { color: selected ? colors.primary : colors.textPrimary }]}>
-                {option.label}
-              </Text>
+              <View style={styles.chipContent}>
+                <Text style={[styles.optionLabel, { color: selected ? colors.primary : colors.textPrimary }]}>
+                  {option.label}
+                </Text>
+                {selected ? <Ionicons name="checkmark-circle" size={18} color={colors.primary} /> : null}
+              </View>
             </Card>
           </Pressable>
         );
@@ -175,17 +188,23 @@ export function NumericInput({
   onChangeText,
   suffix,
   placeholder,
+  maxLength,
+  keyboardType = 'decimal-pad',
+  style,
 }: {
   label: string;
   value: string;
   onChangeText: (value: string) => void;
   suffix?: string;
   placeholder?: string;
+  maxLength?: number;
+  keyboardType?: KeyboardTypeOptions;
+  style?: StyleProp<ViewStyle>;
 }) {
   const { colors } = useAppTheme();
 
   return (
-    <View style={styles.inputGroup}>
+    <View style={[styles.inputGroup, style]}>
       <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{label}</Text>
       <View style={styles.inputRow}>
         <TextInput
@@ -201,7 +220,8 @@ export function NumericInput({
           onChangeText={onChangeText}
           placeholder={placeholder}
           placeholderTextColor={colors.textMuted}
-          keyboardType="decimal-pad"
+          keyboardType={keyboardType}
+          maxLength={maxLength}
         />
         {suffix ? <Text style={[styles.suffix, { color: colors.textSecondary }]}>{suffix}</Text> : null}
       </View>
@@ -281,6 +301,12 @@ const styles = StyleSheet.create({
   },
   chipCard: {
     minWidth: '46%',
+  },
+  chipContent: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+    justifyContent: 'space-between',
   },
   optionLabel: {
     ...typography.h3,
