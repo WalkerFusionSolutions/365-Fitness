@@ -154,6 +154,14 @@ export function useMeasurements(clientId?: string) {
       bodyFat?: number | null;
       chest?: number | null;
       waist?: number | null;
+      hips?: number | null;
+      leftArm?: number | null;
+      rightArm?: number | null;
+      leftThigh?: number | null;
+      rightThigh?: number | null;
+      neck?: number | null;
+      notes?: string | null;
+      date?: string;
     }) => {
       if (!clientId) {
         setError('Please sign in to continue.');

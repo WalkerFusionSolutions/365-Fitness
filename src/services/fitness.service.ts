@@ -107,6 +107,13 @@ export async function addMeasurement({
   bodyFat,
   chest,
   waist,
+  hips,
+  leftArm,
+  rightArm,
+  leftThigh,
+  rightThigh,
+  neck,
+  notes,
   date = todayDate(),
 }: {
   clientId: string;
@@ -114,6 +121,13 @@ export async function addMeasurement({
   bodyFat?: number | null;
   chest?: number | null;
   waist?: number | null;
+  hips?: number | null;
+  leftArm?: number | null;
+  rightArm?: number | null;
+  leftThigh?: number | null;
+  rightThigh?: number | null;
+  neck?: number | null;
+  notes?: string | null;
   date?: string;
 }) {
   const { data, error } = await supabase
@@ -124,6 +138,13 @@ export async function addMeasurement({
       body_fat: bodyFat ?? null,
       chest: chest ?? null,
       waist: waist ?? null,
+      hips: hips ?? null,
+      left_arm: leftArm ?? null,
+      right_arm: rightArm ?? null,
+      left_thigh: leftThigh ?? null,
+      right_thigh: rightThigh ?? null,
+      neck: neck ?? null,
+      notes: notes?.trim() || null,
       date,
     })
     .select('*')

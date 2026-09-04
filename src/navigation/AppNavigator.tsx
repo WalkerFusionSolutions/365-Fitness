@@ -23,6 +23,7 @@ import ClientOnboardingScreen from '@/screens/client/ClientOnboardingScreen';
 import AssessmentScreen from '@/screens/common/AssessmentScreen';
 import MeasurementsScreen from '@/screens/common/MeasurementsScreen';
 import CoachClientDetailScreen from '@/screens/coach/CoachClientDetailScreen';
+import CoachClientProgressScreen from '@/screens/coach/CoachClientProgressScreen';
 import CoachExerciseEditorScreen from '@/screens/coach/CoachExerciseEditorScreen';
 import CoachWorkoutBuilderScreen from '@/screens/coach/CoachWorkoutBuilderScreen';
 import CoachMealPlanBuilderScreen from '@/screens/coach/CoachMealPlanBuilderScreen';
@@ -246,6 +247,11 @@ export function AppNavigator() {
               name="CoachClientMeasurements"
               component={MeasurementsScreen}
               options={detailHeaderOptions('Measurements', colors)}
+            />
+            <Stack.Screen
+              name="CoachClientProgress"
+              component={CoachClientProgressScreen}
+              options={detailHeaderOptions('Progress', colors)}
             />
             <Stack.Screen
               name="CoachExerciseEditor"

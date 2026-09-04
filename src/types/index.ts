@@ -33,7 +33,16 @@ export interface Measurement {
   body_fat?: number | null;
   chest?: number | null;
   waist?: number | null;
+  hips?: number | null;
+  left_arm?: number | null;
+  right_arm?: number | null;
+  left_thigh?: number | null;
+  right_thigh?: number | null;
+  neck?: number | null;
   date?: string | null;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface FitnessAssessment {
@@ -94,9 +103,61 @@ export interface StaffPermission {
 
 export interface ProgressPhoto {
   id: string;
-  client_id: string;
-  photo_url: string;
+  client_id?: string | null;
+  photo_url?: string | null;
+  storage_path: string;
+  pose: ProgressPhotoPose;
+  taken_at: string;
+  date?: string | null;
+  notes?: string | null;
+  created_at?: string;
+}
+
+export type ProgressPhotoPose = 'front' | 'side' | 'back' | 'other';
+
+export interface ProgressPhotoWithUrl extends ProgressPhoto {
+  signedUrl: string | null;
+}
+
+export interface ProgressChartPoint {
   date: string;
+  label: string;
+  weightKg: number;
+}
+
+export interface BodyMeasurementChange {
+  key: keyof Pick<
+    Measurement,
+    | 'body_fat'
+    | 'chest'
+    | 'waist'
+    | 'hips'
+    | 'left_arm'
+    | 'right_arm'
+    | 'left_thigh'
+    | 'right_thigh'
+    | 'neck'
+  >;
+  label: string;
+  unit: '%' | 'cm';
+  starting: number;
+  current: number;
+  change: number;
+}
+
+export interface ProgressSummary {
+  assessment: FitnessAssessment | null;
+  measurements: Measurement[];
+  photos: ProgressPhotoWithUrl[];
+  startingMeasurement: Measurement | null;
+  currentMeasurement: Measurement | null;
+  startingWeightKg: number | null;
+  currentWeightKg: number | null;
+  goalWeightKg: number | null;
+  weightChangeKg: number | null;
+  remainingToGoalKg: number | null;
+  chartPoints: ProgressChartPoint[];
+  bodyChanges: BodyMeasurementChange[];
 }
 
 export interface Workout {
@@ -339,9 +400,11 @@ export type ClientStackParamList = {
   ClientOnboarding: undefined;
   ClientAssessment: undefined;
   ClientMeasurements: { clientId?: string; clientName?: string } | undefined;
+  ClientProgress: { clientId?: string; clientName?: string } | undefined;
   CoachClientDetail: { clientId: string; clientName?: string };
   CoachClientAssessment: { clientId: string; clientName?: string };
   CoachClientMeasurements: { clientId: string; clientName?: string };
+  CoachClientProgress: { clientId: string; clientName?: string };
   // add others later
 };
 
@@ -360,6 +423,7 @@ export type CoachStackParamList = {
   CoachWorkoutBuilder: { workoutId?: string; clientId?: string } | undefined;
   CoachMealPlanBuilder: { mealPlanId?: string; clientId?: string } | undefined;
   CoachNutrition: undefined;
+  CoachClientProgress: { clientId: string; clientName?: string };
   CoachWorkoutDetail: { workoutId: string };
   // add others later
 };

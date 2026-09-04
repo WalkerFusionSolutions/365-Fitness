@@ -135,7 +135,16 @@ type PublicTables = {
           body_fat: number | null;
           chest: number | null;
           waist: number | null;
+          hips: number | null;
+          left_arm: number | null;
+          right_arm: number | null;
+          left_thigh: number | null;
+          right_thigh: number | null;
+          neck: number | null;
           date: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
         };
         Insert: {
           id?: string;
@@ -144,7 +153,16 @@ type PublicTables = {
           body_fat?: number | null;
           chest?: number | null;
           waist?: number | null;
+          hips?: number | null;
+          left_arm?: number | null;
+          right_arm?: number | null;
+          left_thigh?: number | null;
+          right_thigh?: number | null;
+          neck?: number | null;
           date?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
         Update: {
           id?: string;
@@ -153,27 +171,51 @@ type PublicTables = {
           body_fat?: number | null;
           chest?: number | null;
           waist?: number | null;
+          hips?: number | null;
+          left_arm?: number | null;
+          right_arm?: number | null;
+          left_thigh?: number | null;
+          right_thigh?: number | null;
+          neck?: number | null;
           date?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
       };
       progress_photos: {
         Row: {
           id: string;
           client_id: string | null;
-          photo_url: string;
+          photo_url: string | null;
+          storage_path: string;
+          pose: 'front' | 'side' | 'back' | 'other';
           date: string | null;
+          taken_at: string;
+          notes: string | null;
+          created_at: string;
         };
         Insert: {
           id?: string;
           client_id?: string | null;
-          photo_url: string;
+          photo_url?: string | null;
+          storage_path: string;
+          pose?: 'front' | 'side' | 'back' | 'other';
           date?: string | null;
+          taken_at?: string;
+          notes?: string | null;
+          created_at?: string;
         };
         Update: {
           id?: string;
           client_id?: string | null;
-          photo_url?: string;
+          photo_url?: string | null;
+          storage_path?: string;
+          pose?: 'front' | 'side' | 'back' | 'other';
           date?: string | null;
+          taken_at?: string;
+          notes?: string | null;
+          created_at?: string;
         };
       };
       workouts: {

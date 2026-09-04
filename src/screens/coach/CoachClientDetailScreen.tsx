@@ -107,6 +107,23 @@ export default function CoachClientDetailScreen() {
       />
 
       <Card style={styles.card}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Progress</Text>
+        <Metric label="Current Weight" value={formatWeight(data.currentWeightKg)} />
+        <Metric
+          label="Change"
+          value={formatWeightChange(data.currentWeightKg, data.startingWeightKg)}
+        />
+        <Metric
+          label="Latest Measurement"
+          value={data.latestMeasurement?.date ? formatFriendlyDate(data.latestMeasurement.date) : 'Not recorded'}
+        />
+        <Button
+          label="View Progress"
+          onPress={() => navigation.navigate('CoachClientProgress', { clientId, clientName })}
+        />
+      </Card>
+
+      <Card style={styles.card}>
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Workouts</Text>
         {workouts.data.length > 0 ? (
           workouts.data.slice(0, 3).map((workout) => (
@@ -178,6 +195,13 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 function formatMetric(value?: number | null, suffix = '') {
   return value == null ? 'Not recorded' : `${value}${suffix ? ` ${suffix}` : ''}`;
+}
+
+function formatWeightChange(current?: number | null, starting?: number | null) {
+  if (current == null || starting == null) return 'Not recorded';
+
+  const change = Math.round((current - starting) * 10) / 10;
+  return `${change > 0 ? '+' : ''}${change} kg`;
 }
 
 const styles = StyleSheet.create({

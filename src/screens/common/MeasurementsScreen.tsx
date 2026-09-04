@@ -18,6 +18,7 @@ type MeasurementsRoute = RouteProp<
   ClientStackParamList,
   'ClientMeasurements' | 'CoachClientMeasurements'
 >;
+type LengthUnit = 'cm' | 'in';
 
 export default function MeasurementsScreen() {
   const { colors } = useAppTheme();
@@ -31,21 +32,54 @@ export default function MeasurementsScreen() {
     useMeasurements(clientId);
   const [weight, setWeight] = useState('');
   const [weightUnit, setWeightUnit] = useState<WeightUnit>('lb');
+  const [lengthUnit, setLengthUnit] = useState<LengthUnit>('cm');
+  const [date, setDate] = useState(todayDate());
   const [waist, setWaist] = useState('');
   const [chest, setChest] = useState('');
   const [bodyFat, setBodyFat] = useState('');
+  const [hips, setHips] = useState('');
+  const [leftArm, setLeftArm] = useState('');
+  const [rightArm, setRightArm] = useState('');
+  const [leftThigh, setLeftThigh] = useState('');
+  const [rightThigh, setRightThigh] = useState('');
+  const [neck, setNeck] = useState('');
+  const [notes, setNotes] = useState('');
 
   const onSave = async () => {
     const values = {
+      date,
       weight: toNumber(weight)
         ? weightToKg(Number(weight), weightUnit)
         : null,
-      waist: toNumber(waist),
-      chest: toNumber(chest),
+      waist: toCm(waist, lengthUnit),
+      chest: toCm(chest, lengthUnit),
       bodyFat: toNumber(bodyFat),
+      hips: toCm(hips, lengthUnit),
+      leftArm: toCm(leftArm, lengthUnit),
+      rightArm: toCm(rightArm, lengthUnit),
+      leftThigh: toCm(leftThigh, lengthUnit),
+      rightThigh: toCm(rightThigh, lengthUnit),
+      neck: toCm(neck, lengthUnit),
+      notes,
     };
 
-    if (!values.weight && !values.waist && !values.chest && !values.bodyFat) {
+    if (!isValidDate(date)) {
+      Alert.alert('Check the date', 'Use a valid date in YYYY-MM-DD format.');
+      return;
+    }
+
+    if (
+      !values.weight &&
+      !values.waist &&
+      !values.chest &&
+      !values.bodyFat &&
+      !values.hips &&
+      !values.leftArm &&
+      !values.rightArm &&
+      !values.leftThigh &&
+      !values.rightThigh &&
+      !values.neck
+    ) {
       Alert.alert('Measurement needed', 'Enter at least one measurement.');
       return;
     }
@@ -57,6 +91,13 @@ export default function MeasurementsScreen() {
       setWaist('');
       setChest('');
       setBodyFat('');
+      setHips('');
+      setLeftArm('');
+      setRightArm('');
+      setLeftThigh('');
+      setRightThigh('');
+      setNeck('');
+      setNotes('');
     }
   };
 
@@ -96,17 +137,26 @@ export default function MeasurementsScreen() {
               <Card style={styles.form}>
                 <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Add Measurement</Text>
                 <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
-                  Supported fields: weight, waist, chest, body fat. Coach entries require backend permission.
+                  Add only the measurements recorded today. Values are stored canonically as kg and cm.
                 </Text>
+                <AppInput label="Date" value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" />
                 <UnitToggle
                   options={['lb', 'kg']}
                   value={weightUnit}
                   onChange={setWeightUnit}
                 />
                 <Input label="Weight" value={weight} onChangeText={setWeight} suffix={weightUnit} />
-                <Input label="Waist" value={waist} onChangeText={setWaist} suffix="in" />
-                <Input label="Chest" value={chest} onChangeText={setChest} suffix="in" />
+                <UnitToggle options={['cm', 'in']} value={lengthUnit} onChange={setLengthUnit} />
+                <Input label="Waist" value={waist} onChangeText={setWaist} suffix={lengthUnit} />
+                <Input label="Chest" value={chest} onChangeText={setChest} suffix={lengthUnit} />
                 <Input label="Body Fat" value={bodyFat} onChangeText={setBodyFat} suffix="%" />
+                <Input label="Hips" value={hips} onChangeText={setHips} suffix={lengthUnit} />
+                <Input label="Left Arm" value={leftArm} onChangeText={setLeftArm} suffix={lengthUnit} />
+                <Input label="Right Arm" value={rightArm} onChangeText={setRightArm} suffix={lengthUnit} />
+                <Input label="Left Thigh" value={leftThigh} onChangeText={setLeftThigh} suffix={lengthUnit} />
+                <Input label="Right Thigh" value={rightThigh} onChangeText={setRightThigh} suffix={lengthUnit} />
+                <Input label="Neck" value={neck} onChangeText={setNeck} suffix={lengthUnit} />
+                <AppInput label="Notes" value={notes} onChangeText={setNotes} placeholder="Optional" multiline />
                 {error ? <Text style={[styles.inlineError, { color: colors.error }]}>{error}</Text> : null}
                 <Button label="Save Measurement" onPress={onSave} loading={isSaving} />
               </Card>
@@ -164,9 +214,16 @@ function MeasurementRow({ measurement }: { measurement: Measurement }) {
     <Card style={styles.measurementCard}>
       <Text style={[styles.date, { color: colors.textPrimary }]}>{formatDate(measurement.date)}</Text>
       <Metric label="Weight" value={formatWeight(measurement.weight)} />
-      <Metric label="Waist" value={measurement.waist} suffix="in" />
-      <Metric label="Chest" value={measurement.chest} suffix="in" />
+      <Metric label="Waist" value={measurement.waist} suffix="cm" />
+      <Metric label="Chest" value={measurement.chest} suffix="cm" />
       <Metric label="Body Fat" value={measurement.body_fat} suffix="%" />
+      <Metric label="Hips" value={measurement.hips} suffix="cm" />
+      <Metric label="Left Arm" value={measurement.left_arm} suffix="cm" />
+      <Metric label="Right Arm" value={measurement.right_arm} suffix="cm" />
+      <Metric label="Left Thigh" value={measurement.left_thigh} suffix="cm" />
+      <Metric label="Right Thigh" value={measurement.right_thigh} suffix="cm" />
+      <Metric label="Neck" value={measurement.neck} suffix="cm" />
+      <Metric label="Notes" value={measurement.notes} />
     </Card>
   );
 }
@@ -197,6 +254,21 @@ function Metric({
 function toNumber(value: string) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function toCm(value: string, unit: LengthUnit) {
+  const parsed = toNumber(value);
+  if (!parsed) return null;
+  return unit === 'cm' ? parsed : Math.round(parsed * 2.54 * 10) / 10;
+}
+
+function todayDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function isValidDate(value: string) {
+  const parsed = new Date(`${value}T00:00:00`);
+  return !Number.isNaN(parsed.getTime()) && parsed <= new Date();
 }
 
 function formatDate(value?: string | null) {
