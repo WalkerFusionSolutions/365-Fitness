@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -23,7 +23,7 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/AppUI';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
@@ -48,7 +48,9 @@ export default function ConversationScreen() {
   const route = useRoute<ConversationRoute>();
   const listRef = useRef<FlatList<ChatMessage>>(null);
   const isNearBottomRef = useRef(true);
+  const previousMessageCountRef = useRef(0);
   const [draft, setDraft] = useState('');
+  const [showNewMessages, setShowNewMessages] = useState(false);
   const [viewerMessage, setViewerMessage] = useState<ChatMessage | null>(null);
   const params = route.params ?? {};
   const conversationState = useConversation({
@@ -69,6 +71,26 @@ export default function ConversationScreen() {
       void conversationState.refreshMessages();
     }, [conversationState.refreshMessages])
   );
+
+  useEffect(() => {
+    const messageCount = conversationState.messages.length;
+    const previousCount = previousMessageCountRef.current;
+    previousMessageCountRef.current = messageCount;
+
+    if (messageCount === 0) return;
+
+    const newestMessage = conversationState.messages[messageCount - 1];
+
+    if (isNearBottomRef.current) {
+      scrollToEnd(previousCount > 0);
+      setShowNewMessages(false);
+      return;
+    }
+
+    if (messageCount > previousCount && newestMessage?.sender_id !== profile?.id) {
+      setShowNewMessages(true);
+    }
+  }, [conversationState.messages, profile?.id]);
 
   if (conversationState.isLoading) {
     return <LoadingView label="Opening conversation..." />;
@@ -96,13 +118,23 @@ export default function ConversationScreen() {
     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
     const distanceFromBottom =
       contentSize.height - (contentOffset.y + layoutMeasurement.height);
-    isNearBottomRef.current = distanceFromBottom < 96;
+    const isNearBottom = distanceFromBottom < 96;
+    isNearBottomRef.current = isNearBottom;
+    if (isNearBottom) {
+      setShowNewMessages(false);
+    }
   }
 
   function handleContentSizeChange() {
     if (isNearBottomRef.current) {
       scrollToEnd(true);
     }
+  }
+
+  function jumpToNewest() {
+    isNearBottomRef.current = true;
+    setShowNewMessages(false);
+    scrollToEnd(true);
   }
 
   async function sendMessage() {
@@ -173,7 +205,7 @@ export default function ConversationScreen() {
               {title}
             </Text>
             <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-              {subtitle} conversation
+              {subtitle}
             </Text>
           </View>
         </View>
@@ -230,6 +262,22 @@ export default function ConversationScreen() {
             );
           }}
         />
+
+        {showNewMessages ? (
+          <Pressable
+            accessibilityLabel="Jump to new messages"
+            onPress={jumpToNewest}
+            style={[
+              styles.newMessagesButton,
+              { backgroundColor: colors.primary },
+            ]}
+          >
+            <Text style={[styles.newMessagesText, { color: colors.primaryText }]}>
+              New messages
+            </Text>
+            <Ionicons name="arrow-down" size={16} color={colors.primaryText} />
+          </Pressable>
+        ) : null}
 
         <View
           style={[
@@ -297,7 +345,7 @@ export default function ConversationScreen() {
   );
 }
 
-function DateSeparator({ value }: { value: string }) {
+const DateSeparator = React.memo(function DateSeparator({ value }: { value: string }) {
   const { colors } = useAppTheme();
 
   return (
@@ -312,9 +360,9 @@ function DateSeparator({ value }: { value: string }) {
       </Text>
     </View>
   );
-}
+});
 
-function MessageBubble({
+const MessageBubble = React.memo(function MessageBubble({
   compactBottom,
   compactTop,
   isMine,
@@ -380,9 +428,9 @@ function MessageBubble({
       </View>
     </View>
   );
-}
+});
 
-function VideoMessagePreview({
+const VideoMessagePreview = React.memo(function VideoMessagePreview({
   isMine,
   message,
   onOpen,
@@ -395,10 +443,6 @@ function VideoMessagePreview({
 }) {
   const { colors } = useAppTheme();
   const signedUrl = message.signedVideoUrl ?? null;
-  const player = useVideoPlayer(signedUrl, (instance) => {
-    instance.loop = false;
-    instance.muted = true;
-  });
 
   if (!signedUrl) {
     return (
@@ -423,13 +467,13 @@ function VideoMessagePreview({
         { backgroundColor: isMine ? colors.primaryDark : colors.surfaceSecondary },
       ]}
     >
-      <VideoView
-        player={player}
-        allowsPictureInPicture={false}
-        contentFit="cover"
-        nativeControls={false}
-        style={styles.video}
-      />
+      <View style={styles.videoPoster}>
+        <Ionicons
+          name="videocam"
+          size={34}
+          color={isMine ? colors.primaryText : colors.primary}
+        />
+      </View>
       <View style={styles.videoOverlay}>
         <View style={[styles.playButton, { backgroundColor: colors.surface }]}>
           <Ionicons name="play" size={28} color={colors.primary} />
@@ -438,7 +482,7 @@ function VideoMessagePreview({
       </View>
     </Pressable>
   );
-}
+});
 
 function VideoMessageViewer({
   message,
@@ -448,6 +492,7 @@ function VideoMessageViewer({
   onClose: () => void;
 }) {
   const { colors } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const signedUrl = message?.signedVideoUrl ?? null;
   const player = useVideoPlayer(signedUrl, (instance) => {
     instance.loop = false;
@@ -460,17 +505,25 @@ function VideoMessageViewer({
       presentationStyle="fullScreen"
       visible={Boolean(message)}
     >
-      <SafeAreaView style={styles.viewer}>
-        <View style={styles.viewerHeader}>
-          <Pressable
-            accessibilityLabel="Close video"
-            hitSlop={8}
-            onPress={onClose}
-            style={styles.viewerClose}
-          >
-            <Ionicons name="close" size={26} color={colors.white} />
-          </Pressable>
-          <Text style={styles.viewerTitle}>Video feedback</Text>
+      <View style={styles.viewer}>
+        <View
+          pointerEvents="box-none"
+          style={[
+            styles.viewerOverlay,
+            { paddingTop: insets.top + spacing.sm },
+          ]}
+        >
+          <View style={styles.viewerHeader}>
+            <Pressable
+              accessibilityLabel="Close video"
+              hitSlop={8}
+              onPress={onClose}
+              style={styles.viewerClose}
+            >
+              <Ionicons name="close" size={24} color={colors.white} />
+            </Pressable>
+            <Text style={styles.viewerTitle}>Video feedback</Text>
+          </View>
         </View>
         <View style={styles.viewerBody}>
           {signedUrl ? (
@@ -489,7 +542,7 @@ function VideoMessageViewer({
             </View>
           )}
         </View>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 }
@@ -542,9 +595,9 @@ const styles = StyleSheet.create({
   },
   headerButton: {
     alignItems: 'center',
-    height: 40,
+    height: 44,
     justifyContent: 'center',
-    width: 36,
+    width: 44,
   },
   headerText: {
     flex: 1,
@@ -633,6 +686,11 @@ const styles = StyleSheet.create({
   video: {
     ...StyleSheet.absoluteFill,
   },
+  videoPoster: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   videoOverlay: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
@@ -672,6 +730,21 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     paddingBottom: Platform.OS === 'ios' ? spacing.lg : spacing.md,
   },
+  newMessagesButton: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    borderRadius: radius.round,
+    bottom: 82,
+    flexDirection: 'row',
+    gap: spacing.xs,
+    minHeight: 38,
+    paddingHorizontal: spacing.md,
+    position: 'absolute',
+  },
+  newMessagesText: {
+    ...typography.caption,
+    fontWeight: '700',
+  },
   input: {
     ...typography.body,
     borderRadius: radius.lg,
@@ -696,18 +769,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#080D0C',
     flex: 1,
   },
+  viewerOverlay: {
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 10,
+  },
   viewerHeader: {
     alignItems: 'center',
     flexDirection: 'row',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   viewerClose: {
     alignItems: 'center',
-    height: 44,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    borderRadius: radius.round,
+    height: 48,
     justifyContent: 'center',
-    width: 44,
+    width: 48,
   },
   viewerTitle: {
     ...typography.h3,
@@ -719,7 +801,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   viewerVideo: {
-    aspectRatio: 16 / 9,
+    height: '100%',
     width: '100%',
   },
   viewerState: {

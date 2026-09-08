@@ -273,7 +273,7 @@ export function AppNavigator() {
             <Stack.Screen
               name="CoachConversation"
               component={ConversationScreen}
-              options={detailHeaderOptions('Messages', colors)}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="CoachClientAssessment"
@@ -361,7 +361,7 @@ export function AppNavigator() {
             <Stack.Screen
               name="ClientConversation"
               component={ConversationScreen}
-              options={detailHeaderOptions('Messages', colors)}
+              options={{ headerShown: false }}
             />
           </>
         )}
