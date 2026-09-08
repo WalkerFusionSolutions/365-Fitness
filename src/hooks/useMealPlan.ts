@@ -59,7 +59,9 @@ export function useActiveMealPlan(clientId?: string) {
     load();
   }, [load]);
 
-  return { data, isLoading, isRefreshing, error, refresh: () => load(true) };
+  const refresh = useCallback(() => load(true), [load]);
+
+  return { data, isLoading, isRefreshing, error, refresh };
 }
 
 export function useMealPlanDetail(mealPlanId?: string) {
@@ -115,7 +117,9 @@ export function useCoachMealPlans() {
     load();
   }, [load]);
 
-  return { data, isLoading, isRefreshing, error, refresh: () => load(true) };
+  const refresh = useCallback(() => load(true), [load]);
+
+  return { data, isLoading, isRefreshing, error, refresh };
 }
 
 export function useSaveMealPlan() {

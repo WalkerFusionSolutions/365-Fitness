@@ -16,22 +16,36 @@ const emailRedirectTo =
 export function SignupScreen({ navigation }: any) {
   const { colors } = useAppTheme();
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function signUpWithEmail() {
-    if (!email || !password || !fullName) {
-      Alert.alert('Error', 'Please fill in all fields');
+    if (loading) return;
+
+    const trimmedEmail = email.trim();
+    const trimmedName = fullName.trim();
+
+    if (!trimmedEmail || !password || !confirmPassword || !trimmedName) {
+      Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       await signUpWithEmailService({
-        email: email.trim(),
+        email: trimmedEmail,
         password,
-        fullName: fullName.trim(),
+        fullName: trimmedName,
+        phoneNumber,
         emailRedirectTo,
       });
 
@@ -71,15 +85,35 @@ export function SignupScreen({ navigation }: any) {
             onChangeText={setEmail}
           />
           <AppInput
+            label="Phone Number"
+            placeholder="+1 473 555 0123"
+            autoCapitalize="none"
+            keyboardType="phone-pad"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+          />
+          <AppInput
             label="Password"
             placeholder="Create a password"
             secureTextEntry
             value={password}
             onChangeText={setPassword}
           />
+          <AppInput
+            label="Confirm Password"
+            placeholder="Confirm your password"
+            secureTextEntry
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
         </Card>
 
-        <Button label="Sign Up" onPress={signUpWithEmail} loading={loading} style={styles.button} />
+        <Button
+          label="Sign Up"
+          onPress={signUpWithEmail}
+          loading={loading}
+          style={styles.button}
+        />
         
         <Button 
           label="Back to Login" 

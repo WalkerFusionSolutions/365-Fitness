@@ -91,6 +91,28 @@ export default function DashboardScreen({ navigation }: any) {
       <Card style={[styles.workoutCard, { backgroundColor: colors.surfaceElevated }]}>
         <View style={styles.cardHeader}>
           <View style={[styles.iconContainer, { backgroundColor: colors.surfaceSecondary }]}>
+            <Ionicons name="chatbubbles" size={24} color={colors.primary} />
+          </View>
+          <View style={styles.cardTextContainer}>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+              Message Coach
+            </Text>
+            <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+              Send check-ins, questions, and form-check videos privately.
+            </Text>
+          </View>
+        </View>
+        <Button
+          label="Open Messages"
+          variant="outline"
+          onPress={() => navigation.navigate('ClientMessages')}
+          style={styles.actionButton}
+        />
+      </Card>
+
+      <Card style={[styles.workoutCard, { backgroundColor: colors.surfaceElevated }]}>
+        <View style={styles.cardHeader}>
+          <View style={[styles.iconContainer, { backgroundColor: colors.surfaceSecondary }]}>
             <Ionicons name="restaurant" size={24} color={colors.primary} />
           </View>
           <View style={styles.cardTextContainer}>

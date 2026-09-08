@@ -34,6 +34,7 @@ type PublicTables = {
           full_name: string;
           avatar_url: string | null;
           bio: string | null;
+          phone_number: string | null;
           created_at: string;
         };
         Insert: {
@@ -42,6 +43,7 @@ type PublicTables = {
           full_name: string;
           avatar_url?: string | null;
           bio?: string | null;
+          phone_number?: string | null;
           created_at?: string;
         };
         Update: {
@@ -50,6 +52,7 @@ type PublicTables = {
           full_name?: string;
           avatar_url?: string | null;
           bio?: string | null;
+          phone_number?: string | null;
           created_at?: string;
         };
       };
@@ -656,30 +659,124 @@ type PublicTables = {
           updated_at?: string;
         };
       };
-      messages: {
+      conversations: {
         Row: {
           id: string;
-          sender_id: string | null;
-          receiver_id: string | null;
-          content: string | null;
-          video_url: string | null;
-          timestamp: string;
+          client_id: string;
+          coach_id: string;
+          created_at: string;
+          updated_at: string;
+          last_message_at: string | null;
+          last_message_preview: string | null;
+          client_last_read_at: string | null;
+          coach_last_read_at: string | null;
+          status: string;
         };
         Insert: {
           id?: string;
-          sender_id?: string | null;
-          receiver_id?: string | null;
-          content?: string | null;
-          video_url?: string | null;
-          timestamp?: string;
+          client_id: string;
+          coach_id: string;
+          created_at?: string;
+          updated_at?: string;
+          last_message_at?: string | null;
+          last_message_preview?: string | null;
+          client_last_read_at?: string | null;
+          coach_last_read_at?: string | null;
+          status?: string;
         };
         Update: {
           id?: string;
-          sender_id?: string | null;
-          receiver_id?: string | null;
+          client_id?: string;
+          coach_id?: string;
+          created_at?: string;
+          updated_at?: string;
+          last_message_at?: string | null;
+          last_message_preview?: string | null;
+          client_last_read_at?: string | null;
+          coach_last_read_at?: string | null;
+          status?: string;
+        };
+      };
+      message_attachments: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          uploader_id: string;
+          client_id: string;
+          storage_path: string;
+          attachment_type: string;
+          mime_type: string | null;
+          file_size_bytes: number | null;
+          duration_seconds: number | null;
+          original_filename: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          uploader_id: string;
+          client_id: string;
+          storage_path: string;
+          attachment_type?: string;
+          mime_type?: string | null;
+          file_size_bytes?: number | null;
+          duration_seconds?: number | null;
+          original_filename?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          conversation_id?: string;
+          uploader_id?: string;
+          client_id?: string;
+          storage_path?: string;
+          attachment_type?: string;
+          mime_type?: string | null;
+          file_size_bytes?: number | null;
+          duration_seconds?: number | null;
+          original_filename?: string | null;
+          created_at?: string;
+        };
+      };
+      messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          sender_id: string;
+          receiver_id: string;
+          content: string | null;
+          video_url: string | null;
+          timestamp: string;
+          message_type: 'text' | 'video_feedback';
+          body: string | null;
+          attachment_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          sender_id: string;
+          receiver_id: string;
           content?: string | null;
           video_url?: string | null;
           timestamp?: string;
+          message_type?: 'text' | 'video_feedback';
+          body?: string | null;
+          attachment_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          conversation_id?: string;
+          sender_id?: string;
+          receiver_id?: string;
+          content?: string | null;
+          video_url?: string | null;
+          timestamp?: string;
+          message_type?: 'text' | 'video_feedback';
+          body?: string | null;
+          attachment_id?: string | null;
+          created_at?: string;
         };
       };
       notifications: {
@@ -760,9 +857,40 @@ export type Database = {
         Args: { client_uuid: string };
         Returns: boolean;
       };
+      can_access_conversation: {
+        Args: { conversation_uuid: string };
+        Returns: boolean;
+      };
+      can_send_to_conversation: {
+        Args: { conversation_uuid: string };
+        Returns: boolean;
+      };
       can_coach_client: {
         Args: { client_uuid: string };
         Returns: boolean;
+      };
+      coach_can_access_client: {
+        Args: { coach_uuid: string; client_uuid: string };
+        Returns: boolean;
+      };
+      get_or_create_conversation: {
+        Args: { client_uuid: string; coach_uuid: string };
+        Returns: Database['public']['Tables']['conversations']['Row'];
+      };
+      get_primary_coach: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          id: string;
+          role: Database['public']['Enums']['user_role'];
+          full_name: string;
+          avatar_url: string | null;
+          bio: string | null;
+          created_at: string;
+        }>;
+      };
+      mark_conversation_read: {
+        Args: { conversation_uuid: string };
+        Returns: Database['public']['Tables']['conversations']['Row'];
       };
       is_client_profile: {
         Args: { client_uuid: string };

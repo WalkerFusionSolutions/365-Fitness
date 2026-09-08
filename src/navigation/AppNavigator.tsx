@@ -7,9 +7,11 @@ import { useAuth } from '@/hooks/useAuth';
 import {
   getCurrentSession,
   onAuthSessionChange,
+  refreshCurrentSession,
   setSessionFromTokens,
 } from '@/services/auth.service';
 import { getProfileById } from '@/services/profiles.service';
+import { isJwtIssuedAtFutureError } from '@/services/errors';
 import { LoginScreen } from '@/screens/auth/LoginScreen';
 import { SignupScreen } from '@/screens/auth/SignupScreen';
 import { ClientTabs } from './ClientTabs';
@@ -22,6 +24,8 @@ import MealPlanDetailScreen from '@/screens/client/MealPlanDetailScreen';
 import ClientOnboardingScreen from '@/screens/client/ClientOnboardingScreen';
 import AssessmentScreen from '@/screens/common/AssessmentScreen';
 import MeasurementsScreen from '@/screens/common/MeasurementsScreen';
+import ConversationScreen from '@/screens/common/ConversationScreen';
+import ClientMessagesScreen from '@/screens/client/ClientMessagesScreen';
 import CoachClientDetailScreen from '@/screens/coach/CoachClientDetailScreen';
 import CoachClientProgressScreen from '@/screens/coach/CoachClientProgressScreen';
 import CoachExerciseEditorScreen from '@/screens/coach/CoachExerciseEditorScreen';
@@ -57,7 +61,10 @@ export function AppNavigator() {
   useEffect(() => {
     let isMounted = true;
 
-    const loadProfileForSession = async (sessionUserId?: string) => {
+    const loadProfileForSession = async (
+      sessionUserId?: string,
+      didRetryAfterRefresh = false
+    ) => {
       if (!isMounted) return;
 
       if (!sessionUserId) {
@@ -79,8 +86,33 @@ export function AppNavigator() {
 
         if (!isMounted) return;
 
+        if (isJwtIssuedAtFutureError(loadError) && !didRetryAfterRefresh) {
+          try {
+            console.log(
+              'Profile load hit JWT issued-at clock skew. Refreshing session once before retry.'
+            );
+
+            const refreshedSession = await refreshCurrentSession();
+
+            if (!isMounted) return;
+
+            setSession(refreshedSession);
+            await loadProfileForSession(
+              refreshedSession?.user?.id ?? sessionUserId,
+              true
+            );
+            return;
+          } catch (refreshError) {
+            console.error('Unable to refresh skewed session:', refreshError);
+          }
+        }
+
         setProfile(null);
-        setError('Unable to load your profile.');
+        setError(
+          isJwtIssuedAtFutureError(loadError)
+            ? 'Your session token is being rejected because the device clock appears out of sync. Set date and time to automatic, then sign in again.'
+            : 'Unable to load your profile.'
+        );
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -182,7 +214,7 @@ export function AppNavigator() {
     return (
       <ErrorState
         title="Unable to load your profile"
-        subtitle="Close and reopen the app, or sign in again."
+        subtitle={error ?? 'Close and reopen the app, or sign in again.'}
       />
     );
   }
@@ -237,6 +269,11 @@ export function AppNavigator() {
               name="CoachClientDetail"
               component={CoachClientDetailScreen}
               options={detailHeaderOptions('Client', colors)}
+            />
+            <Stack.Screen
+              name="CoachConversation"
+              component={ConversationScreen}
+              options={detailHeaderOptions('Messages', colors)}
             />
             <Stack.Screen
               name="CoachClientAssessment"
@@ -315,6 +352,16 @@ export function AppNavigator() {
               name="ClientMeasurements"
               component={MeasurementsScreen}
               options={detailHeaderOptions('Measurements', colors)}
+            />
+            <Stack.Screen
+              name="ClientMessages"
+              component={ClientMessagesScreen}
+              options={detailHeaderOptions('Messages', colors)}
+            />
+            <Stack.Screen
+              name="ClientConversation"
+              component={ConversationScreen}
+              options={detailHeaderOptions('Messages', colors)}
             />
           </>
         )}

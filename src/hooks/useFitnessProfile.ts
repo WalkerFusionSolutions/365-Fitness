@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   addMeasurement,
   getFitnessAssessment,
@@ -22,11 +22,24 @@ export function useFitnessProfile(clientId?: string) {
   const [isLoading, setIsLoading] = useState(Boolean(clientId));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isMounted = useRef(true);
+  const requestId = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const load = useCallback(async () => {
+    const currentRequestId = requestId.current + 1;
+    requestId.current = currentRequestId;
+
     if (!clientId) {
-      setData(null);
-      setIsLoading(false);
+      if (isMounted.current) {
+        setData(null);
+        setIsLoading(false);
+      }
       return;
     }
 
@@ -34,14 +47,21 @@ export function useFitnessProfile(clientId?: string) {
     setError(null);
 
     try {
-      setData(await getFitnessProfileSummary(clientId));
+      const summary = await getFitnessProfileSummary(clientId);
+      if (isMounted.current && requestId.current === currentRequestId) {
+        setData(summary);
+      }
     } catch (loadError) {
       console.error('Unable to load fitness profile:', loadError);
-      setError(
-        getUserMessage(loadError, 'Unable to load your fitness profile.')
-      );
+      if (isMounted.current && requestId.current === currentRequestId) {
+        setError(
+          getUserMessage(loadError, 'Unable to load your fitness profile.')
+        );
+      }
     } finally {
-      setIsLoading(false);
+      if (isMounted.current && requestId.current === currentRequestId) {
+        setIsLoading(false);
+      }
     }
   }, [clientId]);
 

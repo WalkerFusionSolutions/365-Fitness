@@ -89,7 +89,7 @@ export default function CoachDashboardScreen({ navigation }: any) {
       <IconRow
         icon="chatbubbles-outline"
         title="Messages"
-        subtitle="Messaging is not enabled yet"
+        subtitle="Review form videos and send feedback"
         onPress={() => navigation.navigate('Messages')}
       />
     </Screen>

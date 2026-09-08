@@ -16,10 +16,19 @@ export function LoginScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
 
   async function signInWithEmail() {
+    if (loading) return;
+
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail || !password) {
+      Alert.alert('Error', 'Enter your email and password.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await signInWithEmailService(email.trim(), password);
+      await signInWithEmailService(trimmedEmail, password);
     } catch (error) {
       const message =
         error instanceof AppServiceError

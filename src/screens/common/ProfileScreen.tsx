@@ -70,6 +70,7 @@ export function ProfileScreen() {
   const accountType = profile?.role === 'coach' ? 'Coach' : 'Client';
   const displayName = profile?.full_name?.trim() || '365 FITNESS User';
   const email = session?.user?.email ?? 'Not available';
+  const phoneNumber = profile?.phone_number?.trim() || 'Not added';
 
   return (
     <Screen>
@@ -78,6 +79,9 @@ export function ProfileScreen() {
         <Text style={[styles.name, { color: colors.textPrimary }]}>{displayName}</Text>
         <Badge label={accountType} />
         <Text style={[styles.email, { color: colors.textSecondary }]}>{email}</Text>
+        <Text style={[styles.email, { color: colors.textSecondary }]}>
+          {phoneNumber}
+        </Text>
       </View>
 
       {profile?.role === 'client' ? (

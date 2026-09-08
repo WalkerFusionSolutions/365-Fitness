@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
   RouteProp,
@@ -32,14 +32,20 @@ export default function CoachClientDetailScreen() {
   const history = useWorkoutHistory(clientId);
   const mealPlan = useActiveMealPlan(clientId);
   const water = useTodaysWater(clientId);
+  const hasFocusedOnce = useRef(false);
 
   useFocusEffect(
     React.useCallback(() => {
-      refresh();
-      workouts.refresh();
-      history.refresh();
-      mealPlan.refresh();
-      water.refresh();
+      if (!hasFocusedOnce.current) {
+        hasFocusedOnce.current = true;
+        return;
+      }
+
+      void refresh();
+      void workouts.refresh();
+      void history.refresh();
+      void mealPlan.refresh();
+      void water.refresh();
     }, [history.refresh, mealPlan.refresh, refresh, water.refresh, workouts.refresh])
   );
 
@@ -163,6 +169,12 @@ export default function CoachClientDetailScreen() {
       </Card>
 
       <View style={styles.actions}>
+        <Button
+          label="Message Client"
+          onPress={() =>
+            navigation.navigate('CoachConversation', { clientId, title: clientName })
+          }
+        />
         <Button
           label="Create Workout"
           variant="outline"

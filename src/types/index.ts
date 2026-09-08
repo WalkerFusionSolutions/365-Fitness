@@ -9,6 +9,7 @@ export interface Profile {
   full_name: string;
   avatar_url?: string | null;
   bio?: string | null;
+  phone_number?: string | null;
   created_at: string;
 }
 
@@ -352,13 +353,61 @@ export interface MealPlanWithMeals extends MealPlan {
   meals: MealPlanMeal[];
 }
 
+export type MessageType = 'text' | 'video_feedback';
+
+export interface MessageAttachment {
+  id: string;
+  conversation_id: string;
+  uploader_id: string;
+  client_id: string;
+  storage_path: string;
+  attachment_type: 'video_feedback';
+  mime_type?: string | null;
+  file_size_bytes?: number | null;
+  duration_seconds?: number | null;
+  original_filename?: string | null;
+  created_at: string;
+}
+
 export interface Message {
   id: string;
-  sender_id?: string | null;
-  receiver_id?: string | null;
+  conversation_id: string;
+  sender_id: string;
+  receiver_id: string;
   content?: string | null;
+  video_url?: string | null;
   timestamp: string;
-  video_url?: string;
+  message_type: MessageType;
+  body?: string | null;
+  attachment_id?: string | null;
+  created_at: string;
+  attachment?: MessageAttachment | null;
+  signedVideoUrl?: string | null;
+}
+
+export interface ConversationSummary {
+  id: string;
+  client_id: string;
+  coach_id: string;
+  created_at: string;
+  updated_at: string;
+  last_message_at?: string | null;
+  last_message_preview?: string | null;
+  client_last_read_at?: string | null;
+  coach_last_read_at?: string | null;
+  status: 'active' | 'archived' | string;
+  client?: Profile | null;
+  coach?: Profile | null;
+  otherProfile?: Profile | null;
+  unreadCount: number;
+}
+
+export interface ChatMessage extends Message {}
+
+export interface UnreadState {
+  conversationId: string;
+  unreadCount: number;
+  lastReadAt?: string | null;
 }
 
 export interface Notification {
@@ -401,6 +450,8 @@ export type ClientStackParamList = {
   ClientAssessment: undefined;
   ClientMeasurements: { clientId?: string; clientName?: string } | undefined;
   ClientProgress: { clientId?: string; clientName?: string } | undefined;
+  ClientMessages: undefined;
+  ClientConversation: { conversationId?: string; coachId?: string; title?: string };
   CoachClientDetail: { clientId: string; clientName?: string };
   CoachClientAssessment: { clientId: string; clientName?: string };
   CoachClientMeasurements: { clientId: string; clientName?: string };
@@ -418,6 +469,11 @@ export type CoachTabsParamList = {
 
 export type CoachStackParamList = {
   CoachTabs: undefined;
+  CoachConversation: { conversationId?: string; clientId?: string; title?: string };
+  CoachMessages: undefined;
+  CoachClientDetail: { clientId: string; clientName?: string };
+  CoachClientAssessment: { clientId: string; clientName?: string };
+  CoachClientMeasurements: { clientId: string; clientName?: string };
   ClientDetail: { clientId: string };
   CoachExerciseEditor: { exerciseId?: string } | undefined;
   CoachWorkoutBuilder: { workoutId?: string; clientId?: string } | undefined;

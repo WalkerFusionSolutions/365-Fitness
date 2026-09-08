@@ -88,13 +88,15 @@ export function useCoachAssignments() {
     [load]
   );
 
+  const refresh = useCallback(() => load(true), [load]);
+
   return {
     data,
     isLoading,
     isRefreshing,
     isMutating,
     error,
-    refresh: () => load(true),
+    refresh,
     createAssignment,
     archive,
   };
@@ -167,13 +169,15 @@ export function useClientAssignments() {
     [load]
   );
 
+  const refresh = useCallback(() => load(true), [load]);
+
   return {
     data,
     isLoading,
     isRefreshing,
     isMutating,
     error,
-    refresh: () => load(true),
+    refresh,
     approve,
     archive,
   };
@@ -187,6 +191,7 @@ export function useCoachVisibleClients() {
   const [data, setData] = useState<CoachVisibleClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isMutating, setIsMutating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async (refreshing = false) => {
@@ -213,11 +218,37 @@ export function useCoachVisibleClients() {
     load();
   }, [load]);
 
+  const createAssignment = useCallback(
+    async (clientId: string) => {
+      setIsMutating(true);
+      setError(null);
+
+      try {
+        await createPendingAssignment(clientId);
+        await load(true);
+        return true;
+      } catch (mutationError) {
+        console.error('Unable to create assignment:', mutationError);
+        setError(
+          getUserMessage(mutationError, 'Unable to create assignment request.')
+        );
+        return false;
+      } finally {
+        setIsMutating(false);
+      }
+    },
+    [load]
+  );
+
+  const refresh = useCallback(() => load(true), [load]);
+
   return {
+    createAssignment,
     data,
     isLoading,
+    isMutating,
     isRefreshing,
     error,
-    refresh: () => load(true),
+    refresh,
   };
 }

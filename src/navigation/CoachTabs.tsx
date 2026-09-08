@@ -4,11 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import CoachDashboardScreen from '@/screens/coach/CoachDashboardScreen';
 import CoachClientsScreen from '@/screens/coach/CoachClientsScreen';
 import CoachProgramsScreen from '@/screens/coach/CoachProgramsScreen';
+import CoachMessagesScreen from '@/screens/coach/CoachMessagesScreen';
 import { ProfileScreen } from '@/screens/common/ProfileScreen';
 import { useAppTheme } from '@/hooks/useTheme';
 import { CoachTabsParamList } from '@/types';
-import { Screen } from '@/components/Screen';
-import { AppHeader, IconRow } from '@/components/AppUI';
 
 const Tab = createBottomTabNavigator<CoachTabsParamList>();
 
@@ -70,22 +69,5 @@ export function CoachTabs() {
       />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
-  );
-}
-
-function CoachMessagesScreen() {
-  return (
-    <Screen>
-      <AppHeader
-        title="Messages"
-        subtitle="Client messaging is not enabled yet."
-      />
-      <IconRow
-        icon="chatbubbles-outline"
-        title="Messages coming later"
-        subtitle="Workout and nutrition tools are available now from Programs and client detail."
-        right={null}
-      />
-    </Screen>
   );
 }
