@@ -1,5 +1,8 @@
 import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  createNavigationContainerRef,
+  NavigationContainer,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Linking from 'expo-linking';
 
@@ -25,13 +28,19 @@ import ClientOnboardingScreen from '@/screens/client/ClientOnboardingScreen';
 import AssessmentScreen from '@/screens/common/AssessmentScreen';
 import MeasurementsScreen from '@/screens/common/MeasurementsScreen';
 import ConversationScreen from '@/screens/common/ConversationScreen';
+import AppointmentDetailScreen from '@/screens/common/AppointmentDetailScreen';
+import AppointmentEditorScreen from '@/screens/common/AppointmentEditorScreen';
+import NotificationsScreen, { navigateFromNotification } from '@/screens/common/NotificationsScreen';
 import ClientMessagesScreen from '@/screens/client/ClientMessagesScreen';
+import ClientAppointmentsScreen from '@/screens/client/ClientAppointmentsScreen';
 import CoachClientDetailScreen from '@/screens/coach/CoachClientDetailScreen';
 import CoachClientProgressScreen from '@/screens/coach/CoachClientProgressScreen';
 import CoachExerciseEditorScreen from '@/screens/coach/CoachExerciseEditorScreen';
 import CoachWorkoutBuilderScreen from '@/screens/coach/CoachWorkoutBuilderScreen';
 import CoachMealPlanBuilderScreen from '@/screens/coach/CoachMealPlanBuilderScreen';
 import CoachNutritionScreen from '@/screens/coach/CoachNutritionScreen';
+import CoachAppointmentsScreen from '@/screens/coach/CoachAppointmentsScreen';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useAppTheme } from '@/hooks/useTheme';
 import { ClientStackParamList, CoachStackParamList } from '@/types';
 
@@ -43,6 +52,7 @@ type RootStackParamList = ClientStackParamList & CoachStackParamList & {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 export function AppNavigator() {
   const theme = useAppTheme();
@@ -57,6 +67,58 @@ export function AppNavigator() {
     setLoading,
     resetAuth,
   } = useAuth();
+  const [pendingNotificationData, setPendingNotificationData] =
+    React.useState<Record<string, unknown> | null>(null);
+
+  const handleNotificationNavigation = React.useCallback(
+    (data: Record<string, unknown>) => {
+      const relatedEntityType =
+        typeof data.related_entity_type === 'string'
+          ? data.related_entity_type
+          : typeof data.entityType === 'string'
+            ? data.entityType
+            : null;
+      const relatedEntityId =
+        typeof data.related_entity_id === 'string'
+          ? data.related_entity_id
+          : typeof data.entityId === 'string'
+            ? data.entityId
+            : null;
+
+      if (!relatedEntityType || !relatedEntityId) return;
+
+      if (!navigationRef.isReady() || !profile?.role) {
+        setPendingNotificationData(data);
+        return;
+      }
+
+      navigateFromNotification(
+        {
+          related_entity_id: relatedEntityId,
+          related_entity_type: relatedEntityType,
+          type: 'system',
+        },
+        navigationRef,
+        profile.role
+      );
+    },
+    [profile?.role]
+  );
+
+  usePushNotifications({
+    onNotificationResponse: handleNotificationNavigation,
+    userId: profile?.id,
+  });
+
+  React.useEffect(() => {
+    if (!pendingNotificationData || !navigationRef.isReady() || !profile?.role) {
+      return;
+    }
+
+    const data = pendingNotificationData;
+    setPendingNotificationData(null);
+    handleNotificationNavigation(data);
+  }, [handleNotificationNavigation, pendingNotificationData, profile?.role]);
 
   useEffect(() => {
     let isMounted = true;
@@ -221,6 +283,12 @@ export function AppNavigator() {
 
   return (
     <NavigationContainer
+      onReady={() => {
+        if (pendingNotificationData) {
+          handleNotificationNavigation(pendingNotificationData);
+        }
+      }}
+      ref={navigationRef}
       theme={{
         dark: theme.name === 'dark',
         colors: {
@@ -274,6 +342,21 @@ export function AppNavigator() {
               name="CoachConversation"
               component={ConversationScreen}
               options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="CoachAppointmentDetail"
+              component={AppointmentDetailScreen}
+              options={detailHeaderOptions('Appointment', colors)}
+            />
+            <Stack.Screen
+              name="AppointmentEditor"
+              component={AppointmentEditorScreen}
+              options={detailHeaderOptions('Schedule Appointment', colors)}
+            />
+            <Stack.Screen
+              name="Notifications"
+              component={NotificationsScreen}
+              options={detailHeaderOptions('Notifications', colors)}
             />
             <Stack.Screen
               name="CoachClientAssessment"
@@ -359,9 +442,24 @@ export function AppNavigator() {
               options={detailHeaderOptions('Messages', colors)}
             />
             <Stack.Screen
+              name="ClientAppointments"
+              component={ClientAppointmentsScreen}
+              options={detailHeaderOptions('Appointments', colors)}
+            />
+            <Stack.Screen
               name="ClientConversation"
               component={ConversationScreen}
               options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ClientAppointmentDetail"
+              component={AppointmentDetailScreen}
+              options={detailHeaderOptions('Appointment', colors)}
+            />
+            <Stack.Screen
+              name="Notifications"
+              component={NotificationsScreen}
+              options={detailHeaderOptions('Notifications', colors)}
             />
           </>
         )}

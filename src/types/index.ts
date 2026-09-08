@@ -2,6 +2,32 @@ export type Role = 'client' | 'coach';
 export type AssignmentStatus = 'pending' | 'active' | 'archived';
 export type WeightUnit = 'lb' | 'kg';
 export type HeightUnit = 'ft_in' | 'cm';
+export type AppointmentType =
+  | 'consultation'
+  | 'check_in'
+  | 'workout'
+  | 'assessment'
+  | 'progress_review'
+  | 'nutrition'
+  | 'other';
+export type AppointmentStatus = 'scheduled' | 'completed' | 'cancelled';
+export type AppointmentLocationType = 'in_person' | 'video' | 'phone' | 'other';
+export type NotificationType =
+  | 'appointment_created'
+  | 'appointment_updated'
+  | 'appointment_cancelled'
+  | 'appointment_reminder'
+  | 'workout_assigned'
+  | 'meal_plan_assigned'
+  | 'message_received'
+  | 'system';
+export type AppointmentReminderStatus =
+  | 'pending'
+  | 'in_app_created'
+  | 'push_queued'
+  | 'sent'
+  | 'cancelled'
+  | 'failed';
 
 export interface Profile {
   id: string; // Supabase auth.users id
@@ -11,6 +37,56 @@ export interface Profile {
   bio?: string | null;
   phone_number?: string | null;
   created_at: string;
+}
+
+export interface Appointment {
+  id: string;
+  client_id: string;
+  coach_id: string;
+  title: string;
+  description?: string | null;
+  appointment_type: AppointmentType;
+  status: AppointmentStatus;
+  starts_at: string;
+  ends_at: string;
+  location_type: AppointmentLocationType;
+  location_text?: string | null;
+  meeting_url?: string | null;
+  client_notes?: string | null;
+  coach_notes?: string | null;
+  created_by: string;
+  cancelled_at?: string | null;
+  completed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AppointmentWithProfiles extends Appointment {
+  client?: Profile | null;
+  coach?: Profile | null;
+}
+
+export interface AppointmentReminder {
+  id: string;
+  appointment_id: string;
+  recipient_id: string;
+  remind_at: string;
+  reminder_type: '24_hours_before' | '1_hour_before';
+  status: AppointmentReminderStatus;
+  created_at: string;
+  processed_at?: string | null;
+}
+
+export interface PushDevice {
+  id: string;
+  user_id: string;
+  expo_push_token: string;
+  platform: 'ios' | 'android' | 'web' | 'unknown';
+  device_id?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  last_seen_at: string;
 }
 
 export interface MedicalQuestionnaire {
@@ -415,8 +491,12 @@ export interface Notification {
   user_id?: string | null;
   title: string;
   body: string;
-  type: string;
+  type: NotificationType;
   read?: boolean | null;
+  is_read?: boolean | null;
+  read_at?: string | null;
+  related_entity_type?: string | null;
+  related_entity_id?: string | null;
   created_at: string;
 }
 
@@ -436,6 +516,7 @@ export type ClientTabsParamList = {
   Nutrition: undefined;
   Coach: undefined;
   Progress: undefined;
+  Appointments: undefined;
   Profile: undefined;
 };
 
@@ -452,6 +533,9 @@ export type ClientStackParamList = {
   ClientProgress: { clientId?: string; clientName?: string } | undefined;
   ClientMessages: undefined;
   ClientConversation: { conversationId?: string; coachId?: string; title?: string };
+  ClientAppointments: undefined;
+  ClientAppointmentDetail: { appointmentId: string };
+  Notifications: undefined;
   CoachClientDetail: { clientId: string; clientName?: string };
   CoachClientAssessment: { clientId: string; clientName?: string };
   CoachClientMeasurements: { clientId: string; clientName?: string };
@@ -463,6 +547,7 @@ export type CoachTabsParamList = {
   Coach: undefined;
   Clients: undefined;
   Programs: undefined;
+  Schedule: undefined;
   Messages: undefined;
   Profile: undefined;
 };
@@ -471,6 +556,10 @@ export type CoachStackParamList = {
   CoachTabs: undefined;
   CoachConversation: { conversationId?: string; clientId?: string; title?: string };
   CoachMessages: undefined;
+  CoachAppointments: undefined;
+  AppointmentEditor: { appointmentId?: string; clientId?: string; clientName?: string };
+  CoachAppointmentDetail: { appointmentId: string };
+  Notifications: undefined;
   CoachClientDetail: { clientId: string; clientName?: string };
   CoachClientAssessment: { clientId: string; clientName?: string };
   CoachClientMeasurements: { clientId: string; clientName?: string };

@@ -26,7 +26,15 @@
     "plugins": [
       "expo-font",
       "expo-video",
-      "expo-status-bar"
+      [
+        "expo-notifications",
+        {
+          "color": "#18A88F",
+          "defaultChannel": "appointments"
+        }
+      ],
+      "expo-status-bar",
+      "@react-native-community/datetimepicker"
     ]
   }
 }

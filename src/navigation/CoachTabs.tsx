@@ -5,6 +5,7 @@ import CoachDashboardScreen from '@/screens/coach/CoachDashboardScreen';
 import CoachClientsScreen from '@/screens/coach/CoachClientsScreen';
 import CoachProgramsScreen from '@/screens/coach/CoachProgramsScreen';
 import CoachMessagesScreen from '@/screens/coach/CoachMessagesScreen';
+import CoachAppointmentsScreen from '@/screens/coach/CoachAppointmentsScreen';
 import { ProfileScreen } from '@/screens/common/ProfileScreen';
 import { useAppTheme } from '@/hooks/useTheme';
 import { CoachTabsParamList } from '@/types';
@@ -23,6 +24,7 @@ export function CoachTabs() {
           if (route.name === 'Coach') iconName = focused ? 'grid' : 'grid-outline';
           if (route.name === 'Clients') iconName = focused ? 'people' : 'people-outline';
           else if (route.name === 'Programs') iconName = focused ? 'barbell' : 'barbell-outline';
+          else if (route.name === 'Schedule') iconName = focused ? 'calendar' : 'calendar-outline';
           else if (route.name === 'Messages') iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
           else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
           
@@ -62,6 +64,10 @@ export function CoachTabs() {
       <Tab.Screen
         name="Programs"
         component={CoachProgramsScreen}
+      />
+      <Tab.Screen
+        name="Schedule"
+        component={CoachAppointmentsScreen}
       />
       <Tab.Screen
         name="Messages"

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
@@ -7,6 +8,7 @@ import { AppHeader, Avatar, IconRow, StatCard } from '@/components/AppUI';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import { useAuth } from '@/hooks/useAuth';
 import { useCoachVisibleClients } from '@/hooks/useAssignments';
+import { useNotifications } from '@/hooks/useNotifications';
 import { useAppTheme } from '@/hooks/useTheme';
 import { CoachVisibleClient } from '@/types';
 import { formatWeight } from '@/utils/fitness';
@@ -16,6 +18,7 @@ export default function CoachDashboardScreen({ navigation }: any) {
   const { colors } = useAppTheme();
   const { profile } = useAuth();
   const { data, error, isLoading, refresh } = useCoachVisibleClients();
+  const notifications = useNotifications(profile?.id);
   const coachName = profile?.full_name?.trim() || 'Coach';
   const completeProfiles = data.filter((item) => item.fitnessSummary).length;
   const incompleteProfiles = data.length - completeProfiles;
@@ -41,7 +44,25 @@ export default function CoachDashboardScreen({ navigation }: any) {
       <AppHeader
         title={`Coach ${coachName.split(' ')[0]}`}
         subtitle="Client overview and coaching tools"
-        action={<Avatar name={coachName} />}
+        action={
+          <View style={styles.headerActions}>
+            <Pressable
+              accessibilityLabel="Open notifications"
+              onPress={() => navigation.navigate('Notifications')}
+              style={[styles.bellButton, { backgroundColor: colors.surfaceSecondary }]}
+            >
+              <Ionicons name="notifications-outline" size={22} color={colors.primary} />
+              {notifications.unreadCount > 0 ? (
+                <View style={[styles.bellBadge, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.bellBadgeText, { color: colors.primaryText }]}>
+                    {Math.min(notifications.unreadCount, 9)}
+                  </Text>
+                </View>
+              ) : null}
+            </Pressable>
+            <Avatar name={coachName} />
+          </View>
+        }
       />
 
       <View style={styles.statsRow}>
@@ -85,6 +106,12 @@ export default function CoachDashboardScreen({ navigation }: any) {
         title="Nutrition"
         subtitle="Create and assign meal plans"
         onPress={() => navigation.navigate('CoachNutrition')}
+      />
+      <IconRow
+        icon="calendar-outline"
+        title="Schedule"
+        subtitle="Appointments, check-ins, and progress reviews"
+        onPress={() => navigation.navigate('Schedule')}
       />
       <IconRow
         icon="chatbubbles-outline"
@@ -136,6 +163,31 @@ const styles = StyleSheet.create({
   subtitle: {
     ...typography.caption,
     marginBottom: spacing.lg,
+  },
+  headerActions: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  bellButton: {
+    alignItems: 'center',
+    borderRadius: 22,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  bellBadge: {
+    alignItems: 'center',
+    borderRadius: 9,
+    minWidth: 18,
+    paddingHorizontal: 4,
+    position: 'absolute',
+    right: -2,
+    top: -2,
+  },
+  bellBadgeText: {
+    fontSize: 11,
+    fontWeight: '900',
   },
   sectionTitle: {
     ...typography.h3,

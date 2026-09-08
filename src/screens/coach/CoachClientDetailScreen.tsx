@@ -12,6 +12,7 @@ import { Screen } from '@/components/Screen';
 import { AppHeader, IconRow, ProfileAvatar, StatCard } from '@/components/AppUI';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
+import { useClientAppointments } from '@/hooks/useAppointments';
 import { useAppTheme } from '@/hooks/useTheme';
 import { useClientWorkouts, useWorkoutHistory } from '@/hooks/useWorkout';
 import { useActiveMealPlan, useTodaysWater } from '@/hooks/useMealPlan';
@@ -32,6 +33,7 @@ export default function CoachClientDetailScreen() {
   const history = useWorkoutHistory(clientId);
   const mealPlan = useActiveMealPlan(clientId);
   const water = useTodaysWater(clientId);
+  const appointments = useClientAppointments(clientId);
   const hasFocusedOnce = useRef(false);
 
   useFocusEffect(
@@ -46,7 +48,15 @@ export default function CoachClientDetailScreen() {
       void history.refresh();
       void mealPlan.refresh();
       void water.refresh();
-    }, [history.refresh, mealPlan.refresh, refresh, water.refresh, workouts.refresh])
+      void appointments.refresh();
+    }, [
+      appointments.refresh,
+      history.refresh,
+      mealPlan.refresh,
+      refresh,
+      water.refresh,
+      workouts.refresh,
+    ])
   );
 
   if (isLoading) {
@@ -77,6 +87,21 @@ export default function CoachClientDetailScreen() {
       </Screen>
     );
   }
+
+  const upcomingAppointments = appointments.data
+    .filter(
+      (appointment) =>
+        appointment.status === 'scheduled' &&
+        new Date(appointment.ends_at).getTime() >= Date.now()
+    )
+    .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+  const recentAppointments = appointments.data
+    .filter(
+      (appointment) =>
+        appointment.status !== 'scheduled' ||
+        new Date(appointment.ends_at).getTime() < Date.now()
+    )
+    .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
 
   return (
     <Screen>
@@ -165,6 +190,34 @@ export default function CoachClientDetailScreen() {
         <Metric
           label="Water Today"
           value={`${water.data?.cups_consumed ?? 0} / ${water.data?.daily_goal_cups ?? 8} cups`}
+        />
+      </Card>
+
+      <Card style={styles.card}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Appointments</Text>
+        {upcomingAppointments[0] ? (
+          <Metric
+            label="Next Appointment"
+            value={`${formatFriendlyDate(upcomingAppointments[0].starts_at)} • ${upcomingAppointments[0].title}`}
+          />
+        ) : (
+          <Metric label="Next Appointment" value="None scheduled" />
+        )}
+        {recentAppointments.length > 0 ? (
+          recentAppointments.slice(0, 2).map((appointment) => (
+            <Metric
+              key={appointment.id}
+              label={appointment.title}
+              value={`${formatFriendlyDate(appointment.starts_at)} • ${appointment.status}`}
+            />
+          ))
+        ) : null}
+        <Button
+          label="Schedule Appointment"
+          variant="outline"
+          onPress={() =>
+            navigation.navigate('AppointmentEditor', { clientId, clientName })
+          }
         />
       </Card>
 

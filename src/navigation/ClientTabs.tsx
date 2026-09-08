@@ -6,6 +6,7 @@ import NutritionScreen from '@/screens/client/NutritionScreen';
 import ClientWorkoutScreen from '@/screens/client/ClientWorkoutScreen';
 import DashboardScreen from '@/screens/client/DashboardScreen';
 import ClientProgressScreen from '@/screens/client/ClientProgressScreen';
+import ClientAppointmentsScreen from '@/screens/client/ClientAppointmentsScreen';
 import { ProfileScreen } from '@/screens/common/ProfileScreen';
 import { ClientTabsParamList } from '@/types';
 
@@ -24,6 +25,7 @@ export function ClientTabs() {
           else if (route.name === 'Workouts') iconName = focused ? 'barbell' : 'barbell-outline';
           else if (route.name === 'Nutrition') iconName = focused ? 'restaurant' : 'restaurant-outline';
           else if (route.name === 'Progress') iconName = focused ? 'analytics' : 'analytics-outline';
+          else if (route.name === 'Appointments') iconName = focused ? 'calendar' : 'calendar-outline';
           else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
           
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -61,6 +63,7 @@ export function ClientTabs() {
       <Tab.Screen name="Workouts" component={ClientWorkoutScreen} />
       <Tab.Screen name="Nutrition" component={NutritionScreen} />
       <Tab.Screen name="Progress" component={ClientProgressScreen} />
+      <Tab.Screen name="Appointments" component={ClientAppointmentsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

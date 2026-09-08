@@ -11,7 +11,10 @@ import { useFitnessProfile } from '@/hooks/useFitnessProfile';
 import { useAppTheme } from '@/hooks/useTheme';
 import { useClientWorkouts } from '@/hooks/useWorkout';
 import { useActiveMealPlan, useTodaysWater } from '@/hooks/useMealPlan';
-import { AppHeader, Avatar, ProgressBar, StatCard } from '@/components/AppUI';
+import { useUpcomingAppointments } from '@/hooks/useAppointments';
+import { useNotifications } from '@/hooks/useNotifications';
+import { AppHeader, Avatar, Badge, ProgressBar, StatCard } from '@/components/AppUI';
+import { AppointmentWithProfiles } from '@/types';
 
 export default function DashboardScreen({ navigation }: any) {
   const { colors } = useAppTheme();
@@ -24,6 +27,8 @@ export default function DashboardScreen({ navigation }: any) {
   const { data: workouts } = useClientWorkouts(profile?.id);
   const mealPlan = useActiveMealPlan(profile?.id);
   const water = useTodaysWater(profile?.id);
+  const appointments = useUpcomingAppointments(profile?.id);
+  const notifications = useNotifications(profile?.id);
   const nextWorkout = workouts[0];
   const firstName = profile?.full_name?.split(' ')[0] || 'Athlete';
   const currentWeightLb = fitnessProfile?.currentWeightKg
@@ -44,7 +49,25 @@ export default function DashboardScreen({ navigation }: any) {
       <AppHeader
         title={firstName}
         subtitle="Welcome back"
-        action={<Avatar name={profile?.full_name} />}
+        action={
+          <View style={styles.headerActions}>
+            <Pressable
+              accessibilityLabel="Open notifications"
+              onPress={() => navigation.navigate('Notifications')}
+              style={[styles.bellButton, { backgroundColor: colors.surfaceSecondary }]}
+            >
+              <Ionicons name="notifications-outline" size={22} color={colors.primary} />
+              {notifications.unreadCount > 0 ? (
+                <View style={[styles.bellBadge, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.bellBadgeText, { color: colors.primaryText }]}>
+                    {Math.min(notifications.unreadCount, 9)}
+                  </Text>
+                </View>
+              ) : null}
+            </Pressable>
+            <Avatar name={profile?.full_name} />
+          </View>
+        }
       />
 
       {!fitnessLoading && !fitnessProfile ? (
@@ -62,6 +85,17 @@ export default function DashboardScreen({ navigation }: any) {
       ) : null}
 
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Today's Plan</Text>
+
+      {appointments.nextAppointment ? (
+        <NextAppointmentCard
+          appointment={appointments.nextAppointment}
+          onPress={() =>
+            navigation.navigate('ClientAppointmentDetail', {
+              appointmentId: appointments.nextAppointment!.id,
+            })
+          }
+        />
+      ) : null}
       
       <Card style={[styles.workoutCard, { backgroundColor: colors.surfaceElevated }]}>
         <View style={styles.cardHeader}>
@@ -176,12 +210,78 @@ export default function DashboardScreen({ navigation }: any) {
   );
 }
 
+function NextAppointmentCard({
+  appointment,
+  onPress,
+}: {
+  appointment: AppointmentWithProfiles;
+  onPress: () => void;
+}) {
+  const { colors } = useAppTheme();
+  const start = new Date(appointment.starts_at);
+
+  return (
+    <Card style={[styles.workoutCard, { backgroundColor: colors.surfaceElevated }]}>
+      <View style={styles.cardHeader}>
+        <View style={[styles.iconContainer, { backgroundColor: colors.primary }]}>
+          <Ionicons name="calendar" size={24} color={colors.primaryText} />
+        </View>
+        <View style={styles.cardTextContainer}>
+          <View style={styles.appointmentTitleRow}>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+              {appointment.title}
+            </Text>
+            <Badge label="Next" />
+          </View>
+          <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+            {start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} • {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+          </Text>
+          <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+            {appointment.coach?.full_name ?? 'Coach'}
+          </Text>
+        </View>
+      </View>
+      <Button
+        label="View Details"
+        variant="outline"
+        onPress={onPress}
+        style={styles.actionButton}
+      />
+    </Card>
+  );
+}
+
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing.xl,
+  },
+  headerActions: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  bellButton: {
+    alignItems: 'center',
+    borderRadius: radius.round,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  bellBadge: {
+    alignItems: 'center',
+    borderRadius: 9,
+    minWidth: 18,
+    paddingHorizontal: 4,
+    position: 'absolute',
+    right: -2,
+    top: -2,
+  },
+  bellBadgeText: {
+    fontSize: 11,
+    fontWeight: '900',
   },
   greeting: {
     ...typography.caption,
@@ -234,6 +334,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     ...typography.h3,
     marginBottom: 4,
+  },
+  appointmentTitleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+    justifyContent: 'space-between',
   },
   cardSubtitle: {
     ...typography.caption,

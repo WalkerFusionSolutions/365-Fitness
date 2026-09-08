@@ -11,6 +11,26 @@ type PublicEnums = {
   assignment_status: 'pending' | 'active' | 'archived';
 };
 
+type AppointmentType =
+  | 'consultation'
+  | 'check_in'
+  | 'workout'
+  | 'assessment'
+  | 'progress_review'
+  | 'nutrition'
+  | 'other';
+type AppointmentStatus = 'scheduled' | 'completed' | 'cancelled';
+type AppointmentLocationType = 'in_person' | 'video' | 'phone' | 'other';
+type NotificationType =
+  | 'appointment_created'
+  | 'appointment_updated'
+  | 'appointment_cancelled'
+  | 'appointment_reminder'
+  | 'workout_assigned'
+  | 'meal_plan_assigned'
+  | 'message_received'
+  | 'system';
+
 type WithRelationships<
   Tables extends Record<
     string,
@@ -27,6 +47,138 @@ type WithRelationships<
 };
 
 type PublicTables = {
+      appointments: {
+        Row: {
+          id: string;
+          client_id: string;
+          coach_id: string;
+          title: string;
+          description: string | null;
+          appointment_type: AppointmentType;
+          status: AppointmentStatus;
+          starts_at: string;
+          ends_at: string;
+          location_type: AppointmentLocationType;
+          location_text: string | null;
+          meeting_url: string | null;
+          client_notes: string | null;
+          coach_notes: string | null;
+          created_by: string;
+          cancelled_at: string | null;
+          completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          coach_id: string;
+          title: string;
+          description?: string | null;
+          appointment_type: AppointmentType;
+          status?: AppointmentStatus;
+          starts_at: string;
+          ends_at: string;
+          location_type: AppointmentLocationType;
+          location_text?: string | null;
+          meeting_url?: string | null;
+          client_notes?: string | null;
+          coach_notes?: string | null;
+          created_by: string;
+          cancelled_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          client_id?: string;
+          coach_id?: string;
+          title?: string;
+          description?: string | null;
+          appointment_type?: AppointmentType;
+          status?: AppointmentStatus;
+          starts_at?: string;
+          ends_at?: string;
+          location_type?: AppointmentLocationType;
+          location_text?: string | null;
+          meeting_url?: string | null;
+          client_notes?: string | null;
+          coach_notes?: string | null;
+          created_by?: string;
+          cancelled_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      appointment_reminders: {
+        Row: {
+          id: string;
+          appointment_id: string;
+          recipient_id: string;
+          remind_at: string;
+          reminder_type: '24_hours_before' | '1_hour_before';
+          status: 'pending' | 'in_app_created' | 'push_queued' | 'sent' | 'cancelled' | 'failed';
+          created_at: string;
+          processed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          appointment_id: string;
+          recipient_id: string;
+          remind_at: string;
+          reminder_type: '24_hours_before' | '1_hour_before';
+          status?: 'pending' | 'in_app_created' | 'push_queued' | 'sent' | 'cancelled' | 'failed';
+          created_at?: string;
+          processed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          appointment_id?: string;
+          recipient_id?: string;
+          remind_at?: string;
+          reminder_type?: '24_hours_before' | '1_hour_before';
+          status?: 'pending' | 'in_app_created' | 'push_queued' | 'sent' | 'cancelled' | 'failed';
+          created_at?: string;
+          processed_at?: string | null;
+        };
+      };
+      push_devices: {
+        Row: {
+          id: string;
+          user_id: string;
+          expo_push_token: string;
+          platform: 'ios' | 'android' | 'web' | 'unknown';
+          device_id: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+          last_seen_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          expo_push_token: string;
+          platform: 'ios' | 'android' | 'web' | 'unknown';
+          device_id?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          last_seen_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          expo_push_token?: string;
+          platform?: 'ios' | 'android' | 'web' | 'unknown';
+          device_id?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          last_seen_at?: string;
+        };
+      };
       profiles: {
         Row: {
           id: string;
@@ -785,8 +937,12 @@ type PublicTables = {
           user_id: string | null;
           title: string;
           body: string;
-          type: string;
+          type: NotificationType;
           read: boolean | null;
+          is_read: boolean;
+          read_at: string | null;
+          related_entity_type: string | null;
+          related_entity_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -794,8 +950,12 @@ type PublicTables = {
           user_id?: string | null;
           title: string;
           body: string;
-          type: string;
+          type: NotificationType;
           read?: boolean | null;
+          is_read?: boolean;
+          read_at?: string | null;
+          related_entity_type?: string | null;
+          related_entity_id?: string | null;
           created_at?: string;
         };
         Update: {
@@ -803,8 +963,12 @@ type PublicTables = {
           user_id?: string | null;
           title?: string;
           body?: string;
-          type?: string;
+          type?: NotificationType;
           read?: boolean | null;
+          is_read?: boolean;
+          read_at?: string | null;
+          related_entity_type?: string | null;
+          related_entity_id?: string | null;
           created_at?: string;
         };
       };
@@ -859,6 +1023,10 @@ export type Database = {
       };
       can_access_conversation: {
         Args: { conversation_uuid: string };
+        Returns: boolean;
+      };
+      can_manage_appointment: {
+        Args: { appointment_client_id: string; appointment_coach_id: string };
         Returns: boolean;
       };
       can_send_to_conversation: {
