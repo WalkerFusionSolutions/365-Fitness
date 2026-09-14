@@ -7,7 +7,7 @@ import { Card } from '@/components/Card';
 import { signInWithEmail as signInWithEmailService } from '@/services/auth.service';
 import { AppServiceError } from '@/services/errors';
 import { useAppTheme } from '@/hooks/useTheme';
-import { spacing, typography } from '@/utils/theme';
+import { radius, spacing, typography } from '@/utils/theme';
 
 export function LoginScreen({ navigation }: any) {
   const { colors } = useAppTheme();
@@ -43,11 +43,17 @@ export function LoginScreen({ navigation }: any) {
   return (
     <Screen padded>
       <View style={styles.container}>
-        <Text style={[styles.brand, { color: colors.primary }]}>365 FITNESS</Text>
+        <View style={styles.brandLockup}>
+          <Text style={[styles.brandNumber, { color: colors.primary }]}>365</Text>
+          <Text style={[styles.brand, { color: colors.primary }]}>FITNESS</Text>
+          <View style={[styles.brandLine, { backgroundColor: colors.primary }]} />
+        </View>
         <Text style={[styles.title, { color: colors.textPrimary }]}>Welcome Back</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Continue your progress.</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          Sign in to continue your fitness journey.
+        </Text>
 
-        <Card style={styles.form}>
+        <Card style={[styles.form, { backgroundColor: colors.surfaceElevated }]}>
           <AppInput
             label="Email"
             placeholder="you@example.com"
@@ -73,6 +79,11 @@ export function LoginScreen({ navigation }: any) {
           onPress={() => navigation.navigate('Signup')} 
           disabled={loading}
         />
+
+        <View style={styles.footer}>
+          <Text style={[styles.footerTitle, { color: colors.primary }]}>365 FITNESS</Text>
+          <Text style={[styles.footerSubtitle, { color: colors.textMuted }]}>BUILD / TRAIN / ACHIEVE</Text>
+        </View>
       </View>
     </Screen>
   );
@@ -83,11 +94,28 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  brand: {
-    ...typography.caption,
+  brandLockup: {
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  brandNumber: {
+    fontSize: 62,
+    fontStyle: 'italic',
     fontWeight: '900',
+    letterSpacing: 0,
+    lineHeight: 64,
+  },
+  brand: {
+    fontSize: 16,
+    fontWeight: '900',
+    letterSpacing: 4,
     textAlign: 'center',
-    marginBottom: spacing.xs,
+  },
+  brandLine: {
+    borderRadius: radius.round,
+    height: 3,
+    marginTop: spacing.sm,
+    width: 76,
   },
   title: {
     ...typography.h1,
@@ -101,9 +129,23 @@ const styles = StyleSheet.create({
   form: {
     gap: spacing.md,
     marginBottom: spacing.md,
+    padding: spacing.lg,
   },
   button: {
     marginBottom: spacing.md,
     marginTop: spacing.sm,
+  },
+  footer: {
+    alignItems: 'center',
+    marginTop: spacing.lg,
+  },
+  footerTitle: {
+    ...typography.caption,
+    fontWeight: '900',
+  },
+  footerSubtitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    marginTop: spacing.xs,
   }
 });

@@ -13,7 +13,7 @@ import { useClientWorkouts } from '@/hooks/useWorkout';
 import { useActiveMealPlan, useTodaysWater } from '@/hooks/useMealPlan';
 import { useUpcomingAppointments } from '@/hooks/useAppointments';
 import { useNotifications } from '@/hooks/useNotifications';
-import { AppHeader, Avatar, Badge, ProgressBar, StatCard } from '@/components/AppUI';
+import { AppHeader, Avatar, Badge, ProgressBar, SectionHeader, StatCard } from '@/components/AppUI';
 import { AppointmentWithProfiles } from '@/types';
 
 export default function DashboardScreen({ navigation }: any) {
@@ -47,8 +47,8 @@ export default function DashboardScreen({ navigation }: any) {
   return (
     <Screen padded>
       <AppHeader
-        title={firstName}
-        subtitle="Welcome back"
+        title="Welcome Back"
+        subtitle={`${firstName}, stay consistent and keep moving.`}
         action={
           <View style={styles.headerActions}>
             <Pressable
@@ -84,7 +84,7 @@ export default function DashboardScreen({ navigation }: any) {
         </Card>
       ) : null}
 
-      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Today's Plan</Text>
+      <SectionHeader title="Today's Plan" />
 
       {appointments.nextAppointment ? (
         <NextAppointmentCard
@@ -103,6 +103,7 @@ export default function DashboardScreen({ navigation }: any) {
             <Ionicons name="barbell" size={24} color={colors.white} />
           </View>
           <View style={styles.cardTextContainer}>
+            <Text style={[styles.cardEyebrow, { color: colors.primary }]}>Today's Workout</Text>
             <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
               {nextWorkout?.name ?? 'No workout assigned'}
             </Text>
@@ -113,6 +114,22 @@ export default function DashboardScreen({ navigation }: any) {
             </Text>
           </View>
         </View>
+        {nextWorkout ? (
+          <View style={[styles.metaStrip, { borderColor: colors.border }]}>
+            <View style={styles.metaItem}>
+              <Ionicons name="time-outline" size={16} color={colors.primary} />
+              <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                {nextWorkout.estimated_minutes ? `${nextWorkout.estimated_minutes} min` : 'Duration TBD'}
+              </Text>
+            </View>
+            <View style={styles.metaItem}>
+              <Ionicons name="flash-outline" size={16} color={colors.primary} />
+              <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                {nextWorkout.status ? capitalize(nextWorkout.status) : 'Assigned'}
+              </Text>
+            </View>
+          </View>
+        ) : null}
         {nextWorkout ? (
           <Button
             label="View Workout"
@@ -184,13 +201,21 @@ export default function DashboardScreen({ navigation }: any) {
         />
       </View>
 
-      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Progress Snapshot</Text>
+      <SectionHeader title="Progress Snapshot" />
       <Card style={styles.progressCard}>
-        <View style={styles.progressRow}>
-          <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>Current Weight</Text>
-          <Text style={[styles.progressValue, { color: colors.textPrimary }]}>
-            {currentWeightLb ? `${currentWeightLb} lbs` : 'Not recorded'}
-          </Text>
+        <View style={styles.progressTop}>
+          <View>
+            <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>Current Weight</Text>
+            <Text style={[styles.progressValue, { color: colors.textPrimary }]}>
+              {currentWeightLb ? `${currentWeightLb} lbs` : 'Not recorded'}
+            </Text>
+          </View>
+          <View style={[styles.goalBadge, { backgroundColor: colors.surfaceSecondary }]}>
+            <Text style={[styles.goalBadgeLabel, { color: colors.textSecondary }]}>Goal</Text>
+            <Text style={[styles.goalBadgeValue, { color: colors.primary }]}>
+              {goalWeightLb ? `${goalWeightLb} lbs` : 'Not set'}
+            </Text>
+          </View>
         </View>
         <View style={[styles.progressBarBg, { backgroundColor: colors.border }]}>
           <ProgressBar
@@ -202,7 +227,11 @@ export default function DashboardScreen({ navigation }: any) {
           />
         </View>
         <Text style={[styles.progressGoal, { color: colors.textMuted }]}>
-          Goal: {goalWeightLb ? `${goalWeightLb} lbs` : 'Not set'}
+          {getProgressPercent(
+            fitnessProfile?.startingWeightKg,
+            fitnessProfile?.currentWeightKg,
+            fitnessProfile?.goalWeightKg
+          )}% to goal
         </Text>
       </Card>
 
@@ -307,6 +336,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     marginTop: spacing.md,
   },
+  cardEyebrow: {
+    ...typography.caption,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
   workoutCard: {
     marginBottom: spacing.lg,
     padding: spacing.lg,
@@ -344,6 +378,23 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     ...typography.caption,
   },
+  metaStrip: {
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+    marginBottom: spacing.md,
+    paddingTop: spacing.md,
+  },
+  metaItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+  metaText: {
+    ...typography.caption,
+    fontWeight: '700',
+  },
   placeholderLabel: {
     ...typography.caption,
     fontWeight: '700',
@@ -380,6 +431,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.sm,
   },
+  progressTop: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
   progressLabel: {
     ...typography.body,
   },
@@ -398,6 +456,20 @@ const styles = StyleSheet.create({
   progressGoal: {
     ...typography.caption,
     textAlign: 'right',
+    fontWeight: '800',
+  },
+  goalBadge: {
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  goalBadgeLabel: {
+    ...typography.caption,
+    fontWeight: '800',
+  },
+  goalBadgeValue: {
+    ...typography.body,
+    fontWeight: '800',
   }
 });
 
@@ -413,4 +485,8 @@ function getProgressPercent(
 
   const moved = Math.abs(startingWeight - currentWeight);
   return Math.min(100, Math.max(0, Math.round((moved / total) * 100)));
+}
+
+function capitalize(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }

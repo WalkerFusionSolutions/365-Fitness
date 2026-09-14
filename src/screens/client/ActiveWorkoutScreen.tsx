@@ -14,7 +14,7 @@ import {
 } from '@/hooks/useWorkout';
 import { useAppTheme } from '@/hooks/useTheme';
 import { WorkoutExercise, WorkoutSetLog } from '@/types';
-import { spacing, typography } from '@/utils/theme';
+import { radius, spacing, typography } from '@/utils/theme';
 
 export default function ActiveWorkoutScreen({ route, navigation }: any) {
   const { workoutId } = route.params;
@@ -154,6 +154,11 @@ export default function ActiveWorkoutScreen({ route, navigation }: any) {
       <View style={styles.progressTrack}>
         <ProgressBar value={progressPercent} />
       </View>
+      <View style={styles.sessionMeta}>
+        <MetaTile label="Exercise" value={`${exerciseIndex + 1}/${workout.exercises.length}`} icon="barbell-outline" />
+        <MetaTile label="Set" value={`${setNumber}/${exercise.sets}`} icon="layers-outline" />
+        <MetaTile label="Rest" value={`${exercise.rest_seconds}s`} icon="timer-outline" />
+      </View>
 
       <Card style={styles.currentCard}>
         <Text style={[styles.setTitle, { color: colors.textPrimary }]}>
@@ -184,7 +189,10 @@ export default function ActiveWorkoutScreen({ route, navigation }: any) {
 
       {restSeconds > 0 ? (
         <Card style={[styles.restCard, { backgroundColor: colors.surfaceSecondary }]}>
-          <Text style={[styles.restLabel, { color: colors.textSecondary }]}>Rest</Text>
+          <View style={[styles.restIcon, { backgroundColor: colors.cardBackground }]}>
+            <Ionicons name="timer-outline" size={22} color={colors.primary} />
+          </View>
+          <Text style={[styles.restLabel, { color: colors.textSecondary }]}>Rest Timer</Text>
           <Text style={[styles.restTime, { color: colors.primary }]}>
             {formatTimer(restSeconds)}
           </Text>
@@ -192,6 +200,26 @@ export default function ActiveWorkoutScreen({ route, navigation }: any) {
         </Card>
       ) : null}
     </Screen>
+  );
+}
+
+function MetaTile({
+  icon,
+  label,
+  value,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+}) {
+  const { colors } = useAppTheme();
+
+  return (
+    <View style={[styles.metaTile, { backgroundColor: colors.surfaceSecondary }]}>
+      <Ionicons name={icon} size={18} color={colors.primary} />
+      <Text style={[styles.metaValue, { color: colors.textPrimary }]}>{value}</Text>
+      <Text style={[styles.metaLabel, { color: colors.textSecondary }]}>{label}</Text>
+    </View>
   );
 }
 
@@ -265,6 +293,26 @@ const styles = StyleSheet.create({
   progressTrack: {
     marginBottom: spacing.lg,
   },
+  sessionMeta: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  metaTile: {
+    alignItems: 'center',
+    borderRadius: radius.md,
+    flex: 1,
+    gap: 2,
+    minHeight: 82,
+    padding: spacing.sm,
+  },
+  metaValue: {
+    ...typography.body,
+    fontWeight: '800',
+  },
+  metaLabel: {
+    ...typography.caption,
+  },
   eyebrow: {
     ...typography.caption,
     textTransform: 'uppercase',
@@ -328,6 +376,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     marginTop: spacing.lg,
+  },
+  restIcon: {
+    alignItems: 'center',
+    borderRadius: radius.round,
+    height: 42,
+    justifyContent: 'center',
+    width: 42,
   },
   restLabel: {
     ...typography.caption,

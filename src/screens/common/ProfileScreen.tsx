@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { Avatar, Badge, IconRow, ProfileAvatar, SectionHeader } from '@/components/AppUI';
+import { AppHeader, Avatar, Badge, IconRow, ProfileAvatar, SectionHeader } from '@/components/AppUI';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
@@ -74,6 +74,16 @@ export function ProfileScreen() {
 
   return (
     <Screen>
+      <AppHeader
+        title="Profile"
+        subtitle="Manage your account"
+        action={
+          <View style={[styles.headerIcon, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}>
+            <Ionicons name="person-outline" size={24} color={colors.primary} />
+          </View>
+        }
+      />
+
       <View style={[styles.profileHero, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
         <ProfileAvatar name={displayName} uri={profile?.avatar_url} size={86} />
         <Text style={[styles.name, { color: colors.textPrimary }]}>{displayName}</Text>
@@ -82,6 +92,17 @@ export function ProfileScreen() {
         <Text style={[styles.email, { color: colors.textSecondary }]}>
           {phoneNumber}
         </Text>
+        <View style={[styles.profileDivider, { backgroundColor: colors.border }]} />
+        <View style={styles.statusRow}>
+          <View style={[styles.statusIcon, { backgroundColor: colors.surfaceSecondary }]}>
+            <Ionicons name="shield-checkmark-outline" size={19} color={colors.primary} />
+          </View>
+          <View style={styles.flex}>
+            <Text style={[styles.meta, { color: colors.textSecondary }]}>Account Status</Text>
+            <Text style={[styles.statusValue, { color: colors.textPrimary }]}>Active</Text>
+          </View>
+          <Ionicons name="checkmark-circle" size={22} color={colors.success} />
+        </View>
       </View>
 
       {profile?.role === 'client' ? (
@@ -283,6 +304,14 @@ function labelTheme(value: ThemePreference) {
 }
 
 const styles = StyleSheet.create({
+  headerIcon: {
+    alignItems: 'center',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
   profileHero: {
     alignItems: 'center',
     borderWidth: 1,
@@ -297,6 +326,28 @@ const styles = StyleSheet.create({
   email: {
     ...typography.caption,
     textAlign: 'center',
+  },
+  profileDivider: {
+    height: 1,
+    marginVertical: spacing.sm,
+    width: '100%',
+  },
+  statusRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.md,
+    width: '100%',
+  },
+  statusIcon: {
+    alignItems: 'center',
+    borderRadius: radius.md,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  statusValue: {
+    ...typography.body,
+    fontWeight: '800',
   },
   snapshot: {
     gap: spacing.md,

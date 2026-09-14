@@ -268,7 +268,11 @@ export function IconRow({
   );
 
   if (!onPress) return content;
-  return <Pressable onPress={onPress}>{content}</Pressable>;
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => pressed && styles.pressed}>
+      {content}
+    </Pressable>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -418,5 +422,8 @@ const styles = StyleSheet.create({
   searchInput: {
     ...typography.body,
     flex: 1,
+  },
+  pressed: {
+    opacity: 0.72,
   },
 });

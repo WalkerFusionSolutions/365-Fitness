@@ -133,20 +133,49 @@ export default function NutritionScreen({ navigation }: any) {
         <FilterChip label="Supplements" active={view === 'supplements'} onPress={() => setView('supplements')} />
       </View>
 
-      <Card style={styles.waterCard}>
+      <Card style={[styles.waterCard, { backgroundColor: colors.surfaceElevated }]}>
         <View style={styles.waterHeader}>
-          <View>
-            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Water Today</Text>
-            <Text style={[styles.meta, { color: colors.textSecondary }]}>
-              {cups} of {goal} cups
-            </Text>
+          <View style={styles.waterLeft}>
+            <View style={[styles.waterIcon, { backgroundColor: colors.surfaceSecondary }]}>
+              <Ionicons name="water" size={24} color={colors.primary} />
+            </View>
+            <View>
+              <Text style={[styles.cardEyebrow, { color: colors.primary }]}>Hydration</Text>
+              <Text style={[styles.waterCount, { color: colors.textPrimary }]}>
+                {cups}
+                <Text style={[styles.waterGoal, { color: colors.textSecondary }]}> / {goal}</Text>
+              </Text>
+              <Text style={[styles.meta, { color: colors.textSecondary }]}>cups today</Text>
+            </View>
           </View>
           <Text style={[styles.percent, { color: colors.primary }]}>{Math.min(100, waterProgress)}%</Text>
         </View>
         <ProgressBar value={waterProgress} />
         <View style={styles.waterActions}>
-          <Button label="- Cup" variant="outline" onPress={() => changeWater(-1)} disabled={updateWater.isPending || cups <= 0} style={styles.waterButton} />
-          <Button label="+ Cup" onPress={() => changeWater(1)} loading={updateWater.isPending} style={styles.waterButton} />
+          <Pressable
+            accessibilityLabel="Remove one water cup"
+            disabled={updateWater.isPending || cups <= 0}
+            onPress={() => changeWater(-1)}
+            style={[
+              styles.waterControl,
+              { borderColor: colors.border, backgroundColor: colors.cardBackground },
+              (updateWater.isPending || cups <= 0) && styles.disabled,
+            ]}
+          >
+            <Ionicons name="remove" size={22} color={colors.primary} />
+          </Pressable>
+          <Pressable
+            accessibilityLabel="Add one water cup"
+            disabled={updateWater.isPending}
+            onPress={() => changeWater(1)}
+            style={[
+              styles.waterControl,
+              { backgroundColor: colors.primary },
+              updateWater.isPending && styles.disabled,
+            ]}
+          >
+            <Ionicons name="add" size={22} color={colors.primaryText} />
+          </Pressable>
         </View>
       </Card>
 
@@ -173,6 +202,10 @@ export default function NutritionScreen({ navigation }: any) {
                 <View style={styles.statsRow}>
                   <StatCard icon="flame-outline" label="Calories" value={formatNumber(totals.calories)} />
                   <StatCard icon="fitness-outline" label="Protein" value={`${formatNumber(totals.protein)}g`} tone="success" />
+                </View>
+                <View style={styles.macroStrip}>
+                  <MacroPill label="Carbs" value={`${formatNumber(totals.carbs)}g`} />
+                  <MacroPill label="Fat" value={`${formatNumber(totals.fat)}g`} />
                 </View>
               </Card>
 
@@ -226,11 +259,21 @@ export default function NutritionScreen({ navigation }: any) {
               {grocery.data.items.map((item, index) => (
                 <Pressable key={`${item.name}-${index}`} onPress={() => toggleGrocery(item, index)}>
                   <Card style={styles.groceryRow}>
-                    <Ionicons
-                      name={item.checked ? 'checkbox' : 'square-outline'}
-                      size={24}
-                      color={item.checked ? colors.primary : colors.textMuted}
-                    />
+                    <View
+                      style={[
+                        styles.groceryCheck,
+                        {
+                          backgroundColor: item.checked ? colors.primary : colors.surfaceSecondary,
+                          borderColor: item.checked ? colors.primary : colors.border,
+                        },
+                      ]}
+                    >
+                      <Ionicons
+                        name={item.checked ? 'checkmark' : 'cart-outline'}
+                        size={18}
+                        color={item.checked ? colors.primaryText : colors.textMuted}
+                      />
+                    </View>
                     <View style={styles.flex}>
                       <Text style={[styles.foodName, { color: item.checked ? colors.textMuted : colors.textPrimary }, item.checked && styles.checked]}>
                         {item.name}
@@ -303,9 +346,25 @@ function MealCard({ meal }: { meal: MealPlanMeal }) {
         ))
       )}
       <Text style={[styles.meta, { color: colors.textMuted }]}>
-        P {formatNumber(meal.total_protein_g)}g • C {formatNumber(meal.total_carbs_g)}g • F {formatNumber(meal.total_fat_g)}g
+        Macros
       </Text>
+      <View style={styles.macroStrip}>
+        <MacroPill label="Protein" value={`${formatNumber(meal.total_protein_g)}g`} />
+        <MacroPill label="Carbs" value={`${formatNumber(meal.total_carbs_g)}g`} />
+        <MacroPill label="Fat" value={`${formatNumber(meal.total_fat_g)}g`} />
+      </View>
     </Card>
+  );
+}
+
+function MacroPill({ label, value }: { label: string; value: string }) {
+  const { colors } = useAppTheme();
+
+  return (
+    <View style={[styles.macroPill, { backgroundColor: colors.surfaceSecondary }]}>
+      <Text style={[styles.macroValue, { color: colors.textPrimary }]}>{value}</Text>
+      <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>{label}</Text>
+    </View>
   );
 }
 
@@ -350,12 +409,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  waterLeft: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+    gap: spacing.md,
+  },
+  waterIcon: {
+    alignItems: 'center',
+    borderRadius: radius.md,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
+  cardEyebrow: {
+    ...typography.caption,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  waterCount: {
+    ...typography.h2,
+  },
+  waterGoal: {
+    ...typography.body,
+    fontWeight: '700',
+  },
   waterActions: {
     flexDirection: 'row',
     gap: spacing.sm,
+    justifyContent: 'flex-end',
   },
-  waterButton: {
-    flex: 1,
+  waterControl: {
+    alignItems: 'center',
+    borderRadius: radius.round,
+    borderWidth: 1,
+    height: 46,
+    justifyContent: 'center',
+    width: 46,
+  },
+  disabled: {
+    opacity: 0.5,
   },
   cardTitle: {
     ...typography.h3,
@@ -375,6 +468,25 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     gap: spacing.sm,
+  },
+  macroStrip: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  macroPill: {
+    borderRadius: radius.md,
+    flexGrow: 1,
+    minWidth: 92,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  macroValue: {
+    ...typography.body,
+    fontWeight: '800',
+  },
+  macroLabel: {
+    ...typography.caption,
   },
   mealCard: {
     gap: spacing.sm,
@@ -412,6 +524,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     marginBottom: spacing.sm,
+  },
+  groceryCheck: {
+    alignItems: 'center',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    height: 38,
+    justifyContent: 'center',
+    width: 38,
   },
   checked: {
     textDecorationLine: 'line-through',

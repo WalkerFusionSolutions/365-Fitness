@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
+import { AppHeader } from '@/components/AppUI';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
@@ -53,23 +54,28 @@ export default function ExerciseDetailScreen({ route }: any) {
 
   return (
     <Screen>
-      <Text style={[styles.title, { color: colors.textPrimary }]}>{name}</Text>
-      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-        {exercise.data?.muscle_group ?? 'Exercise'} • {exercise.data?.equipment ?? 'Equipment varies'}
-      </Text>
+      <AppHeader
+        title={name}
+        subtitle={`${exercise.data?.muscle_group ?? 'Exercise'} • ${exercise.data?.equipment ?? 'Equipment varies'}`}
+      />
 
       {exercise.videoUrl ? <ExerciseVideo uri={exercise.videoUrl} /> : null}
 
       {prescribedExercise ? (
         <Card style={styles.card}>
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Prescription</Text>
-          <Text style={[styles.body, { color: colors.textSecondary }]}>
-            {prescribedExercise.sets} x {prescribedExercise.reps} • {prescribedExercise.rest_seconds}s rest
-          </Text>
+          <View style={styles.prescriptionStrip}>
+            <PrescriptionMeta label="Sets" value={String(prescribedExercise.sets)} />
+            <PrescriptionMeta label="Reps" value={prescribedExercise.reps} />
+            <PrescriptionMeta label="Rest" value={`${prescribedExercise.rest_seconds}s`} />
+          </View>
           {prescribedExercise.notes ? (
-            <Text style={[styles.body, { color: colors.textSecondary }]}>
-              {prescribedExercise.notes}
-            </Text>
+            <View style={[styles.notesCallout, { backgroundColor: colors.surfaceSecondary }]}>
+              <Text style={[styles.metaLabel, { color: colors.primary }]}>Coach Notes</Text>
+              <Text style={[styles.body, { color: colors.textSecondary }]}>
+                {prescribedExercise.notes}
+              </Text>
+            </View>
           ) : null}
         </Card>
       ) : null}
@@ -81,6 +87,17 @@ export default function ExerciseDetailScreen({ route }: any) {
         </Text>
       </Card>
     </Screen>
+  );
+}
+
+function PrescriptionMeta({ label, value }: { label: string; value: string }) {
+  const { colors } = useAppTheme();
+
+  return (
+    <View style={[styles.prescriptionMeta, { backgroundColor: colors.surfaceSecondary }]}>
+      <Text style={[styles.metaValue, { color: colors.textPrimary }]}>{value}</Text>
+      <Text style={[styles.metaLabel, { color: colors.textSecondary }]}>{label}</Text>
+    </View>
   );
 }
 
@@ -120,6 +137,29 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     ...typography.h3,
+  },
+  prescriptionStrip: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  prescriptionMeta: {
+    borderRadius: radius.md,
+    flex: 1,
+    minWidth: 82,
+    padding: spacing.md,
+  },
+  metaValue: {
+    ...typography.h3,
+  },
+  metaLabel: {
+    ...typography.caption,
+    fontWeight: '800',
+  },
+  notesCallout: {
+    borderRadius: radius.md,
+    gap: spacing.xs,
+    padding: spacing.md,
   },
   body: {
     ...typography.body,
