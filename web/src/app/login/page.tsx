@@ -1,65 +1,51 @@
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/dashboard/LoginForm";
-import { assets } from "@/components/marketing/LovableAssets";
-import { MarketingShell } from "@/components/marketing/MarketingShell";
-import { SiteButtonLink } from "@/components/marketing/SiteButton";
+import { PhpIcon, PhpReferenceShell } from "@/components/marketing/PhpReferenceSite";
 import { getSessionProfile } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Client Login — 365 Fitness",
-  description: "Client login for 365 Fitness. Access your programme, nutrition plan, progress tracking and coach messages.",
-  robots: {
-    index: false,
-  },
+  title: "Login",
+  robots: { index: false, follow: false },
 };
 
 export default async function LoginPage() {
-  const { user, profile, missingEnv } = await getSessionProfile();
+  const { profile } = await getSessionProfile();
 
-  if (user && profile?.role === "coach") {
+  if (profile?.role === "coach") {
     redirect("/dashboard");
   }
 
   return (
-    <MarketingShell>
-      <section className="grid min-h-screen md:grid-cols-2">
-        <div className="flex items-center px-5 pt-28 pb-16 md:px-12 md:pt-36">
-          <div className="w-full max-w-sm">
-            <p className="label-xs text-teal-bright">Client Area</p>
-            <h1 className="display mt-5 text-6xl leading-[0.86] md:text-7xl">
-              Welcome
-              <br />
-              back.
-            </h1>
-            <p className="mt-6 text-sm leading-relaxed text-bone-dim">
-              Sign in for your programme, nutrition plan, progress and coach messages.
-            </p>
-
-            {missingEnv ? (
-              <p className="mt-8 border-l-2 border-teal p-4 text-sm font-semibold text-bone-dim">
-                Web Supabase variables are not configured yet.
-              </p>
-            ) : null}
-
-            <LoginForm />
-
-            <p className="mt-8 text-sm text-bone-dim">
-              Not a client yet?{" "}
-              <span className="inline-block align-middle">
-                <SiteButtonLink href="/contact" variant="ghost">
-                  Apply
-                </SiteButtonLink>
-              </span>
-            </p>
+    <PhpReferenceShell>
+      <div className="php-container">
+        <div className="php-content-section">
+          <div className="php-grid php-grid-2 php-align-center">
+            <div>
+              <div className="php-hero-badge">MEMBER ACCESS</div>
+              <h1 className="php-section-title" style={{ textAlign: "left", marginBottom: "1.5rem" }}>
+                MEMBER <span>LOGIN</span>
+              </h1>
+              <p className="php-lead">This page uses the colleague PHP login visual direction, but authentication remains the real Supabase email/password flow.</p>
+              <div className="php-grid php-grid-3" style={{ marginTop: "2rem" }}>
+                <div className="php-card php-center"><div className="php-card-body"><PhpIcon>APP</PhpIcon><p>Real sessions</p></div></div>
+                <div className="php-card php-center"><div className="php-card-body"><PhpIcon>365</PhpIcon><p>Coach dashboard</p></div></div>
+                <div className="php-card php-center"><div className="php-card-body"><PhpIcon>OK</PhpIcon><p>Safe errors</p></div></div>
+              </div>
+            </div>
+            <div className="php-card php-login-shell">
+              <div className="php-card-body">
+                <div className="php-center">
+                  <PhpIcon>365</PhpIcon>
+                  <h2 className="php-heading-teal">Welcome Back</h2>
+                  <p>Sign in with your 365 Fitness account.</p>
+                </div>
+                <LoginForm />
+              </div>
+            </div>
           </div>
         </div>
-
-        <div className="img-zoom relative hidden md:block">
-          <img src={assets.coach} alt="" className="h-full w-full object-cover" loading="lazy" />
-          <div className="grain-fade pointer-events-none absolute inset-0" />
-        </div>
-      </section>
-    </MarketingShell>
+      </div>
+    </PhpReferenceShell>
   );
 }

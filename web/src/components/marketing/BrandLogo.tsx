@@ -1,12 +1,12 @@
-import Image from "next/image";
-
 export function BrandLogo({ compact = false, light = false }: { compact?: boolean; light?: boolean }) {
   return (
-    <span className={`inline-flex items-center gap-3 ${light ? "text-bone" : "text-ink"}`}>
-      <Image src="/lovable/mark.png" alt="" width={compact ? 32 : 36} height={compact ? 32 : 36} className={compact ? "h-7 w-7" : "h-8 w-8"} priority={compact} />
-      <span className={`display leading-none tracking-normal ${compact ? "text-lg md:text-xl" : "text-xl"}`}>
-        365 Fitness
-      </span>
+    <span className="inline-flex items-center gap-2">
+      <span className="inline-flex size-9 items-center justify-center rounded-sm bg-teal text-sm font-black text-ink">365</span>
+      {!compact ? (
+        <span className={`font-display text-2xl font-black uppercase tracking-normal ${light ? "text-bone" : "text-foreground"}`}>
+          Fitness
+        </span>
+      ) : null}
     </span>
   );
 }

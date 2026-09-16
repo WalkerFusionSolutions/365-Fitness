@@ -24,14 +24,8 @@ export function onAuthSessionChange(
   return () => subscription.unsubscribe();
 }
 
-export async function setSessionFromTokens(
-  accessToken: string,
-  refreshToken: string
-) {
-  const { data, error } = await supabase.auth.setSession({
-    access_token: accessToken,
-    refresh_token: refreshToken,
-  });
+export async function exchangeAuthCode(code: string) {
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
     throw toServiceError(error, 'Unable to confirm your session.');

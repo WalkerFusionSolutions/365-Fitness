@@ -121,12 +121,12 @@ export function useUploadExerciseVideo() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const upload = useCallback(async (uri: string, fileName?: string) => {
+  const upload = useCallback(async (asset: Parameters<typeof uploadExerciseVideo>[0]) => {
     setIsUploading(true);
     setError(null);
 
     try {
-      return await uploadExerciseVideo(uri, fileName);
+      return await uploadExerciseVideo(asset);
     } catch (uploadError) {
       console.error('Unable to upload exercise video:', uploadError);
       const message = getUserMessage(uploadError, 'Unable to upload video.');

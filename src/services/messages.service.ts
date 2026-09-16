@@ -421,6 +421,10 @@ async function uploadFeedbackVideo({
   const storagePath = `${conversation.client_id}/${conversation.id}/${uploaderId}/${today}/${createPathToken()}.${extension}`;
   const videoData = await readVideoAsset(asset);
 
+  if (videoData.byteLength > MAX_VIDEO_BYTES) {
+    throw new AppServiceError('Use a video smaller than 100 MB.');
+  }
+
   const { error: uploadError } = await supabase.storage
     .from(VIDEO_BUCKET)
     .upload(storagePath, videoData, {

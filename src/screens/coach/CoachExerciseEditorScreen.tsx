@@ -63,8 +63,7 @@ export default function CoachExerciseEditorScreen({ route, navigation }: any) {
     if (result.canceled || !result.assets[0]) return;
 
     try {
-      const asset = result.assets[0];
-      const path = await uploadVideo.upload(asset.uri, asset.fileName ?? undefined);
+      const path = await uploadVideo.upload(result.assets[0]);
       setVideoPath(path);
     } catch {
       Alert.alert('Unable to upload video', uploadVideo.error || 'Please try again.');

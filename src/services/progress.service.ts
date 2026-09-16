@@ -15,6 +15,18 @@ import { getFitnessAssessment } from '@/services/fitness.service';
 
 const PHOTO_BUCKET = 'progress-photos';
 const SIGNED_URL_EXPIRES_IN_SECONDS = 60 * 10;
+const MAX_PROGRESS_PHOTO_BYTES = 10 * 1024 * 1024;
+const PROGRESS_PHOTO_TYPES = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+} as const;
+const PROGRESS_PHOTO_EXTENSIONS = {
+  jpeg: 'image/jpeg',
+  jpg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+} as const;
 
 type MeasurementInput = {
   clientId: string;
@@ -171,10 +183,21 @@ export async function uploadProgressPhoto({
     throw new AppServiceError("That photo couldn't be uploaded. Try again.");
   }
 
-  const extension = getImageExtension(asset);
-  const contentType = asset.mimeType ?? `image/${extension === 'jpg' ? 'jpeg' : extension}`;
+  if (asset.type && asset.type !== 'image') {
+    throw new AppServiceError('Choose a JPEG, PNG, or WebP image.');
+  }
+
+  if (asset.fileSize != null && asset.fileSize > MAX_PROGRESS_PHOTO_BYTES) {
+    throw new AppServiceError('Progress photos must be 10 MB or smaller.');
+  }
+
+  const { contentType, extension } = getProgressPhotoFileType(asset);
   const path = `${clientId}/${takenAt}/${pose}-${createPathToken()}.${extension}`;
   const photoData = await readImageAsset(asset);
+
+  if (photoData.size > MAX_PROGRESS_PHOTO_BYTES) {
+    throw new AppServiceError('Progress photos must be 10 MB or smaller.');
+  }
 
   const { error: uploadError } = await supabase.storage
     .from(PHOTO_BUCKET)
@@ -320,11 +343,31 @@ async function readImageAsset(asset: ImagePicker.ImagePickerAsset) {
   return response.blob();
 }
 
-function getImageExtension(asset: ImagePicker.ImagePickerAsset) {
+function getProgressPhotoFileType(asset: ImagePicker.ImagePickerAsset) {
   const mimeType = asset.mimeType?.toLowerCase();
-  if (mimeType?.includes('png')) return 'png';
-  if (mimeType?.includes('webp')) return 'webp';
-  return 'jpg';
+  if (mimeType) {
+    const extension = PROGRESS_PHOTO_TYPES[mimeType as keyof typeof PROGRESS_PHOTO_TYPES];
+    if (!extension) {
+      throw new AppServiceError('Choose a JPEG, PNG, or WebP image.');
+    }
+
+    return { contentType: mimeType, extension };
+  }
+
+  const source = asset.fileName ?? asset.uri;
+  const extension = source.split('?')[0].split('.').pop()?.toLowerCase();
+  const contentType = extension
+    ? PROGRESS_PHOTO_EXTENSIONS[extension as keyof typeof PROGRESS_PHOTO_EXTENSIONS]
+    : undefined;
+
+  if (!contentType) {
+    throw new AppServiceError('Choose a JPEG, PNG, or WebP image.');
+  }
+
+  return {
+    contentType,
+    extension: PROGRESS_PHOTO_TYPES[contentType],
+  };
 }
 
 function createPathToken() {

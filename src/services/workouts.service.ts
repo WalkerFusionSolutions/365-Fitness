@@ -1,3 +1,4 @@
+import * as ImagePicker from 'expo-image-picker';
 import {
   ExerciseLibraryItem,
   Workout,
@@ -10,6 +11,19 @@ import { supabase } from '@/services/supabase';
 import { AppServiceError, throwIfSupabaseError } from '@/services/errors';
 
 const EXERCISE_VIDEO_BUCKET = 'exercise-videos';
+const MAX_EXERCISE_VIDEO_BYTES = 100 * 1024 * 1024;
+const EXERCISE_VIDEO_TYPES = {
+  'video/mp4': 'mp4',
+  'video/quicktime': 'mov',
+  'video/x-m4v': 'm4v',
+  'video/webm': 'webm',
+} as const;
+const EXERCISE_VIDEO_EXTENSIONS = {
+  m4v: 'video/x-m4v',
+  mov: 'video/quicktime',
+  mp4: 'video/mp4',
+  webm: 'video/webm',
+} as const;
 
 async function getCurrentUserId() {
   const {
@@ -93,23 +107,61 @@ export async function saveExercise(input: {
   return data;
 }
 
-export async function uploadExerciseVideo(uri: string, fileName?: string) {
+export async function uploadExerciseVideo(asset: ImagePicker.ImagePickerAsset) {
+  if (!asset.uri || (asset.type && asset.type !== 'video')) {
+    throw new AppServiceError('Choose an MP4, MOV, M4V, or WebM video.');
+  }
+
+  if (asset.fileSize != null && asset.fileSize > MAX_EXERCISE_VIDEO_BYTES) {
+    throw new AppServiceError('Exercise videos must be 100 MB or smaller.');
+  }
+
   const coachId = await getCurrentUserId();
-  const extension = fileName?.split('.').pop() || uri.split('.').pop() || 'mp4';
-  const safeExtension = extension.split('?')[0] || 'mp4';
-  const path = `${coachId}/${Date.now()}.${safeExtension}`;
-  const response = await fetch(uri);
+  const { contentType, extension } = getExerciseVideoFileType(asset);
+  const path = `${coachId}/${Date.now()}.${extension}`;
+  const response = await fetch(asset.uri);
   const arrayBuffer = await response.arrayBuffer();
+
+  if (arrayBuffer.byteLength > MAX_EXERCISE_VIDEO_BYTES) {
+    throw new AppServiceError('Exercise videos must be 100 MB or smaller.');
+  }
 
   const { error } = await supabase.storage
     .from(EXERCISE_VIDEO_BUCKET)
     .upload(path, arrayBuffer, {
-      contentType: `video/${safeExtension === 'mov' ? 'quicktime' : safeExtension}`,
+      contentType,
       upsert: false,
     });
 
   throwIfSupabaseError(error, 'Unable to upload exercise video.');
   return path;
+}
+
+function getExerciseVideoFileType(asset: ImagePicker.ImagePickerAsset) {
+  const mimeType = asset.mimeType?.toLowerCase();
+  if (mimeType) {
+    const extension = EXERCISE_VIDEO_TYPES[mimeType as keyof typeof EXERCISE_VIDEO_TYPES];
+    if (!extension) {
+      throw new AppServiceError('Choose an MP4, MOV, M4V, or WebM video.');
+    }
+
+    return { contentType: mimeType, extension };
+  }
+
+  const source = asset.fileName ?? asset.uri;
+  const extension = source.split('?')[0].split('.').pop()?.toLowerCase();
+  const contentType = extension
+    ? EXERCISE_VIDEO_EXTENSIONS[extension as keyof typeof EXERCISE_VIDEO_EXTENSIONS]
+    : undefined;
+
+  if (!contentType) {
+    throw new AppServiceError('Choose an MP4, MOV, M4V, or WebM video.');
+  }
+
+  return {
+    contentType,
+    extension: EXERCISE_VIDEO_TYPES[contentType],
+  };
 }
 
 export async function getExerciseVideoUrl(videoPath?: string | null) {

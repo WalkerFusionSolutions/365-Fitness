@@ -1,67 +1,91 @@
-import Image from "next/image";
-import type { Metadata } from "next";
-import { assets } from "@/components/marketing/LovableAssets";
-import { MarketingShell } from "@/components/marketing/MarketingShell";
-import { Reveal } from "@/components/marketing/Reveal";
-import { SiteButtonLink } from "@/components/marketing/SiteButton";
+import Link from "next/link";
+import { PhpIcon, PhpReferenceShell, phpAsset } from "@/components/marketing/PhpReferenceSite";
 
-export const metadata: Metadata = {
-  title: "Nutrition — Fuel Your Body Right | 365 Fitness",
-  description: "Personalized, practical and sustainable nutrition coaching: balanced eating, macros, hydration, grocery planning and meal guides built around your preferences.",
-};
+const journey = [
+  ["Initial Assessment", "Understand your goals, habits, schedule, and training demands."],
+  ["Custom Plan Creation", "Build practical food guidance around your transformation target."],
+  ["Weekly Updates", "Adjust the plan as your body, schedule, and results change."],
+  ["Progress Tracking", "Use measurements, goals, and check-ins to keep nutrition connected to results."],
+];
 
-const topics = [
-  ["01", "Balanced eating", "Protein, carbohydrates and healthy fats in every day — built from food you already eat."],
-  ["02", "Custom macros", "Calories and macros set to your body, your training load and your goal."],
-  ["03", "Preferences", "Your plan is written around what you like and what is available locally."],
-  ["04", "Hydration", "Daily water targets tracked in the 365 app alongside your training."],
-  ["05", "Grocery planning", "Lists that make the week simple — buy once, eat well all week."],
-  ["06", "Consistency", "Plans you can repeat. Sustainable beats perfect every single time."],
+const options = [
+  ["Weight Loss", "Balanced nutrition that supports fat loss without crash dieting."],
+  ["Muscle Building", "Fuel strength training and recovery with consistent habits."],
+  ["Health & Wellness", "Simple, sustainable food choices for energy and long-term health."],
 ];
 
 export default function NutritionPage() {
   return (
-    <MarketingShell>
-      <section className="bg-bone pt-28 text-ink md:pt-36">
-          <div className="grid gap-10 px-5 pb-16 md:grid-cols-[1.3fr_1fr] md:items-end md:px-8 md:pb-24">
+    <PhpReferenceShell>
+      <div className="php-container">
+        <div className="php-content-section">
+          <h1 className="php-section-title">NUTRITION &amp; <span>MEAL PLANS</span></h1>
+          <p className="php-subtitle">Fuel your body. Transform your results.</p>
+
+          <div className="php-grid php-grid-2 php-align-center php-mb">
+            <div className="php-card"><img src={phpAsset("meal-plan2.png")} alt="Personalized meal planning" className="php-card-img php-card-img-tall" /></div>
             <div>
-              <p className="label-xs text-teal-deep">Nutrition — 365 Fitness</p>
-              <Reveal><h1 className="display mt-5 text-[17vw] leading-[0.78] sm:text-8xl xl:text-[10rem]">Fuel<br />your body<br /><span className="text-teal-deep">right.</span></h1></Reveal>
+              <h2 className="php-heading-teal">Personalized Nutrition for Your Goals</h2>
+              <p>365 Fitness pairs training with healthy meal guides, practical coaching, and goal-based nutrition support.</p>
+              <h4>What Makes Our Meal Plans Different?</h4>
+              <ul className="php-muted-list">
+                <li>Built around your training and goals.</li>
+                <li>Designed for consistency and real life.</li>
+                <li>Connected to progress tracking and coaching support.</li>
+              </ul>
+              <div className="php-button-row" style={{ justifyContent: "flex-start" }}>
+                <Link href="/contact" className="php-btn php-btn-primary">Get Your Meal Plan</Link>
+                <a href="tel:+14734157089" className="php-btn php-btn-outline">Consult 365 Fitness</a>
+              </div>
             </div>
-            <Reveal delay={120} className="border-l border-ink/15 pl-6">
-              <p className="text-base leading-relaxed text-ink/70 md:text-lg">Nutrition at 365 Fitness is coaching, not a diet handout. The plan is written for your body, your training and the food you actually enjoy — then adjusted as you go.</p>
-              <p className="display mt-8 text-2xl text-teal-deep md:text-3xl">Personalized. Practical. Sustainable.</p>
-            </Reveal>
           </div>
-          <div className="img-zoom relative h-[50vh] w-full md:h-[75vh]"><Image src={assets.nutrition} alt="Bowl of grilled chicken, brown rice, avocado and tropical fruit" fill sizes="100vw" className="object-cover" /></div>
-        </section>
-        <section className="px-5 py-14 sm:py-20 md:px-8 md:py-28">
-          <h2 className="display text-5xl md:text-7xl">What the plan covers.</h2>
-          <ul className="mt-12 grid gap-x-12 md:grid-cols-2 xl:grid-cols-3">
-            {topics.map(([n, title, copy], index) => (
-              <Reveal as="li" key={n} delay={index * 70} className="border-t border-border py-8 pr-4">
-                <span className="display text-2xl text-teal-bright">{n}</span>
-                <h3 className="display mt-3 text-3xl md:text-4xl">{title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-bone-dim">{copy}</p>
-              </Reveal>
+
+          <h2 className="php-heading-teal php-center">Your Nutrition Journey</h2>
+          <div className="php-grid php-grid-4 php-mb">
+            {journey.map(([title, body]) => (
+              <div className="php-card php-center" key={title}>
+                <div className="php-card-body">
+                  <PhpIcon>N</PhpIcon>
+                  <h5>{title}</h5>
+                  <p>{body}</p>
+                </div>
+              </div>
             ))}
-          </ul>
-        </section>
-        <section className="grid border-y border-border md:grid-cols-[1fr_1fr]">
-          <div className="img-zoom relative min-h-72"><Image src={assets.community} alt="" fill sizes="(min-width:768px) 50vw, 100vw" className="object-cover" /></div>
-          <Reveal className="flex flex-col justify-center gap-8 px-5 py-12 sm:py-16 md:px-12 md:py-24">
-            <p className="label-xs text-teal-bright">Delivered in the app</p>
-            <p className="display text-4xl leading-[0.9] md:text-5xl">Meal plans, lists<br />and water tracking<br />in one place.</p>
-            <ul className="grid gap-2 sm:grid-cols-2">{["Personalized meal plans", "Grocery lists", "Water tracking", "Supplements", "Easy recipes", "Coach messaging"].map((item) => <li key={item} className="flex gap-3 text-sm text-bone-dim"><span className="text-teal-bright">/</span>{item}</li>)}</ul>
-            <SiteButtonLink href="/contact" className="self-start">Ask about nutrition</SiteButtonLink>
-          </Reveal>
-        </section>
-        <section className="px-5 py-24 md:px-8 md:py-32">
-          <div className="grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-end">
-            <p className="display text-[13vw] leading-[0.82] sm:text-6xl xl:text-8xl">Train smart.<br /><span className="text-teal-bright">Eat right.</span></p>
-            <SiteButtonLink href="/programs" variant="outline" size="lg" className="self-start md:justify-self-end">See programs</SiteButtonLink>
           </div>
-        </section>
-    </MarketingShell>
+
+          <div className="php-card php-mb">
+            <div className="php-card-body php-grid php-grid-2 php-align-center">
+              <div>
+                <h3 className="php-heading-teal">Expert Guidance from 365 Fitness</h3>
+                <p>Nutrition is not separate from training. It supports recovery, energy, strength, weight loss, and the consistency needed for transformation.</p>
+              </div>
+              <div className="php-center">
+                <PhpIcon>ISSA</PhpIcon>
+                <h5>TRAIN SMART. EAT RIGHT. LIVE STRONG.</h5>
+              </div>
+            </div>
+          </div>
+
+          <h2 className="php-heading-teal php-center">Meal Plan Options</h2>
+          <div className="php-grid php-grid-3 php-mb">
+            {options.map(([title, body]) => (
+              <div className="php-card php-center" key={title}>
+                <div className="php-card-body">
+                  <PhpIcon>GO</PhpIcon>
+                  <h4 className="php-heading-teal">{title}</h4>
+                  <p>{body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="php-content-section php-cta-card php-center">
+            <h3 className="php-heading-teal">Ready to Transform Your Nutrition?</h3>
+            <p>Package pricing from the PHP demo was not ported. Contact 365 Fitness for the right plan.</p>
+            <Link href="/contact" className="php-btn php-btn-primary">Get Your Meal Plan</Link>
+          </div>
+        </div>
+      </div>
+    </PhpReferenceShell>
   );
 }

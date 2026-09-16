@@ -26,78 +26,104 @@ Deno.serve(async (request) => {
     return json({ error: 'Method not allowed' }, 405);
   }
 
-  if (!supabaseUrl || !serviceRoleKey) {
-    return json({ error: 'Server is not configured for reminder processing.' }, 500);
+  if (!supabaseUrl || !serviceRoleKey || !functionSecret) {
+    return json({ error: 'Server is not securely configured.' }, 500);
   }
 
-  if (functionSecret && request.headers.get('x-phase7-secret') !== functionSecret) {
+  if (request.headers.get('x-phase7-secret') !== functionSecret) {
     return json({ error: 'Unauthorized' }, 401);
   }
 
-  const reminders = await supabaseRequest<Reminder[]>(
-    "/rest/v1/appointment_reminders?status=eq.pending&remind_at=lte.now()&select=id&order=remind_at.asc&limit=50"
-  );
-  const results = [];
-
-  for (const reminder of reminders) {
-    const notification = await supabaseRequest<CreatedNotification[]>(
-      '/rest/v1/rpc/create_due_reminder_notification',
-      {
-        body: JSON.stringify({ reminder_uuid: reminder.id }),
-        method: 'POST',
-      }
-    );
-    const created = Array.isArray(notification) ? notification[0] : notification;
-
-    if (!created?.id) {
-      results.push({ reminder_id: reminder.id, status: 'skipped' });
-      continue;
-    }
-
-    if (sendPushFunctionUrl) {
-      const pushResponse = await fetch(sendPushFunctionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(functionSecret ? { 'x-phase7-secret': functionSecret } : {}),
-        },
-        body: JSON.stringify({
-          body: created.body,
-          data: {
-            related_entity_id: created.related_entity_id,
-            related_entity_type: created.related_entity_type,
-          },
-          notification_id: created.id,
-          title: created.title,
-          user_id: created.user_id,
-        }),
-      });
-
-      await supabaseRequest(`/rest/v1/appointment_reminders?id=eq.${reminder.id}`, {
-        body: JSON.stringify({
-          processed_at: new Date().toISOString(),
-          status: pushResponse.ok ? 'sent' : 'failed',
-        }),
-        method: 'PATCH',
-        prefer: 'return=minimal',
-      });
-
-      results.push({
-        notification_id: created.id,
-        reminder_id: reminder.id,
-        status: pushResponse.ok ? 'sent' : 'failed',
-      });
-    } else {
-      results.push({
-        notification_id: created.id,
-        reminder_id: reminder.id,
-        status: 'in_app_created',
-      });
-    }
+  if (!(await hasValidEmptyPayload(request))) {
+    return json({ error: 'Request body must be empty or an empty JSON object.' }, 400);
   }
 
-  return json({ processed: results.length, results });
+  try {
+    const reminders = await supabaseRequest<Reminder[]>(
+      "/rest/v1/appointment_reminders?status=eq.pending&remind_at=lte.now()&select=id&order=remind_at.asc&limit=50"
+    );
+    const results = [];
+
+    for (const reminder of reminders) {
+      const notification = await supabaseRequest<CreatedNotification[]>(
+        '/rest/v1/rpc/create_due_reminder_notification',
+        {
+          body: JSON.stringify({ reminder_uuid: reminder.id }),
+          method: 'POST',
+        }
+      );
+      const created = Array.isArray(notification) ? notification[0] : notification;
+
+      if (!created?.id) {
+        results.push({ reminder_id: reminder.id, status: 'skipped' });
+        continue;
+      }
+
+      if (sendPushFunctionUrl) {
+        const pushResponse = await fetch(sendPushFunctionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-phase7-secret': functionSecret,
+          },
+          body: JSON.stringify({
+            body: created.body,
+            data: {
+              related_entity_id: created.related_entity_id,
+              related_entity_type: created.related_entity_type,
+            },
+            notification_id: created.id,
+            title: created.title,
+            user_id: created.user_id,
+          }),
+        });
+
+        await supabaseRequest(`/rest/v1/appointment_reminders?id=eq.${reminder.id}`, {
+          body: JSON.stringify({
+            processed_at: new Date().toISOString(),
+            status: pushResponse.ok ? 'sent' : 'failed',
+          }),
+          method: 'PATCH',
+          prefer: 'return=minimal',
+        });
+
+        results.push({
+          notification_id: created.id,
+          reminder_id: reminder.id,
+          status: pushResponse.ok ? 'sent' : 'failed',
+        });
+      } else {
+        results.push({
+          notification_id: created.id,
+          reminder_id: reminder.id,
+          status: 'in_app_created',
+        });
+      }
+    }
+
+    return json({ processed: results.length, results });
+  } catch {
+    console.error('Reminder processing failed.');
+    return json({ error: 'Unable to process reminders.' }, 500);
+  }
 });
+
+async function hasValidEmptyPayload(request: Request) {
+  try {
+    const body = (await request.text()).trim();
+    if (!body) return true;
+
+    const value: unknown = JSON.parse(body);
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value) &&
+      Object.keys(value).length === 0
+    );
+  } catch {
+    return false;
+  }
+}
 
 async function supabaseRequest<T = unknown>(
   path: string,

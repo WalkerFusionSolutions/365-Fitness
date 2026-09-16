@@ -8,10 +8,10 @@ import * as Linking from 'expo-linking';
 
 import { useAuth } from '@/hooks/useAuth';
 import {
+  exchangeAuthCode,
   getCurrentSession,
   onAuthSessionChange,
   refreshCurrentSession,
-  setSessionFromTokens,
 } from '@/services/auth.service';
 import { getProfileById } from '@/services/profiles.service';
 import { isJwtIssuedAtFutureError } from '@/services/errors';
@@ -122,11 +122,14 @@ export function AppNavigator() {
 
   useEffect(() => {
     let isMounted = true;
+    let latestProfileRequestId = 0;
 
     const loadProfileForSession = async (
       sessionUserId?: string,
       didRetryAfterRefresh = false
     ) => {
+      const requestId = ++latestProfileRequestId;
+
       if (!isMounted) return;
 
       if (!sessionUserId) {
@@ -140,13 +143,13 @@ export function AppNavigator() {
       try {
         const profileData = await getProfileById(sessionUserId);
 
-        if (!isMounted) return;
+        if (!isMounted || requestId !== latestProfileRequestId) return;
 
         setProfile(profileData);
       } catch (loadError) {
         console.error('Error fetching user profile:', loadError);
 
-        if (!isMounted) return;
+        if (!isMounted || requestId !== latestProfileRequestId) return;
 
         if (isJwtIssuedAtFutureError(loadError) && !didRetryAfterRefresh) {
           try {
@@ -156,7 +159,7 @@ export function AppNavigator() {
 
             const refreshedSession = await refreshCurrentSession();
 
-            if (!isMounted) return;
+            if (!isMounted || requestId !== latestProfileRequestId) return;
 
             setSession(refreshedSession);
             await loadProfileForSession(
@@ -176,7 +179,7 @@ export function AppNavigator() {
             : 'Unable to load your profile.'
         );
       } finally {
-        if (isMounted) {
+        if (isMounted && requestId === latestProfileRequestId) {
           setLoading(false);
         }
       }
@@ -185,30 +188,14 @@ export function AppNavigator() {
     // Handle Supabase authentication links opened by the app.
     const handleDeepLink = async (url: string) => {
       try {
-        console.log('365 FITNESS deep link received:', url);
-
         const parsedUrl = Linking.parse(url);
+        const code = parsedUrl.queryParams?.code;
 
-        const accessToken = parsedUrl.queryParams?.access_token;
-        const refreshToken = parsedUrl.queryParams?.refresh_token;
-
-        if (accessToken && refreshToken) {
-          console.log('Setting Supabase session from deep link...');
-
-          await setSessionFromTokens(
-            String(accessToken),
-            String(refreshToken)
-          );
-
-          console.log(
-            'Supabase session successfully restored.'
-          );
+        if (typeof code === 'string' && code) {
+          await exchangeAuthCode(code);
         }
-      } catch (error) {
-        console.error(
-          'Error handling authentication deep link:',
-          error
-        );
+      } catch {
+        console.error('Unable to confirm authentication callback.');
       }
     };
 
@@ -230,12 +217,15 @@ export function AppNavigator() {
       }
     };
 
-    // Check whether the app was opened by an authentication link.
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleDeepLink(url);
+    const initializeAuth = async () => {
+      const initialUrl = await Linking.getInitialURL();
+
+      if (initialUrl) {
+        await handleDeepLink(initialUrl);
       }
-    });
+
+      await restoreSession();
+    };
 
     // Listen for authentication links while the app is already open.
     const deepLinkSubscription = Linking.addEventListener(
@@ -245,7 +235,7 @@ export function AppNavigator() {
       }
     );
 
-    restoreSession();
+    void initializeAuth();
 
     // Listen for login, logout, signup and session changes.
     const unsubscribeAuth = onAuthSessionChange((session) => {
