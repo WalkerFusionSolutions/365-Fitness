@@ -16,7 +16,7 @@ import { useAppTheme } from '@/hooks/useTheme';
 import { radius, spacing, typography } from '@/utils/theme';
 
 export function AppHeader({
-  eyebrow = '365 FITNESS',
+  eyebrow,
   title,
   subtitle,
   action,
@@ -173,11 +173,23 @@ export function StatCard({
 
 export function ProgressBar({ value }: { value: number }) {
   const { colors } = useAppTheme();
-  const width = `${Math.min(100, Math.max(0, value))}%` as DimensionValue;
+  const progress = Math.min(100, Math.max(0, value));
+  const width = `${progress}%` as DimensionValue;
 
   return (
-    <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
+    <View
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(progress) }}
+      style={[styles.progressTrack, { backgroundColor: colors.border }]}
+    >
       <View style={[styles.progressFill, { width, backgroundColor: colors.highlight }]} />
+      {[25, 50, 75].map((marker) => (
+        <View
+          key={marker}
+          pointerEvents="none"
+          style={[styles.progressMarker, { left: `${marker}%` as DimensionValue, backgroundColor: colors.background }]}
+        />
+      ))}
     </View>
   );
 }
@@ -281,21 +293,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.md,
-    marginBottom: spacing.lg,
+    marginBottom: 20,
   },
   headerText: {
     flex: 1,
   },
   eyebrow: {
-    ...typography.caption,
+    fontSize: 12,
     fontWeight: '800',
     textTransform: 'uppercase',
   },
   title: {
-    ...typography.h1,
+    ...typography.h2,
   },
   subtitle: {
-    ...typography.body,
+    ...typography.caption,
     marginTop: spacing.xs,
   },
   sectionHeader: {
@@ -303,7 +315,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: spacing.lg,
-    marginBottom: spacing.md,
+    marginBottom: 12,
   },
   sectionTitle: {
     ...typography.h3,
@@ -322,7 +334,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     alignSelf: 'flex-start',
-    borderRadius: radius.round,
+    borderRadius: radius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
   },
@@ -332,10 +344,10 @@ const styles = StyleSheet.create({
   },
   stat: {
     flex: 1,
-    minHeight: 110,
-    borderWidth: 1,
-    borderRadius: radius.lg,
-    padding: spacing.md,
+    minHeight: 88,
+    borderWidth: 0,
+    borderRadius: radius.sm,
+    padding: 12,
     justifyContent: 'space-between',
   },
   statValue: {
@@ -346,6 +358,7 @@ const styles = StyleSheet.create({
     ...typography.caption,
   },
   progressTrack: {
+    position: 'relative',
     height: 8,
     borderRadius: radius.round,
     overflow: 'hidden',
@@ -353,6 +366,13 @@ const styles = StyleSheet.create({
   progressFill: {
     height: '100%',
     borderRadius: radius.round,
+  },
+  progressMarker: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 1,
+    opacity: 0.72,
   },
   inputGroup: {
     gap: spacing.xs,
@@ -363,9 +383,9 @@ const styles = StyleSheet.create({
   },
   input: {
     ...typography.body,
-    minHeight: 54,
+    minHeight: 48,
     borderWidth: 1,
-    borderRadius: radius.lg,
+    borderRadius: radius.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
@@ -375,10 +395,10 @@ const styles = StyleSheet.create({
   },
   chip: {
     borderWidth: 1,
-    borderRadius: radius.round,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    minHeight: 42,
+    borderRadius: radius.sm,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minHeight: 38,
     justifyContent: 'center',
   },
   chipText: {
@@ -389,20 +409,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    borderWidth: 1,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
+    borderBottomWidth: 1,
+    paddingVertical: 14,
   },
   iconBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
   rowTitle: {
-    ...typography.h3,
+    ...typography.body,
+    fontWeight: '700',
   },
   rowSubtitle: {
     ...typography.caption,
@@ -411,9 +430,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   searchWrap: {
-    minHeight: 52,
+    minHeight: 46,
     borderWidth: 1,
-    borderRadius: radius.round,
+    borderRadius: radius.sm,
     paddingHorizontal: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',

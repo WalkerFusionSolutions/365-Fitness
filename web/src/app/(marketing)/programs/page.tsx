@@ -1,47 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
-import { PhpIcon, PhpReferenceShell, phpAsset, programCards } from "@/components/marketing/PhpReferenceSite";
+import { FinalCallout, MarketingPageHero, MarketingShell } from "@/components/marketing/MarketingShell";
+import { assets } from "@/components/marketing/LovableAssets";
 
-export default function ProgramsPage() {
-  return (
-    <PhpReferenceShell>
-      <div className="php-container">
-        <div className="php-content-section">
-          <h1 className="php-section-title">TRAINING <span>PROGRAMS</span></h1>
-          <p className="php-subtitle">Choose the structure that fits your life, then follow the plan.</p>
-
-          <div className="php-grid php-grid-2 php-align-center php-mb">
-            <div className="php-card"><img src={phpAsset("group-train.png")} alt="Group training at 365 Fitness" className="php-card-img php-card-img-tall" /></div>
-            <div>
-              <h2 className="php-heading-teal">Experience the Power of Structured Coaching</h2>
-              <p>Programs can support gym training, at-home work, hybrid weeks, and online coaching. The goal stays the same: your goals, my plan, your results.</p>
-              <h4>Why Choose a Program?</h4>
-              <ul className="php-muted-list">
-                <li>Clear weekly structure.</li>
-                <li>Training that adapts to your environment.</li>
-                <li>Accountability without guesswork.</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="php-grid php-grid-3 php-mb">
-            {programCards.map((program) => (
-              <div className="php-card php-center" key={program.title}>
-                <div className="php-card-body">
-                  <PhpIcon>365</PhpIcon>
-                  <h4 className="php-heading-teal">{program.title}</h4>
-                  <p>{program.body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="php-content-section php-cta-card php-center">
-            <h3 className="php-heading-teal">Ready to Start a Program?</h3>
-            <p>No fake schedules or prices were imported from the PHP reference. Contact 365 Fitness to choose the right structure.</p>
-            <Link href="/contact" className="php-btn php-btn-primary">Contact for Program Info</Link>
-          </div>
-        </div>
-      </div>
-    </PhpReferenceShell>
-  );
-}
+const programs = [["At-home training","A structured plan for the space and equipment you have.",assets.atHome],["Hybrid coaching","In-person direction paired with app-based sessions and check-ins.",assets.community],["Online coaching","Programming, progress tracking, messaging, and video feedback wherever you train.",assets.online]] as const;
+export default function ProgramsPage() { return <MarketingShell><MarketingPageHero image={assets.athletic} title="A program should fit real life." intro="Choose a coaching format that gives your week structure without pretending every week looks the same." /><section className="marketing-frame marketing-programs">{programs.map(([title,body,image],index)=><article key={title} data-reverse={index % 2 === 1}><div className="marketing-program-image"><Image src={image} alt="" fill sizes="(max-width: 768px) 100vw, 50vw" /></div><div><span>0{index+1}</span><h2>{title}</h2><p>{body}</p><ul><li>Clear weekly direction</li><li>Coach review and accountability</li><li>Progress grounded in real records</li></ul><Link className="marketing-text-link dark" href="/contact">Discuss your program</Link></div></article>)}</section><FinalCallout title="Your goals. My plan. Your results." body="Start with the format you can follow consistently." /></MarketingShell>; }

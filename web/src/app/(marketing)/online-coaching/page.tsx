@@ -1,46 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
-import { PhpIcon, PhpReferenceShell, phpAsset } from "@/components/marketing/PhpReferenceSite";
+import { FinalCallout, MarketingPageHero, MarketingShell } from "@/components/marketing/MarketingShell";
+import { assets } from "@/components/marketing/LovableAssets";
 
-const features = [
-  ["Training Plan", "Your week is mapped with clear exercises and progression."],
-  ["Nutrition Support", "Meal guidance stays aligned with your training goal."],
-  ["Messaging", "Use the real 365 Fitness system for coach/client communication."],
-  ["Progress Tracking", "Measurements, goals, and photos stay connected to the backend."],
-];
-
-export default function OnlineCoachingPage() {
-  return (
-    <PhpReferenceShell>
-      <div className="php-container">
-        <div className="php-content-section">
-          <h1 className="php-section-title">ONLINE <span>COACHING</span></h1>
-          <p className="php-subtitle">Train anywhere. Stay connected.</p>
-
-          <div className="php-grid php-grid-2 php-align-center php-mb">
-            <div>
-              <h2 className="php-heading-teal">365 Fitness Beyond the Gym</h2>
-              <p>Online coaching brings the plan, communication, and progress tracking into the real 365 Fitness app experience. The PHP visual style is preserved, but the backend remains Supabase.</p>
-              <div className="php-button-row" style={{ justifyContent: "flex-start" }}>
-                <Link href="/contact" className="php-btn php-btn-primary">Ask About Online Coaching</Link>
-                <Link href="/login" className="php-btn php-btn-outline">Client Login</Link>
-              </div>
-            </div>
-            <div className="php-card"><img src={phpAsset("personal.jpg")} alt="Online coaching support" className="php-card-img php-card-img-tall" /></div>
-          </div>
-
-          <div className="php-grid php-grid-4">
-            {features.map(([title, body]) => (
-              <div className="php-card php-center" key={title}>
-                <div className="php-card-body">
-                  <PhpIcon>APP</PhpIcon>
-                  <h5>{title}</h5>
-                  <p>{body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </PhpReferenceShell>
-  );
-}
+const steps = ["Coach assigns your workout","Train and log performance","Follow assigned nutrition","Track measurements and photos","Message and share private video feedback","Keep appointments and check-ins together"];
+export default function OnlineCoachingPage(){return <MarketingShell><MarketingPageHero image={assets.online} title="Coaching that travels with you." intro="Your program, progress, feedback, and appointments remain connected outside the gym." /><section className="marketing-frame marketing-app-detail"><div><p className="marketing-kicker">The real workflow</p><h2>One coaching relationship. One source of truth.</h2><p>No fake dashboards or decorative metrics. The 365 Fitness app supports the work clients and coaches actually do.</p><Link className="marketing-button dark" href="/contact">Ask about online coaching</Link></div><div className="marketing-workflow">{steps.map((step,index)=><div key={step}><span>{String(index+1).padStart(2,"0")}</span><p>{step}</p></div>)}</div></section><section className="marketing-frame marketing-wide-image"><Image src={assets.results} alt="365 Fitness progress coaching" fill sizes="100vw" /></section><FinalCallout title="Stay connected. Keep moving." body="Build a plan you can follow wherever you train." /></MarketingShell>}

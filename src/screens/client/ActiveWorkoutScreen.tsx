@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
@@ -125,9 +126,12 @@ export default function ActiveWorkoutScreen({ route, navigation }: any) {
           workoutId,
           durationMinutes,
         });
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         navigation.replace('ClientApp');
         return;
       }
+
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
       setRestSeconds(exercise.rest_seconds);
       moveNext();

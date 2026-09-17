@@ -18,7 +18,7 @@ export function DashboardNav({ mobile = false }: { mobile?: boolean }) {
   const pathname = usePathname();
 
   return (
-    <nav className={mobile ? "mx-auto mt-3 flex max-w-6xl gap-2 overflow-x-auto pb-1 lg:hidden" : "mt-8 grid gap-1"}>
+    <nav aria-label="Coach workspace" className={mobile ? "mx-auto mt-3 flex max-w-7xl gap-1 overflow-x-auto pb-1 lg:hidden" : "mt-8 grid gap-1"}>
       {primaryLinks.map(([label, href]) => {
         const active = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
         return (
@@ -27,8 +27,8 @@ export function DashboardNav({ mobile = false }: { mobile?: boolean }) {
             href={href}
             className={
               mobile
-                ? `whitespace-nowrap border px-3 py-1.5 text-sm font-semibold ${active ? "border-teal bg-teal text-ink" : "border-line bg-charcoal text-bone-dim"}`
-                : `border-l-2 px-3 py-2 text-sm font-semibold transition ${active ? "border-teal-bright bg-white/10 text-bone" : "border-transparent text-bone-dim hover:bg-white/10 hover:text-bone"}`
+                ? `whitespace-nowrap border-b-2 px-3 py-2 text-sm font-semibold transition ${active ? "border-brand text-brand" : "border-transparent text-muted hover:text-foreground"}`
+                : `border-l-2 px-3 py-2 text-sm font-semibold transition ${active ? "border-brand bg-secondary text-foreground" : "border-transparent text-muted hover:bg-secondary hover:text-foreground"}`
             }
           >
             {label}

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Card } from "@/components/ui/Card";
 import { initials } from "@/lib/format";
 import type { Profile } from "@/types/app";
 
@@ -21,6 +20,9 @@ export function ClientDirectory({ clients }: { clients: Profile[] }) {
         <p className="text-sm font-semibold text-muted">{filteredClients.length} visible client{filteredClients.length === 1 ? "" : "s"}</p>
       </div>
       <div className="overflow-hidden border border-line bg-panel">
+        <div className="hidden grid-cols-[1.3fr_1fr_auto] gap-4 border-b border-line bg-secondary px-4 py-2 text-xs font-semibold text-muted md:grid">
+          <span>Client</span><span>Phone</span><span>Action</span>
+        </div>
         {filteredClients.map((client) => (
           <Link key={client.id} href={`/dashboard/clients/${client.id}`} className="grid gap-4 border-b border-line p-4 transition last:border-b-0 hover:bg-background md:grid-cols-[1.3fr_1fr_auto] md:items-center">
             <div className="flex items-center gap-4">
@@ -36,10 +38,10 @@ export function ClientDirectory({ clients }: { clients: Profile[] }) {
         ))}
       </div>
       {!filteredClients.length ? (
-        <Card className="p-6">
+        <div className="border-y border-dashed border-line py-6">
           <h3 className="font-bold">No clients match that search.</h3>
-          <p className="mt-2 text-sm text-muted">Only client profiles returned through RLS can appear here.</p>
-        </Card>
+          <p className="mt-1 text-sm text-muted">Try a different name or phone number.</p>
+        </div>
       ) : null}
     </div>
   );

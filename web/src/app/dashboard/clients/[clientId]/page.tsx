@@ -18,17 +18,20 @@ export default async function ClientDetailPage({ params }: PageProps<"/dashboard
         <h1 className="text-3xl font-black">{data.client.full_name}</h1>
         <p className="mt-2 text-muted">{data.client.phone_number ?? "No phone number on profile"}</p>
       </div>
-      <nav className="flex gap-2 overflow-x-auto border-y border-line py-3 text-sm font-black text-muted">
-        {["Overview", "Assessment", "Workouts", "Nutrition", "Progress", "Photos", "Messages", "Appointments"].map((item) => (
-          <span key={item} className="whitespace-nowrap px-2 py-1 first:text-brand">{item}</span>
-        ))}
+      <nav aria-label="Client record" className="flex gap-1 overflow-x-auto border-y border-line py-2 text-sm font-semibold text-muted">
+        <a className="whitespace-nowrap px-3 py-2 hover:text-brand" href="#overview">Overview</a>
+        <a className="whitespace-nowrap px-3 py-2 hover:text-brand" href="#appointments">Appointments</a>
+        <a className="whitespace-nowrap px-3 py-2 hover:text-brand" href="#progress">Progress</a>
+        <a className="whitespace-nowrap px-3 py-2 hover:text-brand" href="#workouts">Workouts</a>
+        <a className="whitespace-nowrap px-3 py-2 hover:text-brand" href="/dashboard/messages">Messages</a>
+        <a className="whitespace-nowrap px-3 py-2 hover:text-brand" href="/dashboard/nutrition">Nutrition</a>
       </nav>
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="p-6 lg:col-span-2">
+      <div id="overview" className="grid gap-6 lg:grid-cols-3">
+        <Card id="appointments" className="scroll-mt-28 p-6 lg:col-span-2">
           <h2 className="text-xl font-bold">Appointments</h2>
           <div className="mt-4 grid gap-3">
             {data.appointments.length ? data.appointments.map((appointment) => (
-              <div key={appointment.id} className="rounded-lg border border-line p-4">
+              <div key={appointment.id} className="border-b border-line py-4 last:border-b-0">
                 <div className="flex justify-between gap-3">
                   <div>
                     <p className="font-bold">{appointment.title}</p>
@@ -40,11 +43,11 @@ export default async function ClientDetailPage({ params }: PageProps<"/dashboard
             )) : <EmptyState title="No appointments found" body="Schedule records visible to this coach will appear here." />}
           </div>
         </Card>
-        <Card className="p-6">
+        <Card id="progress" className="scroll-mt-28 p-6">
           <h2 className="text-xl font-bold">Latest measurements</h2>
           <div className="mt-4 grid gap-3">
             {data.measurements.length ? data.measurements.map((measurement) => (
-              <div key={measurement.id} className="rounded-lg border border-line p-4 text-sm">
+              <div key={measurement.id} className="border-b border-line py-3 text-sm last:border-b-0">
                 <p className="font-bold">{formatDate(measurement.date)}</p>
                 <p className="mt-1 text-muted">Weight: {measurement.weight ?? "n/a"}</p>
                 <p className="text-muted">Body fat: {measurement.body_fat ?? "n/a"}</p>
@@ -53,11 +56,11 @@ export default async function ClientDetailPage({ params }: PageProps<"/dashboard
           </div>
         </Card>
       </div>
-      <Card className="p-6">
+      <Card id="workouts" className="scroll-mt-28 p-6">
         <h2 className="text-xl font-bold">Assigned workouts</h2>
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <div className="mt-4 divide-y divide-line">
           {data.workouts.length ? data.workouts.map((workout) => (
-            <div key={workout.id} className="rounded-lg border border-line p-4">
+            <div key={workout.id} className="grid gap-1 py-4 md:grid-cols-[1fr_auto] md:items-center">
               <p className="font-bold">{workout.name}</p>
               <p className="text-sm text-muted">{workout.status} · {workout.estimated_minutes ?? "No"} min</p>
             </div>

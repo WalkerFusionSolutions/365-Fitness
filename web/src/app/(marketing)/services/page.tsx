@@ -1,53 +1,21 @@
+import Image from "next/image";
 import Link from "next/link";
-import { PhpIcon, PhpReferenceShell, phpAsset, serviceCards, verifiedServices } from "@/components/marketing/PhpReferenceSite";
+import { FinalCallout, MarketingPageHero, MarketingShell } from "@/components/marketing/MarketingShell";
+import { assets } from "@/components/marketing/LovableAssets";
+
+const rows = [
+  ["Personal Training", "Focused one-to-one coaching with a plan built for your goals, experience, and schedule.", assets.coach],
+  ["Athletic & Strength Training", "Purposeful strength, conditioning, and movement work for better performance.", assets.athletic],
+  ["Rehabilitation Training", "Thoughtful exercise progression that respects your current capacity without making medical claims.", assets.recovery],
+  ["Assisted Stretching & Cupping", "Hands-on recovery services that complement training and mobility work.", assets.detail],
+  ["At-Home, Hybrid & Online", "Flexible coaching that keeps programming, feedback, and accountability connected wherever you train.", assets.atHome],
+] as const;
 
 export default function ServicesPage() {
-  return (
-    <PhpReferenceShell>
-      <div className="php-container">
-        <div className="php-content-section">
-          <h1 className="php-section-title">OUR <span>SERVICES</span></h1>
-          <p className="php-subtitle">Your goals. My mission. Personalized training and total transformation.</p>
-
-          {serviceCards.map((service, index) => (
-            <div className="php-grid php-grid-2 php-align-center php-mb" key={service.title}>
-              <div className={`php-card ${index % 2 ? "md:order-2" : ""}`}>
-                <img src={phpAsset(service.image)} alt={service.title} className="php-card-img" />
-              </div>
-              <div>
-                <h2 className="php-heading-teal">{service.title}</h2>
-                <p>{service.body}</p>
-                <ul className="php-muted-list">
-                  {service.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}
-                </ul>
-                <div className="php-button-row" style={{ justifyContent: "flex-start" }}>
-                  <Link href={service.href} className="php-btn php-btn-primary">Learn More</Link>
-                  <Link href="/contact" className="php-btn php-btn-outline">Book Session</Link>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          <h2 className="php-heading-teal php-center">Choose Your Fitness Journey</h2>
-          <div className="php-grid php-grid-3">
-            {verifiedServices.map((service) => (
-              <div className="php-card php-center" key={service}>
-                <div className="php-card-body">
-                  <PhpIcon>FIT</PhpIcon>
-                  <h5>{service}</h5>
-                  <p>Available through 365 Fitness coaching, consultation, and programming.</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="php-content-section php-cta-card php-center">
-            <h3 className="php-heading-teal">Ready to Transform?</h3>
-            <p>TRAIN SMART. EAT RIGHT. LIVE STRONG.</p>
-            <Link href="/contact" className="php-btn php-btn-primary">Start Today</Link>
-          </div>
-        </div>
-      </div>
-    </PhpReferenceShell>
-  );
+  return <MarketingShell>
+    <MarketingPageHero image={assets.strength} title="Coaching for the work in front of you." intro="Personal training, athletic development, recovery support, and flexible programming under one clear plan." />
+    <section className="marketing-frame marketing-service-directory">{rows.map(([title, body, image], index) => <article key={title}><span>0{index + 1}</span><div><h2>{title}</h2><p>{body}</p><Link className="marketing-text-link dark" href="/contact">Ask about this service</Link></div><div className="marketing-directory-image"><Image src={image} alt="" fill sizes="(max-width: 768px) 100vw, 32vw" /></div></article>)}</section>
+    <div className="marketing-frame marketing-inline-list"><strong>Also available</strong><span>Personalized detox plans</span><span>Healthy meal guides</span><span>Nutrition support</span></div>
+    <FinalCallout title="Train smart. Eat right. Live strong." body="Tell us where you are now and what you want to change." />
+  </MarketingShell>;
 }

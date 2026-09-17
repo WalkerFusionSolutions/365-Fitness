@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppHeader, FilterChip, ProgressBar, SectionHeader, StatCard } from '@/components/AppUI';
+import { AppHeader, SectionHeader, StatCard } from '@/components/AppUI';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
@@ -13,8 +13,6 @@ import {
   useGroceryList,
   useSaveGroceryList,
   useSupplements,
-  useTodaysWater,
-  useUpdateWater,
 } from '@/hooks/useMealPlan';
 import { useAppTheme } from '@/hooks/useTheme';
 import { GroceryItem, MealPlanMeal, MealType } from '@/types';
@@ -30,14 +28,9 @@ export default function NutritionScreen({ navigation }: any) {
   const plan = useActiveMealPlan(clientId);
   const grocery = useGroceryList(clientId, plan.data?.id);
   const supplements = useSupplements(clientId);
-  const water = useTodaysWater(clientId);
-  const updateWater = useUpdateWater();
   const generateGrocery = useGenerateGroceryList();
   const saveGrocery = useSaveGroceryList();
-  const cups = water.data?.cups_consumed ?? 0;
-  const goal = water.data?.daily_goal_cups ?? 8;
-  const waterProgress = goal > 0 ? Math.round((cups / goal) * 100) : 0;
-  const isLoading = plan.isLoading || water.isLoading;
+  const isLoading = plan.isLoading;
   const firstName = profile?.full_name?.split(' ')[0] || 'Athlete';
   const todaysMeals = useMemo(() => getTodaysMeals(plan.data?.meals ?? []), [plan.data?.meals]);
   const totals = useMemo(() => getMealTotals(todaysMeals), [todaysMeals]);
@@ -46,22 +39,6 @@ export default function NutritionScreen({ navigation }: any) {
     plan.refresh();
     grocery.refresh();
     supplements.refresh();
-    water.refresh();
-  };
-
-  const changeWater = async (delta: number) => {
-    if (!clientId) return;
-
-    try {
-      const updated = await updateWater.update({
-        clientId,
-        cups: Math.max(0, cups + delta),
-        dailyGoalCups: goal,
-      });
-      water.setData(updated);
-    } catch {
-      Alert.alert('Unable to update water', 'Please try again.');
-    }
   };
 
   const onGenerateGrocery = async () => {
@@ -127,57 +104,21 @@ export default function NutritionScreen({ navigation }: any) {
         subtitle={`Fuel plan for ${firstName}`}
       />
 
-      <View style={styles.segmentRow}>
-        <FilterChip label="Today" active={view === 'today'} onPress={() => setView('today')} />
-        <FilterChip label="Grocery" active={view === 'grocery'} onPress={() => setView('grocery')} />
-        <FilterChip label="Supplements" active={view === 'supplements'} onPress={() => setView('supplements')} />
+      <View style={[styles.segmentRow, { backgroundColor: colors.surfaceSecondary }]}>
+        {(['today', 'grocery', 'supplements'] as const).map((option) => (
+          <Pressable
+            accessibilityRole="tab"
+            accessibilityState={{ selected: view === option }}
+            key={option}
+            onPress={() => setView(option)}
+            style={[styles.segment, view === option && { backgroundColor: colors.surface }]}
+          >
+            <Text style={[styles.segmentText, { color: view === option ? colors.primary : colors.textSecondary }]}>
+              {option === 'today' ? 'Meals' : capitalize(option)}
+            </Text>
+          </Pressable>
+        ))}
       </View>
-
-      <Card style={[styles.waterCard, { backgroundColor: colors.surfaceElevated }]}>
-        <View style={styles.waterHeader}>
-          <View style={styles.waterLeft}>
-            <View style={[styles.waterIcon, { backgroundColor: colors.surfaceSecondary }]}>
-              <Ionicons name="water" size={24} color={colors.primary} />
-            </View>
-            <View>
-              <Text style={[styles.cardEyebrow, { color: colors.primary }]}>Hydration</Text>
-              <Text style={[styles.waterCount, { color: colors.textPrimary }]}>
-                {cups}
-                <Text style={[styles.waterGoal, { color: colors.textSecondary }]}> / {goal}</Text>
-              </Text>
-              <Text style={[styles.meta, { color: colors.textSecondary }]}>cups today</Text>
-            </View>
-          </View>
-          <Text style={[styles.percent, { color: colors.primary }]}>{Math.min(100, waterProgress)}%</Text>
-        </View>
-        <ProgressBar value={waterProgress} />
-        <View style={styles.waterActions}>
-          <Pressable
-            accessibilityLabel="Remove one water cup"
-            disabled={updateWater.isPending || cups <= 0}
-            onPress={() => changeWater(-1)}
-            style={[
-              styles.waterControl,
-              { borderColor: colors.border, backgroundColor: colors.cardBackground },
-              (updateWater.isPending || cups <= 0) && styles.disabled,
-            ]}
-          >
-            <Ionicons name="remove" size={22} color={colors.primary} />
-          </Pressable>
-          <Pressable
-            accessibilityLabel="Add one water cup"
-            disabled={updateWater.isPending}
-            onPress={() => changeWater(1)}
-            style={[
-              styles.waterControl,
-              { backgroundColor: colors.primary },
-              updateWater.isPending && styles.disabled,
-            ]}
-          >
-            <Ionicons name="add" size={22} color={colors.primaryText} />
-          </Pressable>
-        </View>
-      </Card>
 
       {view === 'today' ? (
         <View>
@@ -397,67 +338,27 @@ function formatNumber(value?: number | null) {
 const styles = StyleSheet.create({
   segmentRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  waterCard: {
-    gap: spacing.md,
-  },
-  waterHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  waterLeft: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    flex: 1,
-    gap: spacing.md,
-  },
-  waterIcon: {
-    alignItems: 'center',
     borderRadius: radius.md,
-    height: 48,
-    justifyContent: 'center',
-    width: 48,
+    marginBottom: spacing.sm,
+    padding: 3,
   },
-  cardEyebrow: {
-    ...typography.caption,
-    fontWeight: '900',
-    textTransform: 'uppercase',
-  },
-  waterCount: {
-    ...typography.h2,
-  },
-  waterGoal: {
-    ...typography.body,
-    fontWeight: '700',
-  },
-  waterActions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    justifyContent: 'flex-end',
-  },
-  waterControl: {
+  segment: {
     alignItems: 'center',
-    borderRadius: radius.round,
-    borderWidth: 1,
-    height: 46,
     justifyContent: 'center',
-    width: 46,
+    borderRadius: radius.sm,
+    flex: 1,
+    minHeight: 38,
+    paddingHorizontal: spacing.sm,
   },
-  disabled: {
-    opacity: 0.5,
+  segmentText: {
+    ...typography.caption,
+    fontWeight: '800',
   },
   cardTitle: {
     ...typography.h3,
   },
   meta: {
     ...typography.caption,
-  },
-  percent: {
-    ...typography.h2,
   },
   planCard: {
     gap: spacing.md,

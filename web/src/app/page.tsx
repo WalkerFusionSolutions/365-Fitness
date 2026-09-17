@@ -1,84 +1,63 @@
+import Image from "next/image";
 import Link from "next/link";
-import { PhpIcon, PhpReferenceShell, serviceCards } from "@/components/marketing/PhpReferenceSite";
+import { MarketingShell, FinalCallout } from "@/components/marketing/MarketingShell";
+import { assets } from "@/components/marketing/LovableAssets";
+
+const services = [
+  ["Personal training", "One-to-one coaching shaped around your ability, schedule, and goals.", assets.coach, "/services"],
+  ["Strength and athletic training", "Structured sessions that develop useful strength, movement quality, and performance.", assets.strength, "/programs"],
+  ["Nutrition support", "Healthy meal guides and practical nutrition direction that work with your training.", assets.nutrition, "/nutrition"],
+] as const;
+
+const workflow = [
+  "Your coach assigns the workout and nutrition plan.",
+  "You train and log the work as it happens.",
+  "Measurements and progress photos show the real trend.",
+  "Messages, video feedback, and appointments keep coaching connected.",
+];
 
 export default function HomePage() {
   return (
-    <PhpReferenceShell>
-      <section className="php-hero-section">
-        <div className="php-container">
-          <div className="php-hero-content">
-            <div className="php-gym-name">365 FITNESS</div>
-            <div className="php-hero-badge">ELITE PERFORMANCE</div>
-            <h1 className="php-hero-title">
-              TRANSFORM YOUR <span className="block">BODY &amp; MIND</span>
-            </h1>
-            <div className="php-text-panel">
-              <p className="php-lead">
-                At <strong className="php-highlight">365 FITNESS</strong>, we deliver premium personal training, group sessions, and nutrition planning designed for real results.
-                Your goals, my mission: personalized training and total transformation.
-              </p>
-            </div>
-            <div className="php-button-row">
-              <Link href="/contact" className="php-btn php-btn-primary">START YOUR JOURNEY</Link>
-              <Link href="/about" className="php-btn php-btn-outline">MEET VICTOR</Link>
-            </div>
-            <div className="php-mini-banner">
-              <h4 className="php-heading-teal">GRENADA&apos;S PREMIER FITNESS DESTINATION</h4>
-              <p>Call +1 473 415 7089 or follow @365fitnessgnd</p>
-            </div>
+    <MarketingShell>
+      <section className="marketing-home-hero">
+        <Image src={assets.hero} alt="365 Fitness personal training session" fill sizes="100vw" priority />
+        <div className="marketing-hero-shade" />
+        <div className="marketing-frame marketing-hero-copy">
+          <p className="marketing-kicker">Grenada · In person and online</p>
+          <h1>365 Fitness</h1>
+          <p className="marketing-hero-line">Your goals. My mission.</p>
+          <p className="marketing-hero-intro">Personalized training, practical nutrition, and direct coaching built around the work you can sustain.</p>
+          <div className="marketing-actions">
+            <Link className="marketing-button" href="/contact">Start your plan</Link>
+            <Link className="marketing-text-link" href="/services">Explore coaching</Link>
           </div>
+        </div>
+        <div className="marketing-service-rail" aria-label="Services"><span>Personal</span><span>Athletic</span><span>Strength</span><span>Recovery</span><span>Online</span></div>
+      </section>
+
+      <section className="marketing-editorial marketing-frame">
+        <div className="marketing-editorial-title"><p className="marketing-kicker">The 365 approach</p><h2>Train with a plan that belongs to you.</h2></div>
+        <div className="marketing-editorial-copy"><p>Training should make the next step clear. Your sessions, food guidance, check-ins, and progress all work together instead of living in separate places.</p><Link className="marketing-text-link dark" href="/about">How coaching works</Link></div>
+      </section>
+
+      <section className="marketing-service-list">
+        {services.map(([title, body, image, href], index) => (
+          <article className="marketing-service-row marketing-frame" key={title}>
+            <div className="marketing-service-number">0{index + 1}</div>
+            <div className="marketing-service-media"><Image src={image} alt="" fill sizes="(max-width: 768px) 100vw, 42vw" /></div>
+            <div className="marketing-service-copy"><h3>{title}</h3><p>{body}</p><Link className="marketing-text-link dark" href={href}>Learn more</Link></div>
+          </article>
+        ))}
+      </section>
+
+      <section className="marketing-app-band">
+        <div className="marketing-frame marketing-app-grid">
+          <div className="marketing-app-image"><Image src={assets.results} alt="Athlete reviewing progress with 365 Fitness" fill sizes="(max-width: 900px) 100vw, 48vw" /></div>
+          <div className="marketing-app-copy"><p className="marketing-kicker">Connected coaching</p><h2>Your plan stays with you between sessions.</h2><ol>{workflow.map((item, index) => <li key={item}><span>{index + 1}</span>{item}</li>)}</ol><Link className="marketing-button" href="/online-coaching">See online coaching</Link></div>
         </div>
       </section>
 
-      <section className="php-container">
-        <div className="php-content-section">
-          <h2 className="php-section-title">ELITE <span>SERVICES</span> AT 365 FITNESS</h2>
-          <p className="php-subtitle">Discover the complete fitness experience: train smart, eat right, live strong.</p>
-          <div className="php-grid php-grid-3">
-            {serviceCards.map((service, index) => (
-              <div className="php-card php-center" key={service.title}>
-                <div className="php-card-body">
-                  <PhpIcon>{["PT", "GR", "N"][index]}</PhpIcon>
-                  <h5>{service.title.toUpperCase()}</h5>
-                  <p>{service.body}</p>
-                  <Link href={service.href} className="php-btn php-btn-primary">GET STARTED</Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="php-container">
-        <div className="php-content-section php-center">
-          <h3 className="php-heading-teal">WHY CHOOSE 365 FITNESS?</h3>
-          <div className="php-grid php-grid-3">
-            <div>
-              <PhpIcon>365</PhpIcon>
-              <h5>PERSONALIZED TRAINING</h5>
-              <p>Plans built around your goals, not generic templates.</p>
-            </div>
-            <div>
-              <PhpIcon>FIT</PhpIcon>
-              <h5>COACHING AND NUTRITION</h5>
-              <p>Training and food habits work together for total transformation.</p>
-            </div>
-            <div>
-              <PhpIcon>GO</PhpIcon>
-              <h5>REAL ACCOUNTABILITY</h5>
-              <p>Progress, communication, and consistency stay connected through the real 365 system.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="php-container">
-        <div className="php-content-section php-cta-card php-center">
-          <h3 className="php-heading-teal">READY TO JOIN 365 FITNESS?</h3>
-          <p>NO EXCUSES. JUST RESULTS.</p>
-          <Link href="/contact" className="php-btn php-btn-primary">GET STARTED AT 365 FITNESS</Link>
-        </div>
-      </section>
-    </PhpReferenceShell>
+      <FinalCallout title="No excuses. Just results." body="Start with a conversation about your goals, schedule, and the coaching format that fits your life." />
+    </MarketingShell>
   );
 }

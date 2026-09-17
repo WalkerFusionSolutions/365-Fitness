@@ -146,28 +146,30 @@ export function ScheduleBoard({ initialAppointments, clients, coachId }: { initi
       <Card className="p-6">
         <h2 className="text-xl font-bold">Create appointment</h2>
         <form onSubmit={createAppointment} className="mt-5 grid gap-4">
-          <select className="input" value={form.client_id} onChange={(event) => setForm({ ...form, client_id: event.target.value })} required>
+          <label className="grid gap-1 text-sm font-semibold" htmlFor="appointment-client">Client</label>
+          <select id="appointment-client" className="input -mt-3" value={form.client_id} onChange={(event) => setForm({ ...form, client_id: event.target.value })} required>
             <option value="">Choose client</option>
             {clients.map((client) => (
               <option key={client.id} value={client.id}>{client.full_name}</option>
             ))}
           </select>
-          <input className="input" placeholder="Title" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required />
+          <label className="grid gap-1 text-sm font-semibold" htmlFor="appointment-title">Title</label>
+          <input id="appointment-title" className="input -mt-3" placeholder="Progress check-in" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required />
           <div className="grid gap-4 md:grid-cols-2">
-            <input className="input" type="datetime-local" value={form.starts_at} onChange={(event) => setForm({ ...form, starts_at: event.target.value })} required />
-            <input className="input" type="datetime-local" value={form.ends_at} onChange={(event) => setForm({ ...form, ends_at: event.target.value })} required />
+            <label className="grid gap-1 text-sm font-semibold">Starts<input className="input font-normal" type="datetime-local" value={form.starts_at} onChange={(event) => setForm({ ...form, starts_at: event.target.value })} required /></label>
+            <label className="grid gap-1 text-sm font-semibold">Ends<input className="input font-normal" type="datetime-local" value={form.ends_at} onChange={(event) => setForm({ ...form, ends_at: event.target.value })} required /></label>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            <select className="input" value={form.appointment_type} onChange={(event) => setForm({ ...form, appointment_type: event.target.value as Appointment["appointment_type"] })}>
+            <label className="grid gap-1 text-sm font-semibold">Appointment type<select className="input font-normal" value={form.appointment_type} onChange={(event) => setForm({ ...form, appointment_type: event.target.value as Appointment["appointment_type"] })}>
               {["consultation", "check_in", "workout", "assessment", "progress_review", "nutrition", "other"].map((type) => <option key={type} value={type}>{type.replaceAll("_", " ")}</option>)}
-            </select>
-            <select className="input" value={form.location_type} onChange={(event) => setForm({ ...form, location_type: event.target.value as Appointment["location_type"] })}>
+            </select></label>
+            <label className="grid gap-1 text-sm font-semibold">Location type<select className="input font-normal" value={form.location_type} onChange={(event) => setForm({ ...form, location_type: event.target.value as Appointment["location_type"] })}>
               {["video", "phone", "in_person", "other"].map((type) => <option key={type} value={type}>{type.replaceAll("_", " ")}</option>)}
-            </select>
+            </select></label>
           </div>
-          <input className="input" placeholder="Location details" value={form.location_text} onChange={(event) => setForm({ ...form, location_text: event.target.value })} />
-          <input className="input" placeholder="Meeting URL" value={form.meeting_url} onChange={(event) => setForm({ ...form, meeting_url: event.target.value })} />
-          <textarea className="input min-h-24" placeholder="Description" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
+          <label className="grid gap-1 text-sm font-semibold">Location details<input className="input font-normal" placeholder="Gym, studio, or call details" value={form.location_text} onChange={(event) => setForm({ ...form, location_text: event.target.value })} /></label>
+          <label className="grid gap-1 text-sm font-semibold">Meeting URL<input className="input font-normal" type="url" placeholder="https://" value={form.meeting_url} onChange={(event) => setForm({ ...form, meeting_url: event.target.value })} /></label>
+          <label className="grid gap-1 text-sm font-semibold">Description<textarea className="input min-h-24 font-normal" placeholder="Add useful context for the session" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
           <Button type="submit" disabled={saving || clients.length === 0}>{saving ? "Saving..." : "Create appointment"}</Button>
         </form>
         {message ? <p className="mt-4 rounded-lg bg-emerald-50 p-3 text-sm font-semibold text-brand">{message}</p> : null}
@@ -180,11 +182,11 @@ export function ScheduleBoard({ initialAppointments, clients, coachId }: { initi
             <h2 className="text-xl font-bold">Schedule</h2>
             <p className="text-sm text-muted">Create, reschedule, cancel, and complete records through existing RLS.</p>
           </div>
-          <input className="input max-w-48" type="date" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} />
+          <label className="grid gap-1 text-xs font-semibold text-muted">View date<input className="input max-w-48 text-foreground" type="date" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} /></label>
         </div>
         <div className="mt-5 grid gap-3">
           {selectedAppointments.length ? selectedAppointments.map((appointment) => (
-            <div key={appointment.id} className="rounded-lg border border-line p-4">
+            <div key={appointment.id} className="border-b border-line py-4 last:border-b-0">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -202,7 +204,7 @@ export function ScheduleBoard({ initialAppointments, clients, coachId }: { initi
               </div>
             </div>
           )) : (
-            <div className="rounded-lg border border-dashed border-line p-6 text-muted">No appointments returned for this day.</div>
+            <div className="border-y border-dashed border-line py-6 text-sm text-muted">No appointments scheduled for this day.</div>
           )}
         </div>
       </Card>

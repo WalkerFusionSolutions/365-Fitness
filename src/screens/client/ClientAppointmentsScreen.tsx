@@ -163,7 +163,7 @@ function AppointmentRow({
 
   return (
     <Pressable onPress={onPress}>
-      <Card style={styles.row}>
+      <View style={[styles.row, { borderColor: colors.border }]}>
         <ProfileAvatar
           name={appointment.coach?.full_name ?? 'Coach'}
           uri={appointment.coach?.avatar_url}
@@ -181,7 +181,7 @@ function AppointmentRow({
           </Text>
         </View>
         <Badge label={formatStatus(appointment.status)} tone={appointment.status === 'scheduled' ? 'primary' : 'muted'} />
-      </Card>
+      </View>
     </Pressable>
   );
 }
@@ -250,7 +250,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: spacing.md,
-    marginBottom: spacing.sm,
+    borderBottomWidth: 1,
+    paddingVertical: 14,
   },
   rowTitle: {
     ...typography.body,

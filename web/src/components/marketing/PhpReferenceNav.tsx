@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -19,7 +20,7 @@ export function PhpReferenceNav() {
     <nav className="php-navbar">
       <div className="php-container php-navbar-inner">
         <Link className="php-logo-link" href="/" onClick={() => setOpen(false)}>
-          <img src="/php-reference/logo.png" alt="365 Fitness Logo" className="php-nav-logo" />
+          <Image src="/php-reference/logo.png" alt="365 Fitness Logo" className="php-nav-logo" width={50} height={50} />
           <span className="php-brand">365 FITNESS</span>
         </Link>
         <button className="php-nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded={open} onClick={() => setOpen((value) => !value)}>

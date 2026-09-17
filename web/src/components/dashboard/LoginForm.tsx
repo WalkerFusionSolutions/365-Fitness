@@ -41,19 +41,19 @@ export function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="mt-10 grid gap-5">
       <div>
-        <label className="label-xs text-bone-dim" htmlFor="email">Email</label>
+        <label className="text-sm font-semibold text-foreground" htmlFor="email">Email</label>
         <input id="email" className="input mt-2" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
       </div>
       <div>
-        <label className="label-xs text-bone-dim" htmlFor="password">Password</label>
-        <div className="mt-2 flex border border-line bg-charcoal/80 focus-within:border-teal">
-          <input id="password" className="min-w-0 flex-1 bg-transparent px-4 py-3 text-bone outline-none" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required />
-          <button className="border-l border-line px-4 text-sm font-black text-teal-bright transition hover:text-bone" type="button" onClick={() => setShowPassword((value) => !value)}>
+        <label className="text-sm font-semibold text-foreground" htmlFor="password">Password</label>
+        <div className="mt-2 flex border border-line bg-white focus-within:border-brand">
+          <input id="password" className="min-w-0 flex-1 bg-transparent px-4 py-3 text-foreground outline-none" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required />
+          <button className="border-l border-line px-4 text-sm font-bold text-brand transition hover:bg-secondary" type="button" onClick={() => setShowPassword((value) => !value)}>
             {showPassword ? "Hide" : "Show"}
           </button>
         </div>
       </div>
-      {error ? <p className="border-l-2 border-red-400 p-4 text-sm text-red-200">{error}</p> : null}
+      {error ? <p className="border-l-2 border-danger bg-red-50 p-4 text-sm text-red-800">{error}</p> : null}
       <Button type="submit" disabled={loading}>{loading ? "Signing in..." : "Sign in"}</Button>
     </form>
   );

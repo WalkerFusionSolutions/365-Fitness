@@ -8,14 +8,14 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const variants = {
-  primary: "bg-teal text-bone hover:bg-teal-bright",
-  secondary: "border border-bone/35 text-bone hover:border-teal-bright hover:bg-teal-bright/10",
-  ghost: "text-bone-dim hover:text-bone",
+  primary: "bg-brand text-white hover:bg-brand-strong",
+  secondary: "border border-line bg-card text-foreground hover:border-brand hover:bg-secondary",
+  ghost: "text-muted hover:bg-secondary hover:text-foreground",
   danger: "bg-danger text-white hover:opacity-90",
 };
 
 export function Button({ variant = "primary", href, className = "", children, ...props }: ButtonProps) {
-  const base = `label-xs inline-flex min-h-11 items-center justify-center rounded-sm px-6 py-2 transition-[background-color,color,border-color,transform] duration-300 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 ${variants[variant]} ${className}`;
+  const base = `inline-flex min-h-11 items-center justify-center rounded-sm px-5 py-2 text-sm font-bold transition-[background-color,color,border-color,transform] duration-200 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 ${variants[variant]} ${className}`;
 
   if (href) {
     return (

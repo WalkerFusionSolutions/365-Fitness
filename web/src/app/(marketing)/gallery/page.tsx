@@ -1,36 +1,6 @@
-import Link from "next/link";
-import { PhpReferenceShell, phpAsset } from "@/components/marketing/PhpReferenceSite";
+import Image from "next/image";
+import { MarketingPageHero, MarketingShell } from "@/components/marketing/MarketingShell";
+import { assets } from "@/components/marketing/LovableAssets";
 
-const images = [
-  ["personal-train.png", "Personal training"],
-  ["group-train.png", "Group training"],
-  ["meal-plan2.png", "Nutrition planning"],
-  ["placeholder-1.jpg", "365 Fitness"],
-  ["placeholder-2.jpg", "Coaching"],
-  ["placeholder-3.jpg", "Training"],
-];
-
-export default function GalleryPage() {
-  return (
-    <PhpReferenceShell>
-      <div className="php-container">
-        <div className="php-content-section">
-          <h1 className="php-section-title">365 FITNESS <span>GALLERY</span></h1>
-          <p className="php-subtitle">Images carried from the PHP reference asset folder into the production Next app.</p>
-          <div className="php-grid php-grid-3">
-            {images.map(([src, alt]) => (
-              <div className="php-card" key={src}>
-                <img src={phpAsset(src)} alt={alt} className="php-card-img" />
-              </div>
-            ))}
-          </div>
-          <div className="php-content-section php-cta-card php-center">
-            <h3 className="php-heading-teal">See More Daily Work</h3>
-            <p>Follow @365fitnessgnd for current public updates.</p>
-            <Link href="https://www.instagram.com/365fitnessgnd/" className="php-btn php-btn-primary">Open Instagram</Link>
-          </div>
-        </div>
-      </div>
-    </PhpReferenceShell>
-  );
-}
+const images=[[assets.coach,"Personal coaching"],[assets.strength,"Strength training"],[assets.athletic,"Athletic training"],[assets.nutrition,"Nutrition guidance"],[assets.recovery,"Recovery work"],[assets.atHome,"At-home training"],[assets.online,"Online coaching"]] as const;
+export default function GalleryPage(){return <MarketingShell><MarketingPageHero image={assets.community} title="The work, up close." intro="Training, coaching, nutrition, and recovery across the 365 Fitness experience." /><section className="marketing-frame marketing-gallery">{images.map(([src,alt],index)=><figure key={src} className={index===0||index===5?"wide":""}><Image src={src} alt={alt} fill sizes="(max-width: 700px) 100vw, 50vw" /><figcaption>{alt}</figcaption></figure>)}</section></MarketingShell>}

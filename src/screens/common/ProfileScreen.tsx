@@ -84,7 +84,7 @@ export function ProfileScreen() {
         }
       />
 
-      <View style={[styles.profileHero, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+      <View style={styles.profileHero}>
         <ProfileAvatar name={displayName} uri={profile?.avatar_url} size={86} />
         <Text style={[styles.name, { color: colors.textPrimary }]}>{displayName}</Text>
         <Badge label={accountType} />
@@ -313,19 +313,15 @@ const styles = StyleSheet.create({
     width: 48,
   },
   profileHero: {
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: radius.xl,
-    padding: spacing.xl,
+    alignItems: 'flex-start',
+    paddingBottom: spacing.md,
     gap: spacing.sm,
   },
   name: {
     ...typography.h2,
-    textAlign: 'center',
   },
   email: {
     ...typography.caption,
-    textAlign: 'center',
   },
   profileDivider: {
     height: 1,
@@ -392,13 +388,13 @@ const styles = StyleSheet.create({
   },
   segmented: {
     flexDirection: 'row',
-    borderRadius: radius.round,
+    borderRadius: radius.md,
     padding: 4,
   },
   segment: {
     flex: 1,
     alignItems: 'center',
-    borderRadius: radius.round,
+    borderRadius: radius.sm,
     paddingVertical: spacing.sm,
     minHeight: 42,
     justifyContent: 'center',

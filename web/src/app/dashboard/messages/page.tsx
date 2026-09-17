@@ -3,8 +3,9 @@ import { getCoachDashboardData } from "@/lib/data";
 import { formatDateTime } from "@/lib/format";
 
 export default async function MessagesDashboardPage() {
-  const { conversations } = await getCoachDashboardData();
+  const { conversations, clients } = await getCoachDashboardData();
   const first = conversations[0];
+  const clientNames = new Map(clients.map((client) => [client.id, client.full_name]));
 
   return (
     <div className="grid gap-6">
@@ -16,7 +17,7 @@ export default async function MessagesDashboardPage() {
         <aside className="border-b border-line lg:border-b-0 lg:border-r">
           {conversations.length ? conversations.map((conversation) => (
             <div key={conversation.id} className="border-b border-line p-4">
-              <p className="font-bold">Conversation</p>
+              <p className="font-bold">{clientNames.get(conversation.client_id) ?? "Client conversation"}</p>
               <p className="mt-1 line-clamp-2 text-sm text-muted">{conversation.last_message_preview ?? "No message preview"}</p>
               <p className="mt-3 text-xs font-semibold text-muted">{conversation.last_message_at ? formatDateTime(conversation.last_message_at) : "No recent message"}</p>
             </div>
@@ -27,7 +28,7 @@ export default async function MessagesDashboardPage() {
             <>
               <div>
                 <p className="text-sm font-black uppercase text-brand">Selected conversation</p>
-                <h2 className="mt-3 text-2xl font-black">Conversation preview</h2>
+                <h2 className="mt-3 text-2xl font-black">{clientNames.get(first.client_id) ?? "Client conversation"}</h2>
                 <p className="mt-3 text-muted">{first.last_message_preview ?? "No recent message body available."}</p>
               </div>
               <p className="border-t border-line pt-4 text-sm text-muted">Full message send/read flows stay for Web Phase 2 so existing Phase 6 security is not rushed.</p>

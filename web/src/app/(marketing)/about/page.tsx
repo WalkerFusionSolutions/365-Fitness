@@ -1,58 +1,13 @@
-import Link from "next/link";
-import { PhpIcon, PhpReferenceShell, phpAsset } from "@/components/marketing/PhpReferenceSite";
-
-const approach = [
-  ["Personalized Workout Plans", "Customized training programs based on your fitness level, body, schedule, and goals."],
-  ["Expert Nutritional Guidance", "Healthy meal guides and practical nutrition support built to match the training plan."],
-  ["Supportive Environment", "Clear coaching, accountability, and encouragement throughout the process."],
-  ["Long-Term Results", "Sustainable progress over quick fixes."],
-];
+import Image from "next/image";
+import { FinalCallout, MarketingPageHero, MarketingShell } from "@/components/marketing/MarketingShell";
+import { assets } from "@/components/marketing/LovableAssets";
 
 export default function AboutPage() {
-  return (
-    <PhpReferenceShell>
-      <div className="php-container">
-        <div className="php-content-section">
-          <h1 className="php-section-title">ABOUT <span>365 FITNESS</span></h1>
-          <p className="php-subtitle">Your journey to better health, 365 days a year.</p>
-
-          <div className="php-grid php-grid-2 php-align-center php-mb">
-            <div>
-              <h2 className="php-heading-teal">Our Mission</h2>
-              <p>At 365 Fitness, our mission is simple: to help you achieve your fitness and weight-loss goals through personalized training and balanced nutrition. Real results come from consistency, knowledge, and support.</p>
-            </div>
-            <div className="php-card"><img src={phpAsset("placeholder-1.jpg")} alt="365 Fitness training space" className="php-card-img" /></div>
-          </div>
-
-          <div className="php-grid php-grid-2 php-align-center php-mb">
-            <div className="php-card"><img src={phpAsset("placeholder-2.jpg")} alt="365 Fitness coach" className="php-card-img" /></div>
-            <div>
-              <h2 className="php-heading-teal">Meet Victor Williams</h2>
-              <p><strong>Victor Williams</strong> is the driving force behind 365 Fitness. The public site keeps the colleague design while using verified 365 Fitness messaging: your goals, my plan, your results.</p>
-              <p>Training, nutrition, accountability, and progress all work together so clients can train smart, eat right, and live strong.</p>
-            </div>
-          </div>
-
-          <h2 className="php-heading-teal php-center">The 365 Fitness Approach</h2>
-          <div className="php-grid php-grid-4 php-mb">
-            {approach.map(([title, body]) => (
-              <div className="php-card php-center" key={title}>
-                <div className="php-card-body">
-                  <PhpIcon>365</PhpIcon>
-                  <h5>{title}</h5>
-                  <p>{body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="php-content-section php-cta-card php-center">
-            <h2 className="php-heading-teal">Looking Forward</h2>
-            <p>Your goals become our goals. Start with a consultation and build the plan that fits your life.</p>
-            <Link href="/contact" className="php-btn php-btn-primary">Schedule Consultation</Link>
-          </div>
-        </div>
-      </div>
-    </PhpReferenceShell>
-  );
+  return <MarketingShell>
+    <MarketingPageHero image={assets.coach} title="Coaching built around the person." intro="365 Fitness connects clear training, practical nutrition, and direct accountability in one personal plan." />
+    <section className="marketing-frame marketing-story-grid"><div><p className="marketing-kicker">Your goals. My plan. Your results.</p><h2>Consistency becomes easier when the work is clear.</h2></div><div className="marketing-prose"><p>There is no generic template for a real person. Training begins with your current ability, available time, preferred environment, and the outcome you are working toward.</p><p>The plan can move between personal training, at-home work, hybrid weeks, and online support without losing the thread.</p></div></section>
+    <section className="marketing-frame marketing-principles">{[["01","Assess honestly","Start from the body, schedule, and experience you have now."],["02","Build deliberately","Make every session and food choice serve the same goal."],["03","Review the evidence","Use logged training, measurements, photos, and conversation to adjust."],["04","Stay consistent","Progress comes from repeatable work, not a dramatic short-term fix."]].map(([n,title,body]) => <article key={n}><span>{n}</span><h3>{title}</h3><p>{body}</p></article>)}</section>
+    <section className="marketing-frame marketing-wide-image"><Image src={assets.community} alt="365 Fitness coaching environment" fill sizes="100vw" /></section>
+    <FinalCallout title="Personalized training. Total transformation." body="Choose the structure that gives you clarity, accountability, and room to progress." />
+  </MarketingShell>;
 }

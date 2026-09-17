@@ -9,28 +9,28 @@ import { initials } from "@/lib/format";
 
 export function DashboardShell({ profile, children }: { profile: Profile; children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-ink text-bone">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-line bg-charcoal p-5 lg:block">
+    <div className="dashboard-root min-h-screen bg-background text-foreground">
+      <aside className="fixed inset-y-0 left-0 hidden w-60 border-r border-line bg-sidebar p-5 lg:block">
         <Link href="/dashboard" aria-label="365 Fitness dashboard">
-          <BrandLogo compact light />
+          <BrandLogo />
         </Link>
         <DashboardNav />
         <div className="absolute bottom-5 left-5 right-5 grid gap-2 border-t border-line pt-4">
-          <Link href="/dashboard/profile" className="px-3 py-2 text-sm font-semibold text-bone-dim transition hover:bg-white/10 hover:text-bone">Profile</Link>
+          <Link href="/dashboard/profile" className="px-3 py-2 text-sm font-semibold text-muted transition hover:bg-secondary hover:text-foreground">Profile</Link>
           <form action={signOut}>
-            <button className="w-full px-3 py-2 text-left text-sm font-semibold text-bone-dim transition hover:bg-white/10 hover:text-bone" type="submit">Sign Out</button>
+            <button className="w-full px-3 py-2 text-left text-sm font-semibold text-muted transition hover:bg-secondary hover:text-foreground" type="submit">Sign out</button>
           </form>
         </div>
       </aside>
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-10 border-b border-line bg-ink/95 px-4 py-4 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+      <div className="lg:pl-60">
+        <header className="sticky top-0 z-20 border-b border-line bg-background/95 px-4 py-3 backdrop-blur">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
             <div>
-              <p className="label-xs text-teal-bright">Coach Portal</p>
-              <p className="font-bold">{profile.full_name}</p>
+              <p className="text-xs font-semibold text-muted">Coach workspace</p>
+              <p className="font-bold text-foreground">{profile.full_name}</p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="hidden h-10 w-10 items-center justify-center rounded-full bg-teal text-sm font-black text-ink sm:flex">
+              <div className="hidden h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-black text-white sm:flex">
                 {initials(profile.full_name)}
               </div>
               <form action={signOut} className="lg:hidden">
@@ -40,7 +40,7 @@ export function DashboardShell({ profile, children }: { profile: Profile; childr
           </div>
           <DashboardNav mobile />
         </header>
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <main className="mx-auto max-w-7xl px-4 py-7 md:px-6 lg:px-8">{children}</main>
       </div>
     </div>
   );

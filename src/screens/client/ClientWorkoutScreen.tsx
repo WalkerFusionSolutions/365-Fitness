@@ -73,13 +73,13 @@ export default function ClientWorkoutScreen({ navigation }: any) {
           }
         />
       ) : (
-        <Card style={styles.emptyCard}>
+        <View style={[styles.emptyCard, { borderColor: colors.border }]}>
           <EmptyState
             icon="barbell-outline"
             title="No workout assigned"
-            subtitle="Your coach has not assigned a workout yet."
+            subtitle="Your next training session will appear here once your coach assigns it."
           />
-        </Card>
+        </View>
       )}
 
       <SectionHeader title="Upcoming" />
@@ -161,7 +161,7 @@ function WorkoutRow({ workout, onPress }: { workout: Workout; onPress: () => voi
 
   return (
     <Pressable onPress={onPress}>
-      <Card style={styles.row}>
+      <View style={[styles.row, { borderColor: colors.border }]}>
         <View style={styles.flex}>
           <Text style={[styles.rowTitle, { color: colors.textPrimary }]}>{workout.name}</Text>
           <Text style={[styles.meta, { color: colors.textSecondary }]}>
@@ -169,7 +169,7 @@ function WorkoutRow({ workout, onPress }: { workout: Workout; onPress: () => voi
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-      </Card>
+      </View>
     </Pressable>
   );
 }
@@ -178,7 +178,7 @@ function HistoryRow({ entry }: { entry: WorkoutHistoryItem }) {
   const { colors } = useAppTheme();
 
   return (
-    <Card style={styles.row}>
+    <View style={[styles.row, { borderColor: colors.border }]}>
       <View style={[styles.checkIcon, { backgroundColor: `${colors.success}22` }]}>
         <Ionicons name="checkmark" size={18} color={colors.success} />
       </View>
@@ -191,7 +191,7 @@ function HistoryRow({ entry }: { entry: WorkoutHistoryItem }) {
           {entry.duration_minutes ? ` • ${entry.duration_minutes} min` : ''}
         </Text>
       </View>
-    </Card>
+    </View>
   );
 }
 
@@ -226,13 +226,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   emptyCard: {
-    paddingVertical: spacing.lg,
+    borderBottomWidth: 1,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    marginBottom: spacing.sm,
+    borderBottomWidth: 1,
+    paddingVertical: 14,
   },
   rowTitle: {
     ...typography.h3,

@@ -199,7 +199,7 @@ export default function ClientProgressScreen({ navigation }: any) {
       refreshControl={<RefreshControl refreshing={false} onRefresh={progress.refresh} />}
     >
       <AppHeader
-        eyebrow={isCoachView ? 'CLIENT PROGRESS' : 'PROGRESS'}
+        eyebrow={isCoachView ? 'CLIENT PROGRESS' : undefined}
         title={isCoachView ? clientName : 'Progress'}
         subtitle="Measurements, goals, and transformation photos."
       />
@@ -627,6 +627,7 @@ const styles = StyleSheet.create({
   summaryCard: {
     gap: spacing.md,
     marginBottom: spacing.lg,
+    paddingVertical: spacing.lg,
   },
   cardTitle: {
     ...typography.h3,
@@ -658,8 +659,10 @@ const styles = StyleSheet.create({
   },
   chartCard: {
     alignItems: 'center',
+    borderWidth: 0,
     marginBottom: spacing.lg,
     overflow: 'hidden',
+    paddingHorizontal: 0,
   },
   chart: {
     borderRadius: radius.md,
@@ -669,6 +672,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   bodyCard: {
+    borderWidth: 0,
+    borderBottomWidth: 1,
     gap: spacing.xs,
   },
   form: {

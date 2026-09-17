@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFitnessProfile } from '@/hooks/useFitnessProfile';
 import { useAppTheme } from '@/hooks/useTheme';
 import { useClientWorkouts } from '@/hooks/useWorkout';
-import { useActiveMealPlan, useTodaysWater } from '@/hooks/useMealPlan';
+import { useActiveMealPlan } from '@/hooks/useMealPlan';
 import { useUpcomingAppointments } from '@/hooks/useAppointments';
 import { useNotifications } from '@/hooks/useNotifications';
 import { AppHeader, Avatar, Badge, ProgressBar, SectionHeader, StatCard } from '@/components/AppUI';
@@ -26,7 +26,6 @@ export default function DashboardScreen({ navigation }: any) {
   } = useFitnessProfile(profile?.id);
   const { data: workouts } = useClientWorkouts(profile?.id);
   const mealPlan = useActiveMealPlan(profile?.id);
-  const water = useTodaysWater(profile?.id);
   const appointments = useUpcomingAppointments(profile?.id);
   const notifications = useNotifications(profile?.id);
   const nextWorkout = workouts[0];
@@ -47,8 +46,8 @@ export default function DashboardScreen({ navigation }: any) {
   return (
     <Screen padded>
       <AppHeader
-        title="Welcome Back"
-        subtitle={`${firstName}, stay consistent and keep moving.`}
+        title={`Hi, ${firstName}`}
+        subtitle="Your training, nutrition, and next session at a glance."
         action={
           <View style={styles.headerActions}>
             <Pressable
@@ -139,65 +138,31 @@ export default function DashboardScreen({ navigation }: any) {
         ) : null}
       </Card>
 
-      <Card style={[styles.workoutCard, { backgroundColor: colors.surfaceElevated }]}>
-        <View style={styles.cardHeader}>
-          <View style={[styles.iconContainer, { backgroundColor: colors.surfaceSecondary }]}>
-            <Ionicons name="chatbubbles" size={24} color={colors.primary} />
-          </View>
-          <View style={styles.cardTextContainer}>
-            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
-              Message Coach
-            </Text>
-            <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
-              Send check-ins, questions, and form-check videos privately.
-            </Text>
-          </View>
-        </View>
-        <Button
-          label="Open Messages"
-          variant="outline"
-          onPress={() => navigation.navigate('ClientMessages')}
-          style={styles.actionButton}
-        />
-      </Card>
+      <ContextAction
+        icon="chatbubbles-outline"
+        title="Message your coach"
+        subtitle="Questions, check-ins, and private video feedback"
+        onPress={() => navigation.navigate('ClientMessages')}
+      />
 
-      <Card style={[styles.workoutCard, { backgroundColor: colors.surfaceElevated }]}>
-        <View style={styles.cardHeader}>
-          <View style={[styles.iconContainer, { backgroundColor: colors.surfaceSecondary }]}>
-            <Ionicons name="restaurant" size={24} color={colors.primary} />
-          </View>
-          <View style={styles.cardTextContainer}>
-            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
-              {mealPlan.data?.name ?? 'No meal plan assigned'}
-            </Text>
-            <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
-              {mealPlan.data
-                ? mealPlan.data.description || 'Your assigned nutrition plan is ready.'
-                : "Your coach hasn't assigned nutrition yet."}
-            </Text>
-          </View>
-        </View>
-        {mealPlan.data ? (
-          <Button
-            label="View Meal Plan"
-            variant="outline"
-            onPress={() => navigation.navigate('MealPlanDetail', { mealPlanId: mealPlan.data!.id })}
-            style={styles.actionButton}
-          />
-        ) : null}
-      </Card>
+      <ContextAction
+        icon="restaurant-outline"
+        title={mealPlan.data?.name ?? 'No meal plan assigned'}
+        subtitle={mealPlan.data?.description || 'Your assigned nutrition plan will appear here.'}
+        onPress={mealPlan.data ? () => navigation.navigate('MealPlanDetail', { mealPlanId: mealPlan.data!.id }) : undefined}
+      />
 
       <View style={styles.row}>
-        <StatCard
-          icon="water-outline"
-          label="Water"
-          value={`${water.data?.cups_consumed ?? 0} / ${water.data?.daily_goal_cups ?? 8}`}
-        />
         <StatCard
           icon="restaurant-outline"
           label="Meals Today"
           value={mealPlan.data?.meals.length ?? 0}
           tone="success"
+        />
+        <StatCard
+          icon="calendar-outline"
+          label="Next Session"
+          value={appointments.nextAppointment ? 'Scheduled' : 'None yet'}
         />
       </View>
 
@@ -237,6 +202,32 @@ export default function DashboardScreen({ navigation }: any) {
 
     </Screen>
   );
+}
+
+function ContextAction({
+  icon,
+  onPress,
+  subtitle,
+  title,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  onPress?: () => void;
+  subtitle: string;
+  title: string;
+}) {
+  const { colors } = useAppTheme();
+  const content = (
+    <View style={[styles.contextRow, { borderColor: colors.border }]}>
+      <Ionicons name={icon} size={21} color={colors.primary} />
+      <View style={styles.cardTextContainer}>
+        <Text style={[styles.contextTitle, { color: colors.textPrimary }]}>{title}</Text>
+        <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
+      </View>
+      {onPress ? <Ionicons name="chevron-forward" size={18} color={colors.textMuted} /> : null}
+    </View>
+  );
+
+  return onPress ? <Pressable onPress={onPress}>{content}</Pressable> : content;
 }
 
 function NextAppointmentCard({
@@ -342,7 +333,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   workoutCard: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
     padding: spacing.lg,
   },
   onboardingCard: {
@@ -377,6 +368,17 @@ const styles = StyleSheet.create({
   },
   cardSubtitle: {
     ...typography.caption,
+  },
+  contextRow: {
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    paddingVertical: 14,
+  },
+  contextTitle: {
+    ...typography.body,
+    fontWeight: '700',
   },
   metaStrip: {
     borderTopWidth: 1,

@@ -55,12 +55,13 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flexGrow: 1,
-    paddingBottom: 104,
+    paddingBottom: 88,
   },
   container: {
     flex: 1,
   },
   padded: {
-    padding: spacing.lg,
+    paddingHorizontal: 20,
+    paddingTop: spacing.md,
   }
 });

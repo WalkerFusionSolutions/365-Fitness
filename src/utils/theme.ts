@@ -24,10 +24,10 @@ export const palette = {
 };
 
 export const lightColors = {
-  background: palette.neutral.offWhite,
+  background: '#F4F6F5',
   surface: palette.neutral.pureWhite,
   surfaceElevated: palette.neutral.pureWhite,
-  surfaceSecondary: '#EEF5F3',
+  surfaceSecondary: '#EAF2EF',
   cardBackground: palette.neutral.pureWhite,
   inputBackground: palette.neutral.pureWhite,
   primary: palette.primary.emerald,
@@ -48,12 +48,12 @@ export const lightColors = {
 };
 
 export const darkColors = {
-  background: palette.neutral.black,
-  surface: '#101A18',
-  surfaceElevated: '#172522',
-  surfaceSecondary: '#1D2E2A',
-  cardBackground: '#101A18',
-  inputBackground: '#172522',
+  background: '#0B100F',
+  surface: '#141B19',
+  surfaceElevated: '#1A2421',
+  surfaceSecondary: '#202D29',
+  cardBackground: '#141B19',
+  inputBackground: '#1A2421',
   primary: palette.primary.athleticGreen,
   primaryText: palette.neutral.black,
   primaryDark: palette.primary.deepTeal,
@@ -61,9 +61,9 @@ export const darkColors = {
   highlight: palette.primary.athleticGreen,
   text: palette.neutral.pureWhite,
   textPrimary: palette.neutral.pureWhite,
-  textSecondary: '#9BAAA6',
-  textMuted: '#9BAAA6',
-  border: '#263633',
+  textSecondary: '#B3C0BC',
+  textMuted: '#91A09C',
+  border: '#30403C',
   success: palette.status.success,
   error: palette.status.error,
   danger: palette.status.error,
@@ -96,12 +96,12 @@ export const colors = lightColors;
 
 export const typography = {
   h1: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: '800' as const,
     letterSpacing: 0,
   },
   h2: {
-    fontSize: 24,
+    fontSize: 25,
     fontWeight: '700' as const,
     letterSpacing: 0,
   },
@@ -132,9 +132,9 @@ export const spacing = {
 
 export const radius = {
   sm: 8,
-  md: 14,
-  lg: 18,
-  xl: 24,
+  md: 10,
+  lg: 12,
+  xl: 16,
   round: 9999,
 };
 

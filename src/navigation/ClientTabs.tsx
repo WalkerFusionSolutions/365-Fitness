@@ -34,29 +34,33 @@ export function ClientTabs() {
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
           position: 'absolute',
-          left: 16,
-          right: 16,
-          bottom: 12,
-          minHeight: 68,
-          paddingTop: 8,
-          paddingBottom: 10,
-          borderRadius: 24,
-          backgroundColor: colors.primaryDark,
-          borderTopWidth: 0,
-          elevation: 8,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 62,
+          paddingTop: 6,
+          paddingBottom: 6,
+          borderRadius: 0,
+          backgroundColor: colors.surface,
+          borderTopWidth: 1,
+          borderTopColor: colors.border,
+          elevation: 6,
           shadowColor: '#000000',
-          shadowOpacity: 0.14,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: -2 },
         },
         tabBarLabelStyle: {
           fontWeight: '700',
-          fontSize: 12,
+          fontSize: 10,
         },
         tabBarLabel:
           route.name === 'Workouts'
             ? 'Workout'
+            : route.name === 'Appointments'
+              ? 'Schedule'
             : route.name,
+        tabBarIconStyle: { marginTop: 1 },
       })}
     >
       <Tab.Screen name="Home" component={DashboardScreen} />

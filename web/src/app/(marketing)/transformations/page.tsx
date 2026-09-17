@@ -1,33 +1,4 @@
-import Link from "next/link";
-import { PhpIcon, PhpReferenceShell } from "@/components/marketing/PhpReferenceSite";
+import { FinalCallout, MarketingPageHero, MarketingShell } from "@/components/marketing/MarketingShell";
+import { assets } from "@/components/marketing/LovableAssets";
 
-export default function TransformationsPage() {
-  return (
-    <PhpReferenceShell>
-      <div className="php-container">
-        <div className="php-content-section">
-          <h1 className="php-section-title">REAL <span>PROGRESS</span></h1>
-          <p className="php-subtitle">No fake transformations, no invented numbers, no stock claims.</p>
-
-          <div className="php-grid php-grid-3 php-mb">
-            {["Measurements", "Goals", "Progress Photos"].map((item) => (
-              <div className="php-card php-center" key={item}>
-                <div className="php-card-body">
-                  <PhpIcon>365</PhpIcon>
-                  <h5>{item}</h5>
-                  <p>Tracked through the real 365 Fitness system for authenticated clients and coaches.</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="php-content-section php-cta-card php-center">
-            <h3 className="php-heading-teal">Your Results Start With the Plan</h3>
-            <p>Client transformations are shared only with permission. Start with a consultation and build the work.</p>
-            <Link href="/contact" className="php-btn php-btn-primary">Start Your Transformation</Link>
-          </div>
-        </div>
-      </div>
-    </PhpReferenceShell>
-  );
-}
+export default function TransformationsPage(){return <MarketingShell><MarketingPageHero image={assets.results} title="Progress you can account for." intro="No invented testimonials, before-and-after claims, or fake numbers. Real progress belongs to the client." /><section className="marketing-frame marketing-evidence"><div><span>01</span><h2>Measurements</h2><p>Chronological records make changes visible without turning one number into the whole story.</p></div><div><span>02</span><h2>Goals</h2><p>A clear target gives training and nutrition a shared direction.</p></div><div><span>03</span><h2>Private photos</h2><p>Progress photos remain private and are shared only within the real coaching workflow.</p></div></section><section className="marketing-frame marketing-quote"><p>“No excuses. Just results.”</p><span>The standard is consistent work, honestly tracked.</span></section><FinalCallout title="Start with the plan." body="Your transformation story should be earned, personal, and yours to share." /></MarketingShell>}
