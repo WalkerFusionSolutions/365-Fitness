@@ -7,19 +7,19 @@ export function PhpReferenceShell({ children }: { children: ReactNode }) {
   return (
     <div className="php-site">
       <PhpReferenceNav />
-      {children}
+      <main className="php-main">{children}</main>
       <footer className="php-footer">
         <div className="php-container php-footer-grid">
           <div>
             <h5>365-FITNESS</h5>
-            <p>Elite Training. Exceptional Results.</p>
+            <p>Personalized Training. Total Transformation.</p>
             <a href="https://www.instagram.com/365fitnessgnd/" target="_blank" rel="noreferrer">
               Follow us on Instagram
             </a>
           </div>
           <div className="php-footer-right">
             <p>Contact: 365fitnessgnd@gmail.com | +1 473 415 7089</p>
-            <p>Personalized Training. Total Transformation.</p>
+            <p>Your Goals. My Mission.</p>
             <p>(c) {new Date().getFullYear()} 365-Fitness. All rights reserved.</p>
           </div>
         </div>
@@ -45,6 +45,24 @@ export function PhpIcon({ children }: { children: ReactNode }) {
   return <div className="php-icon" aria-hidden="true">{children}</div>;
 }
 
+export function PhpCallout({
+  body,
+  title,
+}: {
+  body: string;
+  title: string;
+}) {
+  return (
+    <section className="php-container php-mb">
+      <div className="php-content-section php-cta-card php-center">
+        <h2 className="php-heading-teal">{title}</h2>
+        <p className="php-callout-copy">{body}</p>
+        <a className="php-btn php-btn-primary" href="/contact">Start your plan</a>
+      </div>
+    </section>
+  );
+}
+
 export const verifiedServices = [
   "Personal Training",
   "Athletic Training",
@@ -68,11 +86,11 @@ export const serviceCards = [
     bullets: ["Personalized coaching", "Strength and conditioning", "Accountability and progress tracking"],
   },
   {
-    title: "Group Training",
+    title: "Athletic & Strength Training",
     image: "group-train.png",
     href: "/programs",
-    body: "High-energy training in a supportive small-group structure, adapted for the people in the room.",
-    bullets: ["Interactive sessions", "Motivating environment", "Smart progressions"],
+    body: "Purposeful strength, conditioning, and movement work designed around performance goals.",
+    bullets: ["Athletic development", "Strength programming", "Smart progressions"],
   },
   {
     title: "Meal Plans & Nutrition",

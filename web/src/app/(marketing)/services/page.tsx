@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { FinalCallout, MarketingPageHero, MarketingShell } from "@/components/marketing/MarketingShell";
 import { assets } from "@/components/marketing/LovableAssets";
+import { PhpServicesPage } from "@/components/marketing/php/PhpMarketingPages";
+import { getMarketingVariant } from "@/lib/marketingVariant";
 
 const rows = [
   ["Personal Training", "Focused one-to-one coaching with a plan built for your goals, experience, and schedule.", assets.coach],
@@ -12,6 +14,8 @@ const rows = [
 ] as const;
 
 export default function ServicesPage() {
+  if (getMarketingVariant() === "php") return <PhpServicesPage />;
+
   return <MarketingShell>
     <MarketingPageHero image={assets.strength} title="Coaching for the work in front of you." intro="Personal training, athletic development, recovery support, and flexible programming under one clear plan." />
     <section className="marketing-frame marketing-service-directory">{rows.map(([title, body, image], index) => <article key={title}><span>0{index + 1}</span><div><h2>{title}</h2><p>{body}</p><Link className="marketing-text-link dark" href="/contact">Ask about this service</Link></div><div className="marketing-directory-image"><Image src={image} alt="" fill sizes="(max-width: 768px) 100vw, 32vw" /></div></article>)}</section>

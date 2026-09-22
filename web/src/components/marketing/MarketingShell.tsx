@@ -20,10 +20,9 @@ const links = [
 export function MarketingShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const variant = process.env.NEXT_PUBLIC_MARKETING_VARIANT === "php" ? "php" : "lovable";
 
   return (
-    <div className={`marketing-site marketing-${variant}`}>
+    <div className="marketing-site marketing-lovable">
       <header className="marketing-nav">
         <div className="marketing-frame marketing-nav-inner">
           <Link className="marketing-brand" href="/" onClick={() => setOpen(false)} aria-label="365 Fitness home">

@@ -333,6 +333,10 @@ a {
   z-index: 1;
 }
 
+.php-main {
+  min-height: 70vh;
+}
+
 .php-container {
   width: min(100% - 2rem, 1140px);
   margin: 0 auto;
@@ -362,8 +366,6 @@ a {
 }
 
 .php-nav-logo {
-  height: 50px;
-  width: auto;
   border-radius: 8px;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
   transition: transform 0.4s ease, filter 0.4s ease;
@@ -438,6 +440,11 @@ a {
   transform: translateY(-2px);
 }
 
+.php-nav-link[data-active="true"] {
+  background: rgba(32, 178, 170, 0.15);
+  color: var(--teal);
+}
+
 .php-hero-section {
   min-height: 90vh;
   display: flex;
@@ -490,6 +497,10 @@ a {
   line-height: 1.1;
   margin-bottom: 1.5rem;
   text-shadow: 4px 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+.php-hero-title span {
+  display: block;
 }
 
 .php-text-panel {
@@ -612,6 +623,26 @@ a {
   text-align: center;
 }
 
+.php-prose {
+  color: var(--light-gray);
+  font-size: 1.08rem;
+  line-height: 1.8;
+}
+
+.php-prose h1,
+.php-prose h2 {
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.php-prose p + p {
+  margin-top: 1rem;
+}
+
+.php-prose .php-btn {
+  margin-top: 1.5rem;
+}
+
 .php-grid {
   display: grid;
   gap: 1.5rem;
@@ -683,6 +714,16 @@ a {
   height: 500px;
 }
 
+.php-inline-link {
+  display: inline-block;
+  margin-top: 1rem;
+  border-bottom: 2px solid var(--teal);
+  color: var(--teal);
+  font-weight: 800;
+  padding-bottom: 0.15rem;
+  text-transform: uppercase;
+}
+
 .php-center {
   text-align: center;
 }
@@ -712,6 +753,156 @@ a {
   background: rgba(0, 0, 0, 0.6);
   padding: 1.5rem;
   backdrop-filter: blur(8px);
+}
+
+.php-mini-banner h2 {
+  color: var(--teal);
+  font-family: Montserrat, var(--font-display), sans-serif;
+  font-size: clamp(1.3rem, 3vw, 1.75rem);
+  font-weight: 800;
+}
+
+.php-callout-copy {
+  max-width: 760px;
+  margin: 1rem auto 1.5rem;
+  color: var(--light-gray);
+  font-size: 1.08rem;
+  line-height: 1.75;
+}
+
+.php-service-stack {
+  display: grid;
+  gap: 4rem;
+}
+
+.php-service-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+
+.php-service-row[data-reverse="true"] .php-card {
+  order: 2;
+}
+
+.php-service-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.php-service-list span {
+  border: 1px solid rgba(32, 178, 170, 0.45);
+  border-radius: 8px;
+  background: rgba(32, 178, 170, 0.08);
+  color: var(--light-gray);
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+}
+
+.php-quote-panel {
+  border-color: var(--teal);
+  text-align: center;
+}
+
+.php-quote-panel p {
+  color: var(--teal);
+  font-family: Montserrat, var(--font-display), sans-serif;
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.php-quote-panel span {
+  display: block;
+  margin-top: 1rem;
+  color: var(--light-gray);
+  font-size: 1.1rem;
+}
+
+.php-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.php-gallery figure {
+  position: relative;
+  min-height: 360px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: var(--medium-gray);
+}
+
+.php-gallery figure.php-gallery-wide {
+  grid-column: 1 / -1;
+  min-height: 520px;
+}
+
+.php-gallery img {
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.php-gallery figure:hover img {
+  transform: scale(1.04);
+}
+
+.php-gallery figcaption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+  color: var(--white);
+  font-weight: 700;
+  padding: 3rem 1.25rem 1.25rem;
+}
+
+.php-contact-grid,
+.php-login-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: start;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+
+.php-contact-list {
+  margin-top: 2rem;
+}
+
+.php-contact-list div {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 1rem 0;
+}
+
+.php-contact-list dt {
+  color: var(--teal);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.php-contact-list dd {
+  margin-top: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.php-login-page {
+  display: grid;
+  min-height: 72vh;
+  align-items: center;
+}
+
+.php-login-title {
+  color: var(--white);
+  font-family: Montserrat, var(--font-display), sans-serif;
+  font-size: clamp(2.8rem, 7vw, 5.4rem);
+  font-weight: 900;
+  line-height: 0.95;
 }
 
 .php-form-shell .input,
@@ -800,7 +991,7 @@ a {
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1180px) {
   .php-nav-toggle {
     display: block;
   }
@@ -849,8 +1040,66 @@ a {
     text-align: left;
   }
 
+  .php-service-row,
+  .php-contact-grid,
+  .php-login-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .php-service-row[data-reverse="true"] .php-card {
+    order: initial;
+  }
+
+  .php-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .php-gallery figure,
+  .php-gallery figure.php-gallery-wide {
+    grid-column: auto;
+    min-height: 340px;
+  }
+
   .php-btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 430px) {
+  .php-container {
+    width: min(100% - 1.25rem, 1140px);
+  }
+
+  .php-navbar-inner {
+    min-height: 68px;
+  }
+
+  .php-brand {
+    font-size: 1.35rem;
+  }
+
+  .php-hero-section {
+    padding: 88px 0 64px;
+  }
+
+  .php-hero-badge {
+    font-size: 0.78rem;
+    padding: 10px 16px;
+  }
+
+  .php-content-section {
+    border-radius: 10px;
+    padding: 1.5rem 1rem;
+  }
+
+  .php-card-img,
+  .php-card-img-tall {
+    height: 280px;
+  }
+
+  .php-gallery figure,
+  .php-gallery figure.php-gallery-wide {
+    min-height: 280px;
   }
 }
 

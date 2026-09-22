@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { MarketingShell, FinalCallout } from "@/components/marketing/MarketingShell";
 import { assets } from "@/components/marketing/LovableAssets";
+import { PhpHomePage } from "@/components/marketing/php/PhpMarketingPages";
+import { getMarketingVariant } from "@/lib/marketingVariant";
 
 const services = [
   ["Personal training", "One-to-one coaching shaped around your ability, schedule, and goals.", assets.coach, "/services"],
@@ -17,6 +19,8 @@ const workflow = [
 ];
 
 export default function HomePage() {
+  if (getMarketingVariant() === "php") return <PhpHomePage />;
+
   return (
     <MarketingShell>
       <section className="marketing-home-hero">

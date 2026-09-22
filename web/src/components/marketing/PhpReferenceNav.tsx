@@ -2,25 +2,31 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const navItems = [
-  { label: "Home", href: "/", icon: "H" },
-  { label: "About", href: "/about", icon: "i" },
-  { label: "Services", href: "/services", icon: "S" },
-  { label: "Contact", href: "/contact", icon: "C" },
-  { label: "Instagram", href: "https://www.instagram.com/365fitnessgnd/", icon: "IG", external: true },
-  { label: "Login", href: "/login", icon: "IN" },
-];
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Services", href: "/services" },
+  { label: "Programs", href: "/programs" },
+  { label: "Nutrition", href: "/nutrition" },
+  { label: "Online", href: "/online-coaching" },
+  { label: "Results", href: "/transformations" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Contact", href: "/contact" },
+  { label: "Login", href: "/login" },
+] as const;
 
 export function PhpReferenceNav() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   return (
     <nav className="php-navbar">
       <div className="php-container php-navbar-inner">
         <Link className="php-logo-link" href="/" onClick={() => setOpen(false)}>
-          <Image src="/php-reference/logo.png" alt="365 Fitness Logo" className="php-nav-logo" width={50} height={50} />
+          <Image src="/php-reference/logo.png" alt="365 Fitness Logo" className="php-nav-logo" width={38} height={50} />
           <span className="php-brand">365 FITNESS</span>
         </Link>
         <button className="php-nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
@@ -29,17 +35,18 @@ export function PhpReferenceNav() {
           <span />
         </button>
         <div className="php-nav-links" data-open={open}>
-          {navItems.map((item) =>
-            item.external ? (
-              <a key={item.href} className="php-nav-link" href={item.href} target="_blank" rel="noreferrer">
-                <span aria-hidden="true">{item.icon}</span> {item.label}
-              </a>
-            ) : (
-              <Link key={item.href} className="php-nav-link" href={item.href} onClick={() => setOpen(false)}>
-                <span aria-hidden="true">{item.icon}</span> {item.label}
-              </Link>
-            ),
-          )}
+          {navItems.map((item) => (
+            <Link
+              aria-current={pathname === item.href ? "page" : undefined}
+              className="php-nav-link"
+              data-active={pathname === item.href}
+              href={item.href}
+              key={item.href}
+              onClick={() => setOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
         </div>
       </div>
     </nav>
