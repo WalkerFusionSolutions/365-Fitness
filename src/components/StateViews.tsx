@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/Button';
 import { useAppTheme } from '@/hooks/useTheme';
 import { spacing, typography } from '@/utils/theme';
@@ -9,14 +10,14 @@ export function LoadingView({ label = 'Loading...' }: { label?: string }) {
   const { colors } = useAppTheme();
 
   return (
-    <View style={[styles.loading, { backgroundColor: colors.background }]}>
+    <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={[styles.loading, { backgroundColor: colors.background }]}>
       <View style={[styles.skeletonTitle, { backgroundColor: colors.surfaceSecondary }]} />
       <View style={[styles.skeletonLead, { backgroundColor: colors.surfaceSecondary }]} />
       <View style={[styles.skeletonBlock, { backgroundColor: colors.surface }]} />
       <View style={[styles.skeletonRow, { borderColor: colors.border }]} />
       <View style={[styles.skeletonRow, { borderColor: colors.border }]} />
       {label ? <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text> : null}
-    </View>
+    </SafeAreaView>
   );
 }
 

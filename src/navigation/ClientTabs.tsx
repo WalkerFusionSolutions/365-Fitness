@@ -1,74 +1,101 @@
 import React from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@/hooks/useTheme';
+import { FrostedTabBackground } from './FrostedTabBackground';
 import NutritionScreen from '@/screens/client/NutritionScreen';
 import ClientWorkoutScreen from '@/screens/client/ClientWorkoutScreen';
 import DashboardScreen from '@/screens/client/DashboardScreen';
 import ClientProgressScreen from '@/screens/client/ClientProgressScreen';
-import ClientAppointmentsScreen from '@/screens/client/ClientAppointmentsScreen';
-import { ProfileScreen } from '@/screens/common/ProfileScreen';
 import { ClientTabsParamList } from '@/types';
 
 const Tab = createBottomTabNavigator<ClientTabsParamList>();
 
 export function ClientTabs() {
-  const { colors } = useAppTheme();
+  const theme = useAppTheme();
+  const { colors } = theme;
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
+      screenListeners={{
+        tabPress: () => {
+          void Haptics.selectionAsync();
+        },
+      }}
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarHideOnKeyboard: true,
+        tabBarBackground: () => <FrostedTabBackground />,
+        tabBarIcon: ({ focused, color }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'home';
           if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
           else if (route.name === 'Workouts') iconName = focused ? 'barbell' : 'barbell-outline';
           else if (route.name === 'Nutrition') iconName = focused ? 'restaurant' : 'restaurant-outline';
           else if (route.name === 'Progress') iconName = focused ? 'analytics' : 'analytics-outline';
-          else if (route.name === 'Appointments') iconName = focused ? 'calendar' : 'calendar-outline';
-          else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
           
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return (
+            <View style={styles.iconWrap}>
+              <Ionicons name={iconName} size={21} color={color} />
+              <View
+                style={[
+                  styles.activeMark,
+                  { backgroundColor: focused ? colors.highlight : 'transparent' },
+                ]}
+              />
+            </View>
+          );
         },
         tabBarActiveTintColor: colors.highlight,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
           height: 62,
-          paddingTop: 6,
-          paddingBottom: 6,
-          borderRadius: 0,
-          backgroundColor: colors.surface,
-          borderTopWidth: 1,
+          marginHorizontal: 10,
+          marginBottom: Math.max(insets.bottom, 8),
+          paddingTop: 7,
+          paddingBottom: 5,
+          borderRadius: 22,
+          backgroundColor: theme.name === 'dark' ? '#141B19E8' : '#FFFFFFE8',
+          borderWidth: StyleSheet.hairlineWidth,
           borderTopColor: colors.border,
-          elevation: 6,
+          borderColor: colors.border,
+          overflow: 'hidden',
+          elevation: Platform.OS === 'android' ? 8 : 0,
           shadowColor: '#000000',
-          shadowOpacity: 0.08,
-          shadowRadius: 8,
-          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: theme.name === 'dark' ? 0.28 : 0.12,
+          shadowRadius: 14,
+          shadowOffset: { width: 0, height: 5 },
         },
         tabBarLabelStyle: {
           fontWeight: '700',
-          fontSize: 10,
+          fontSize: 11,
+          lineHeight: 14,
         },
-        tabBarLabel:
-          route.name === 'Workouts'
-            ? 'Workout'
-            : route.name === 'Appointments'
-              ? 'Schedule'
-            : route.name,
-        tabBarIconStyle: { marginTop: 1 },
+        tabBarLabel: route.name === 'Workouts' ? 'Workout' : route.name,
+        tabBarIconStyle: { marginTop: 0 },
+        tabBarItemStyle: { minWidth: 0 },
       })}
     >
       <Tab.Screen name="Home" component={DashboardScreen} />
       <Tab.Screen name="Workouts" component={ClientWorkoutScreen} />
       <Tab.Screen name="Nutrition" component={NutritionScreen} />
       <Tab.Screen name="Progress" component={ClientProgressScreen} />
-      <Tab.Screen name="Appointments" component={ClientAppointmentsScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  iconWrap: {
+    alignItems: 'center',
+    height: 27,
+    justifyContent: 'space-between',
+  },
+  activeMark: {
+    borderRadius: 2,
+    height: 2,
+    width: 13,
+  },
+});

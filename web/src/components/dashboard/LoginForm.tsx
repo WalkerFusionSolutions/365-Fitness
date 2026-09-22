@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { signInCoach } from "@/lib/actions";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { Button } from "@/components/ui/Button";
 
@@ -25,11 +25,10 @@ export function LoginForm() {
       return;
     }
 
-    const supabase = createSupabaseBrowserClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const result = await signInCoach(email, password);
 
-    if (signInError) {
-      setError(signInError.message);
+    if (!result.ok) {
+      setError(result.error);
       setLoading(false);
       return;
     }
@@ -42,12 +41,12 @@ export function LoginForm() {
     <form onSubmit={onSubmit} className="mt-10 grid gap-5">
       <div>
         <label className="text-sm font-semibold text-foreground" htmlFor="email">Email</label>
-        <input id="email" className="input mt-2" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+        <input id="email" className="input mt-2" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
       </div>
       <div>
         <label className="text-sm font-semibold text-foreground" htmlFor="password">Password</label>
         <div className="mt-2 flex border border-line bg-white focus-within:border-brand">
-          <input id="password" className="min-w-0 flex-1 bg-transparent px-4 py-3 text-foreground outline-none" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required />
+          <input id="password" className="min-w-0 flex-1 bg-transparent px-4 py-3 text-foreground outline-none" type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
           <button className="border-l border-line px-4 text-sm font-bold text-brand transition hover:bg-secondary" type="button" onClick={() => setShowPassword((value) => !value)}>
             {showPassword ? "Hide" : "Show"}
           </button>

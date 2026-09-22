@@ -12,6 +12,7 @@ import { Screen } from '@/components/Screen';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { AppHeader, Badge, SectionHeader } from '@/components/AppUI';
+import { ClientHeaderActions } from '@/components/ClientHeaderActions';
 import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { useAppTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/hooks/useAuth';
@@ -59,6 +60,7 @@ export default function ClientWorkoutScreen({ navigation }: any) {
       <AppHeader
         title="Training"
         subtitle="Assigned workouts and completed sessions."
+        action={<ClientHeaderActions />}
       />
 
       <SectionHeader title="Today" />

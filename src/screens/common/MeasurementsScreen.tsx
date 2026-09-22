@@ -26,8 +26,7 @@ export default function MeasurementsScreen() {
   const { profile } = useAuth();
   const params = route.params as { clientId?: string; clientName?: string } | undefined;
   const clientId = params?.clientId ?? profile?.id;
-  const canAdd =
-    !params?.clientId || params.clientId === profile?.id || profile?.role === 'coach';
+  const canAdd = profile?.role === 'coach' && Boolean(params?.clientId);
   const { data, error, isLoading, isSaving, refresh, saveMeasurement } =
     useMeasurements(clientId);
   const [weight, setWeight] = useState('');
@@ -131,8 +130,15 @@ export default function MeasurementsScreen() {
             <AppHeader
               eyebrow=""
               title="Measurements"
-              subtitle={params?.clientName || 'Track progress over time.'}
+              subtitle={params?.clientName || 'Your coach-recorded measurement history.'}
             />
+            {!canAdd ? (
+              <View style={[styles.infoBanner, { backgroundColor: colors.surfaceSecondary }]}>
+                <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+                  Measurements are recorded by your coach.
+                </Text>
+              </View>
+            ) : null}
             {canAdd ? (
               <Card style={styles.form}>
                 <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Add Measurement</Text>
@@ -167,7 +173,9 @@ export default function MeasurementsScreen() {
           <EmptyState
             icon="analytics-outline"
             title="No measurements yet."
-            subtitle="Historical measurement records will appear here."
+            subtitle={canAdd
+              ? 'Record the first measurement for this client.'
+              : "Your coach's measurement records will appear here."}
           />
         }
         renderItem={({ item }) => <MeasurementRow measurement={item} />}
@@ -281,7 +289,14 @@ function formatDate(value?: string | null) {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.md, paddingBottom: 120 },
+  content: { padding: spacing.md, paddingBottom: spacing.lg },
+  infoBanner: {
+    borderRadius: 8,
+    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+  },
+  infoText: { ...typography.caption, fontWeight: '600' },
   form: { gap: spacing.md, marginBottom: spacing.lg },
   cardTitle: { ...typography.h3 },
   cardSubtitle: { ...typography.caption },

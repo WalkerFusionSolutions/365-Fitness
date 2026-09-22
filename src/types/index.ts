@@ -1,3 +1,5 @@
+import type { NavigatorScreenParams } from '@react-navigation/native';
+
 export type Role = 'client' | 'coach';
 export type AssignmentStatus = 'pending' | 'active' | 'archived';
 export type WeightUnit = 'lb' | 'kg';
@@ -514,23 +516,20 @@ export type ClientTabsParamList = {
   Home: undefined;
   Workouts: undefined;
   Nutrition: undefined;
-  Coach: undefined;
   Progress: undefined;
-  Appointments: undefined;
-  Profile: undefined;
 };
 
 export type ClientStackParamList = {
-  ClientTabs: undefined;
+  ClientApp: NavigatorScreenParams<ClientTabsParamList>;
   WorkoutDetail: { workoutId: string };
   ActiveWorkout: { workoutId: string };
   ExerciseDetail: { workoutId?: string; exerciseId?: string; workoutExerciseId?: string };
   WorkoutHistoryDetail: { completedWorkoutId: string };
   MealPlanDetail: { mealPlanId: string };
   ClientOnboarding: undefined;
+  ClientProfile: undefined;
   ClientAssessment: undefined;
   ClientMeasurements: { clientId?: string; clientName?: string } | undefined;
-  ClientProgress: { clientId?: string; clientName?: string } | undefined;
   ClientMessages: undefined;
   ClientConversation: { conversationId?: string; coachId?: string; title?: string };
   ClientAppointments: undefined;
@@ -553,7 +552,7 @@ export type CoachTabsParamList = {
 };
 
 export type CoachStackParamList = {
-  CoachTabs: undefined;
+  CoachApp: NavigatorScreenParams<CoachTabsParamList>;
   CoachConversation: { conversationId?: string; clientId?: string; title?: string };
   CoachMessages: undefined;
   CoachAppointments: undefined;

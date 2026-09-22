@@ -214,7 +214,7 @@ function ExerciseRow({
 const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
-    paddingBottom: 120,
+    paddingBottom: spacing.lg,
   },
   actionRow: {
     flexDirection: 'row',

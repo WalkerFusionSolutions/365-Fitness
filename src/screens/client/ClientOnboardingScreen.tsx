@@ -137,7 +137,7 @@ export default function ClientOnboardingScreen({ navigation }: any) {
           <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Current BMI</Text>
           <Text style={[styles.bmiValue, { color: colors.primary }]}>{bmi?.toFixed(1) ?? 'Not available'}</Text>
           <Text style={[styles.bodyText, { color: colors.textSecondary }]}>
-            Your assessment and starting measurement were saved.
+            Your assessment was saved. Your coach will record body measurements.
           </Text>
         </Card>
         <Button label="Back to Profile" onPress={() => navigation.goBack()} />
@@ -323,7 +323,7 @@ export default function ClientOnboardingScreen({ navigation }: any) {
     if (step === 4) {
       return (
         <>
-          <SectionHeader title="Current Weight" subtitle="This becomes your starting weight." />
+          <SectionHeader title="Current Weight" subtitle="This establishes the starting point in your assessment." />
           <UnitToggle options={['lb', 'kg']} value={weightUnit} onChange={setWeightUnit} />
           <NumericInput label="Current Weight" value={currentWeight} onChangeText={setCurrentWeight} suffix={weightUnit} />
         </>

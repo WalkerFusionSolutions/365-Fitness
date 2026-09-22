@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Pressable,
   PressableProps,
@@ -13,27 +13,42 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '@/hooks/useTheme';
+import { resolveProfileAvatarUrl } from '@/services/avatar.service';
 import { radius, spacing, typography } from '@/utils/theme';
 
 export function AppHeader({
   eyebrow,
   title,
   subtitle,
+  leading,
   action,
 }: {
   eyebrow?: string;
   title: string;
   subtitle?: string;
+  leading?: React.ReactNode;
   action?: React.ReactNode;
 }) {
   const { colors } = useAppTheme();
 
   return (
     <View style={styles.header}>
+      {leading}
       <View style={styles.headerText}>
         {eyebrow ? <Text style={[styles.eyebrow, { color: colors.primary }]}>{eyebrow}</Text> : null}
-        <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
-        {subtitle ? <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{subtitle}</Text> : null}
+        <Text
+          adjustsFontSizeToFit
+          minimumFontScale={0.72}
+          numberOfLines={1}
+          style={[styles.title, { color: colors.textPrimary }]}
+        >
+          {title}
+        </Text>
+        {subtitle ? (
+          <Text numberOfLines={2} style={[styles.subtitle, { color: colors.textSecondary }]}>
+            {subtitle}
+          </Text>
+        ) : null}
       </View>
       {action}
     </View>
@@ -55,7 +70,12 @@ export function SectionHeader({
     <View style={styles.sectionHeader}>
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{title}</Text>
       {actionLabel && onAction ? (
-        <Pressable onPress={onAction} hitSlop={8}>
+        <Pressable
+          accessibilityLabel={`${actionLabel}, ${title}`}
+          accessibilityRole="button"
+          onPress={onAction}
+          hitSlop={8}
+        >
           <Text style={[styles.sectionAction, { color: colors.primary }]}>{actionLabel}</Text>
         </Pressable>
       ) : null}
@@ -99,11 +119,33 @@ export function ProfileAvatar({
   size?: number;
 }) {
   const { colors } = useAppTheme();
+  const [resolvedUri, setResolvedUri] = useState<string | null>(null);
+  const [didFail, setDidFail] = useState(false);
 
-  if (uri) {
+  useEffect(() => {
+    let active = true;
+    setDidFail(false);
+    setResolvedUri(null);
+
+    void resolveProfileAvatarUrl(uri)
+      .then((value) => {
+        if (active) setResolvedUri(value);
+      })
+      .catch(() => {
+        if (active) setResolvedUri(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [uri]);
+
+  if (resolvedUri && !didFail) {
     return (
       <Image
-        source={{ uri }}
+        accessibilityLabel={`${name?.trim() || 'User'} profile photo`}
+        onError={() => setDidFail(true)}
+        source={{ uri: resolvedUri }}
         style={{
           width: size,
           height: size,
@@ -238,6 +280,8 @@ export function FilterChip({ label, active, onPress }: { label: string; active: 
 
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
       onPress={onPress}
       style={[
         styles.chip,
@@ -266,8 +310,13 @@ export function IconRow({
   onPress?: PressableProps['onPress'];
 }) {
   const { colors } = useAppTheme();
+  const trailing = right !== undefined
+    ? right
+    : onPress
+      ? <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      : null;
   const content = (
-      <View style={[styles.iconRow, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+    <View style={[styles.iconRow, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
       <View style={[styles.iconBadge, { backgroundColor: colors.surfaceSecondary }]}>
         <Ionicons name={icon} size={20} color={colors.primary} />
       </View>
@@ -275,13 +324,18 @@ export function IconRow({
         <Text style={[styles.rowTitle, { color: colors.textPrimary }]}>{title}</Text>
         {subtitle ? <Text style={[styles.rowSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text> : null}
       </View>
-      {right ?? <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />}
+      {trailing}
     </View>
   );
 
   if (!onPress) return content;
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => pressed && styles.pressed}>
+    <Pressable
+      accessibilityLabel={subtitle ? `${title}. ${subtitle}` : title}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => pressed && styles.pressed}
+    >
       {content}
     </Pressable>
   );
@@ -297,6 +351,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
+    minWidth: 0,
   },
   eyebrow: {
     fontSize: 12,

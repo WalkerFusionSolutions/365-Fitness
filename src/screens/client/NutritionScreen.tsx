@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppHeader, SectionHeader, StatCard } from '@/components/AppUI';
+import { ClientHeaderActions } from '@/components/ClientHeaderActions';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
@@ -102,9 +103,14 @@ export default function NutritionScreen({ navigation }: any) {
       <AppHeader
         title="Nutrition"
         subtitle={`Fuel plan for ${firstName}`}
+        action={<ClientHeaderActions />}
       />
 
-      <View style={[styles.segmentRow, { backgroundColor: colors.surfaceSecondary }]}>
+      <View
+        accessibilityLabel="Nutrition sections"
+        accessibilityRole="tablist"
+        style={[styles.segmentRow, { backgroundColor: colors.surfaceSecondary }]}
+      >
         {(['today', 'grocery', 'supplements'] as const).map((option) => (
           <Pressable
             accessibilityRole="tab"
@@ -192,13 +198,23 @@ export default function NutritionScreen({ navigation }: any) {
                   {grocery.data.items.filter((item) => item.checked).length} of {grocery.data.items.length} checked
                 </Text>
                 {plan.data ? (
-                  <Pressable onPress={onGenerateGrocery} disabled={generateGrocery.isPending}>
+                  <Pressable
+                    accessibilityRole="button"
+                    disabled={generateGrocery.isPending}
+                    onPress={onGenerateGrocery}
+                  >
                     <Text style={[styles.link, { color: colors.primary }]}>Regenerate</Text>
                   </Pressable>
                 ) : null}
               </View>
               {grocery.data.items.map((item, index) => (
-                <Pressable key={`${item.name}-${index}`} onPress={() => toggleGrocery(item, index)}>
+                <Pressable
+                  accessibilityLabel={`${item.name}${item.quantity ? `, ${item.quantity}` : ''}`}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: item.checked }}
+                  key={`${item.name}-${index}`}
+                  onPress={() => toggleGrocery(item, index)}
+                >
                   <Card style={styles.groceryRow}>
                     <View
                       style={[
@@ -271,7 +287,7 @@ function MealCard({ meal }: { meal: MealPlanMeal }) {
   return (
     <Card style={styles.mealCard}>
       <View style={styles.mealHeader}>
-        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>{label}</Text>
+        <Text numberOfLines={2} style={[styles.cardTitle, styles.mealTitle, { color: colors.textPrimary }]}>{label}</Text>
         <Text style={[styles.pill, { color: colors.primary, backgroundColor: colors.surfaceSecondary }]}>
           {formatNumber(meal.total_calories)} kcal
         </Text>
@@ -394,9 +410,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   mealHeader: {
+    alignItems: 'flex-start',
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: spacing.md,
+  },
+  mealTitle: {
+    flex: 1,
+    minWidth: 0,
   },
   pill: {
     ...typography.caption,

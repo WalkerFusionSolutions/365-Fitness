@@ -217,7 +217,7 @@ function formatStatus(status: string) {
 const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
-    paddingBottom: 120,
+    paddingBottom: spacing.lg,
   },
   sectionTitle: {
     ...typography.h3,

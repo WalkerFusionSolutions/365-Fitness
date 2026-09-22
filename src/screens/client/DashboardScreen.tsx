@@ -13,7 +13,9 @@ import { useClientWorkouts } from '@/hooks/useWorkout';
 import { useActiveMealPlan } from '@/hooks/useMealPlan';
 import { useUpcomingAppointments } from '@/hooks/useAppointments';
 import { useNotifications } from '@/hooks/useNotifications';
-import { AppHeader, Avatar, Badge, ProgressBar, SectionHeader, StatCard } from '@/components/AppUI';
+import { AppHeader, Badge, ProgressBar, SectionHeader, StatCard } from '@/components/AppUI';
+import { ClientHeaderActions } from '@/components/ClientHeaderActions';
+import { calculateProgressPercent } from '@/services/progress.service';
 import { AppointmentWithProfiles } from '@/types';
 
 export default function DashboardScreen({ navigation }: any) {
@@ -36,6 +38,11 @@ export default function DashboardScreen({ navigation }: any) {
   const goalWeightLb = fitnessProfile?.goalWeightKg
     ? Math.round(fitnessProfile.goalWeightKg * 2.20462)
     : null;
+  const progressPercent = calculateProgressPercent(
+    fitnessProfile?.startingWeightKg,
+    fitnessProfile?.currentWeightKg,
+    fitnessProfile?.goalWeightKg
+  );
 
   useFocusEffect(
     React.useCallback(() => {
@@ -48,25 +55,7 @@ export default function DashboardScreen({ navigation }: any) {
       <AppHeader
         title={`Hi, ${firstName}`}
         subtitle="Your training, nutrition, and next session at a glance."
-        action={
-          <View style={styles.headerActions}>
-            <Pressable
-              accessibilityLabel="Open notifications"
-              onPress={() => navigation.navigate('Notifications')}
-              style={[styles.bellButton, { backgroundColor: colors.surfaceSecondary }]}
-            >
-              <Ionicons name="notifications-outline" size={22} color={colors.primary} />
-              {notifications.unreadCount > 0 ? (
-                <View style={[styles.bellBadge, { backgroundColor: colors.primary }]}>
-                  <Text style={[styles.bellBadgeText, { color: colors.primaryText }]}>
-                    {Math.min(notifications.unreadCount, 9)}
-                  </Text>
-                </View>
-              ) : null}
-            </Pressable>
-            <Avatar name={profile?.full_name} />
-          </View>
-        }
+        action={<ClientHeaderActions unreadCount={notifications.unreadCount} />}
       />
 
       {!fitnessLoading && !fitnessProfile ? (
@@ -94,7 +83,14 @@ export default function DashboardScreen({ navigation }: any) {
             })
           }
         />
-      ) : null}
+      ) : (
+        <ContextAction
+          icon="calendar-outline"
+          title="No appointments coming up"
+          subtitle="Open your schedule to review upcoming sessions."
+          onPress={() => navigation.navigate('ClientAppointments')}
+        />
+      )}
       
       <Card style={[styles.workoutCard, { backgroundColor: colors.surfaceElevated }]}>
         <View style={styles.cardHeader}>
@@ -104,7 +100,7 @@ export default function DashboardScreen({ navigation }: any) {
           <View style={styles.cardTextContainer}>
             <Text style={[styles.cardEyebrow, { color: colors.primary }]}>Today's Workout</Text>
             <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
-              {nextWorkout?.name ?? 'No workout assigned'}
+              {nextWorkout?.name ?? 'No workout assigned yet'}
             </Text>
             <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
               {nextWorkout
@@ -182,22 +178,20 @@ export default function DashboardScreen({ navigation }: any) {
             </Text>
           </View>
         </View>
-        <View style={[styles.progressBarBg, { backgroundColor: colors.border }]}>
-          <ProgressBar
-            value={getProgressPercent(
-              fitnessProfile?.startingWeightKg,
-              fitnessProfile?.currentWeightKg,
-              fitnessProfile?.goalWeightKg
-            )}
-          />
-        </View>
-        <Text style={[styles.progressGoal, { color: colors.textMuted }]}>
-          {getProgressPercent(
-            fitnessProfile?.startingWeightKg,
-            fitnessProfile?.currentWeightKg,
-            fitnessProfile?.goalWeightKg
-          )}% to goal
-        </Text>
+        {progressPercent != null ? (
+          <>
+            <View style={styles.progressBarBg}>
+              <ProgressBar value={progressPercent} />
+            </View>
+            <Text style={[styles.progressGoal, { color: colors.textMuted }]}>
+              {progressPercent}% to goal
+            </Text>
+          </>
+        ) : (
+          <Text style={[styles.progressEmpty, { color: colors.textSecondary }]}>
+            Your coach-recorded measurements will appear here.
+          </Text>
+        )}
       </Card>
 
     </Screen>
@@ -227,7 +221,15 @@ function ContextAction({
     </View>
   );
 
-  return onPress ? <Pressable onPress={onPress}>{content}</Pressable> : content;
+  return onPress ? (
+    <Pressable
+      accessibilityLabel={`${title}. ${subtitle}`}
+      accessibilityRole="button"
+      onPress={onPress}
+    >
+      {content}
+    </Pressable>
+  ) : content;
 }
 
 function NextAppointmentCard({
@@ -460,6 +462,10 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontWeight: '800',
   },
+  progressEmpty: {
+    ...typography.caption,
+    marginTop: spacing.sm,
+  },
   goalBadge: {
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
@@ -474,20 +480,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   }
 });
-
-function getProgressPercent(
-  startingWeight?: number | null,
-  currentWeight?: number | null,
-  goalWeight?: number | null
-) {
-  if (!startingWeight || !currentWeight || !goalWeight) return 0;
-
-  const total = Math.abs(startingWeight - goalWeight);
-  if (total === 0) return 100;
-
-  const moved = Math.abs(startingWeight - currentWeight);
-  return Math.min(100, Math.max(0, Math.round((moved / total) * 100)));
-}
 
 function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);

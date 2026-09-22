@@ -196,7 +196,7 @@ function formatConversationTime(value?: string | null) {
 const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
-    paddingBottom: 120,
+    paddingBottom: spacing.lg,
   },
   inlineError: {
     ...typography.caption,

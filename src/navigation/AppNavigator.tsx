@@ -33,6 +33,7 @@ import AppointmentEditorScreen from '@/screens/common/AppointmentEditorScreen';
 import NotificationsScreen, { navigateFromNotification } from '@/screens/common/NotificationsScreen';
 import ClientMessagesScreen from '@/screens/client/ClientMessagesScreen';
 import ClientAppointmentsScreen from '@/screens/client/ClientAppointmentsScreen';
+import { ProfileScreen } from '@/screens/common/ProfileScreen';
 import CoachClientDetailScreen from '@/screens/coach/CoachClientDetailScreen';
 import CoachClientProgressScreen from '@/screens/coach/CoachClientProgressScreen';
 import CoachExerciseEditorScreen from '@/screens/coach/CoachExerciseEditorScreen';
@@ -47,8 +48,6 @@ import { ClientStackParamList, CoachStackParamList } from '@/types';
 type RootStackParamList = ClientStackParamList & CoachStackParamList & {
   Login: undefined;
   Signup: undefined;
-  ClientApp: undefined;
-  CoachApp: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -415,6 +414,11 @@ export function AppNavigator() {
               name="ClientOnboarding"
               component={ClientOnboardingScreen}
               options={detailHeaderOptions('Fitness Profile', colors)}
+            />
+            <Stack.Screen
+              name="ClientProfile"
+              component={ProfileScreen}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="ClientAssessment"

@@ -193,12 +193,6 @@ export async function saveFitnessAssessment({
 
   throwIfSupabaseError(goalError, 'Unable to save your goal.');
 
-  await addMeasurement({
-    clientId,
-    weight: completedAssessment.currentWeightKg,
-    date: todayDate(),
-  });
-
   return completedAssessment;
 }
 

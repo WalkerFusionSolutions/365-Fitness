@@ -33,7 +33,7 @@ export function Screen({
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {scroll ? (
         <ScrollView
           contentContainerStyle={styles.scroll}
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flexGrow: 1,
-    paddingBottom: 88,
+    paddingBottom: spacing.lg,
   },
   container: {
     flex: 1,

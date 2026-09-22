@@ -240,7 +240,7 @@ function formatRelativeTime(value: string) {
 const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
-    paddingBottom: 120,
+    paddingBottom: spacing.lg,
   },
   headerRow: {
     alignItems: 'center',

@@ -201,7 +201,7 @@ function formatLocation(appointment: AppointmentWithProfiles) {
 const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
-    paddingBottom: 120,
+    paddingBottom: spacing.lg,
   },
   addButton: {
     alignItems: 'center',
